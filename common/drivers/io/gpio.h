@@ -1,13 +1,13 @@
 /**
  * @file gpio.h
  * @brief Gpio driver interface.
- * @author TJ Malaska
- * @date 9/13/2025
+ * @author TJ
+ * @date 1/23/2026
  *
  */
 
 #pragma once
-namespace LBR
+namespace MM
 {
 /**
  * @class Gpio
@@ -41,4 +41,4 @@ public:
      */
     ~Gpio() = default;
 };
-}  // namespace LBR
+}  // namespace MM

@@ -38,6 +38,19 @@
                 "TARGET_DEVICE": "STM32L476",
                 "MCU_NAME": "STM32L476xx"
             }
+        },
+        {
+            "name": "stm32f411",
+            "inherits": "build",
+            "binaryDir": "${sourceDir}/build/stm32f411",
+            "toolchainFile": "cmake/gcc-m4f.cmake",
+            "cacheVariables": {
+                "LINKER_SCRIPT": "${sourceDir}/mcu_support/stm32/f4xx/f411/STM32F411RETX_FLASH.ld",
+                "STARTUP_FILE": "${sourceDir}/mcu_support/stm32/f4xx/f411/startup_stm32f411xe.s",
+                "TARGET_DEVICE": "STM32F411",
+                "MCU_NAME": "STM32F411xE"
+            }
         }
+        
     ]
 }

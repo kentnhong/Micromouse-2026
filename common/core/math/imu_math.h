@@ -7,7 +7,7 @@
 
 #pragma once
 
-namespace LBR
+namespace MM
 {
 
 struct Vec3
@@ -20,4 +20,4 @@ struct Quaternion
     float w, x, y, z;
 };
 
-}  // namespace LBR
+}  // namespace MM

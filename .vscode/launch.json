@@ -4,27 +4,27 @@
     "configurations": [
         {
             "cwd": "${workspaceFolder}",
-            "executable": "${workspaceRoot}/build/stm32f746/app/cli_app/cli_app",
-            "name": "DEBUG CLI F7",
+            "executable": "${workspaceRoot}/build/stm32f411/app/cli_app/cli_app",
+            "name": "DEBUG CLI F4",
             "request": "launch",
             "type": "cortex-debug",
             "servertype": "openocd",
-            "device": "STM32F746",
-            "svdFile": "${workspaceRoot}/mcu_support/stm32/f7xx/f746/STM32F746.svd",
+            "device": "STM32F411",
+            "svdFile": "${workspaceRoot}/mcu_support/stm32/f4xx/f411/STM32F411.svd",
             "searchDir": [
                 "${workspaceRoot}/mcu_support/stm32"
             ],
             "runToMain": true,
             "configFiles": [
                 "${workspaceRoot}/mcu_support/stm32/stlink-dap.cfg",
-                "${workspaceRoot}/mcu_support/stm32/f7xx/stm32f7x.cfg"
+                "${workspaceRoot}/mcu_support/stm32/f4xx/stm32f4x.cfg"
             ],
             "debuggerArgs": [
                 "-d",
                 "${workspaceRoot}",
             ],
             "preRestartCommands": [
-                "add-symbol-file /build/stm32f746/app/cli_app/cli_app",
+                "add-symbol-file /build/stm32f411/app/cli_app/cli_app",
                 "load",
                 "enable breakpoint",
                 "monitor reset"
@@ -33,27 +33,27 @@
         },
         {
             "cwd": "${workspaceFolder}",
-            "executable": "${workspaceRoot}/build/stm32l476/app/blink/blink",
-            "name": "DEBUG BLINK L4",
+            "executable": "${workspaceRoot}/build/stm32f411/app/blink/blink",
+            "name": "DEBUG BLINK F4",
             "request": "launch",
             "type": "cortex-debug",
             "servertype": "openocd",
-            "device": "STM32L4",
-            "svdFile": "${workspaceRoot}/mcu_support/l4xx/STM32L4x2.svd",
+            "device": "STM32F411",
+            "svdFile": "${workspaceRoot}/mcu_support/f4xx/STM32F4x1.svd",
             "searchDir": [
                 "${workspaceRoot}/mcu_support/stm32"
             ],
             "runToMain": true,
             "configFiles": [
                 "${workspaceRoot}/mcu_support/stm32/stlink-dap.cfg",
-                "${workspaceRoot}/mcu_support/stm32/l4xx/stm32l4x.cfg"
+                "${workspaceRoot}/mcu_support/stm32/f4xx/stm32f4x.cfg"
             ],
             "debuggerArgs": [
                 "-d",
                 "${workspaceRoot}",
             ],
             "preRestartCommands": [
-                "add-symbol-file build/stm32l476/app/blink/blink",
+                "add-symbol-file build/stm32f411/app/blink/blink",
                 "load",
                 "enable breakpoint",
                 "monitor reset"
@@ -62,27 +62,27 @@
         },
         {
             "cwd": "${workspaceFolder}",
-            "executable": "${workspaceRoot}/build/stm32l476/app/spi_test/spi_test",
-            "name": "DEBUG SPI TEST",
+            "executable": "${workspaceRoot}/build/stm32f411/app/spi_test/spi_test",
+            "name": "DEBUG SPI F4",
             "request": "launch",
             "type": "cortex-debug",
             "servertype": "openocd",
-            "device": "STM32L4",
-            "svdFile": "${workspaceRoot}/mcu_support/l4xx/STM32L4x2.svd",
+            "device": "STM32F411",
+            "svdFile": "${workspaceRoot}/mcu_support/f4xx/STM32F4x1.svd",
             "searchDir": [
                 "${workspaceRoot}/mcu_support/stm32"
             ],
             "runToMain": true,
             "configFiles": [
                 "${workspaceRoot}/mcu_support/stm32/stlink-dap.cfg",
-                "${workspaceRoot}/mcu_support/stm32/l4xx/stm32l4x.cfg"
+                "${workspaceRoot}/mcu_support/stm32/f4xx/stm32f4x.cfg"
             ],
             "debuggerArgs": [
                 "-d",
                 "${workspaceRoot}",
             ],
             "preRestartCommands": [
-                "add-symbol-file build/stm32l476/app/spi_test/spi_test",
+                "add-symbol-file build/stm32f411/app/spi_test/spi_test",
                 "load",
                 "enable breakpoint",
                 "monitor reset"
@@ -91,27 +91,27 @@
         },
         {
             "cwd": "${workspaceFolder}",
-            "executable": "${workspaceRoot}/build/stm32l476/app/i2c_test/i2c_test",
-            "name": "DEBUG I2C L4",
+            "executable": "${workspaceRoot}/build/stm32f411/app/i2c_test/i2c_test",
+            "name": "DEBUG I2C F4",
             "request": "launch",
             "type": "cortex-debug",
             "servertype": "openocd",
-            "device": "STM32L4",
-            "svdFile": "${workspaceRoot}/mcu_support/l4xx/STM32L4x2.svd",
+            "device": "STM32F411",
+            "svdFile": "${workspaceRoot}/mcu_support/f4xx/STM32F4x1.svd",
             "searchDir": [
                 "${workspaceRoot}/mcu_support/stm32"
             ],
             "runToMain": true,
             "configFiles": [
                 "${workspaceRoot}/mcu_support/stm32/stlink-dap.cfg",
-                "${workspaceRoot}/mcu_support/stm32/l4xx/stm32l4x.cfg"
+                "${workspaceRoot}/mcu_support/stm32/f4xx/stm32f4x1.cfg"
             ],
             "debuggerArgs": [
                 "-d",
                 "${workspaceRoot}",
             ],
             "preRestartCommands": [
-                "add-symbol-file build/stm32l476/app/i2c_test/i2c_test",
+                "add-symbol-file build/stm32f411/app/i2c_test/i2c_test",
                 "load",
                 "enable breakpoint",
                 "monitor reset"
@@ -120,27 +120,27 @@
         },
         {
             "cwd": "${workspaceFolder}",
-            "executable": "${workspaceRoot}/build/stm32l476/app/imu_test/imu_test",
-            "name": "DEBUG IMU BNO055",
+            "executable": "${workspaceRoot}/build/stm32f411/app/imu_test/imu_test",
+            "name": "DEBUG IMU BNO055 F4",
             "request": "launch",
             "type": "cortex-debug",
             "servertype": "openocd",
-            "device": "STM32L4",
-            "svdFile": "${workspaceRoot}/mcu_support/stm32/l4xx/STM32L4x2.svd",
+            "device": "STM32F411",
+            "svdFile": "${workspaceRoot}/mcu_support/stm32/f4xx/STM32F4x1.svd",
             "searchDir": [
                 "${workspaceRoot}/mcu_support/stm32"
             ],
             "runToMain": true,
             "configFiles": [
                 "${workspaceRoot}/mcu_support/stm32/stlink-dap.cfg",
-                "${workspaceRoot}/mcu_support/stm32/l4xx/stm32l4x.cfg"
+                "${workspaceRoot}/mcu_support/stm32/f4xx/stm32f4x.cfg"
             ],
             "debuggerArgs": [
                 "-d",
                 "${workspaceRoot}",
             ],
             "preRestartCommands": [
-                "add-symbol-file build/stm32l476/app/imu_test/imu_test",
+                "add-symbol-file build/stm32f411/app/imu_test/imu_test",
                 "load",
                 "enable breakpoint",
                 "monitor reset"
@@ -149,36 +149,6 @@
             "liveWatch": {
                 "enabled": true
             }
-        },
-
-        {
-            "cwd": "${workspaceFolder}",
-            "executable": "${workspaceRoot}/build/stm32l476/app/bmp390_test/bmp390_test",
-            "name": "DEBUG BMP390 L4",
-            "request": "launch",
-            "type": "cortex-debug",
-            "servertype": "openocd",
-            "device": "STM32L4",
-            "svdFile": "${workspaceRoot}/mcu_support/l4xx/STM32L4x2.svd",
-            "searchDir": [
-                "${workspaceRoot}/mcu_support/stm32"
-            ],
-            "runToMain": true,
-            "configFiles": [
-                "${workspaceRoot}/mcu_support/stm32/stlink-dap.cfg",
-                "${workspaceRoot}/mcu_support/stm32/l4xx/stm32l4x.cfg"
-            ],
-            "debuggerArgs": [
-                "-d",
-                "${workspaceRoot}",
-            ],
-            "preRestartCommands": [
-                "add-symbol-file build/stm32l476/app/bmp390_test/bmp390_test",
-                "load",
-                "enable breakpoint",
-                "monitor reset"
-            ],
-            "showDevDebugOutput": true,
-        },
+        }
     ]
 }

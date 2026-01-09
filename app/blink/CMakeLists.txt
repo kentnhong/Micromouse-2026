@@ -1,3 +1,4 @@
+
 set(EXECUTABLE blink)
 set(LDF ${CMAKE_CURRENT_BINARY_DIR}/${EXECUTABLE}.ld)
 
@@ -6,7 +7,7 @@ set(PREPROCESS_DEFS
     -DDEF_FLASH_SIZE=1024K
 )
 
-add_subdirectory_for(STM32L476 bsp_l476)
+add_subdirectory_for(STM32F411 bsp_f411)
 
 if (TARGET blink_bsp)
 

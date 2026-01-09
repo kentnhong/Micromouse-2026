@@ -6,10 +6,10 @@
  */
 
 #pragma once
-#include <cstdint>
-#include <span>
+#include <stddef.h>
+#include <stdint.h>
 
-namespace LBR
+namespace MM
 {
 /**
  * @class I2c
@@ -26,18 +26,7 @@ public:
      * @param dev_addr address of target device
      * @return true if successful, false otherwise
      */
-    virtual bool mem_read(std::span<uint8_t> data, const uint8_t reg_addr,
-                          uint8_t dev_addr) = 0;
-
-    /**
-     * @brief Read data from external device that uses 16-bit memory addresses
-     * 
-     * @param data block of memory to read data into from the bus
-     * @param reg_addr data register of external device to read from
-     * @param dev_addr address of target device
-     * @return true if successful, false otherwise
-     */
-    virtual bool mem_read(std::span<uint8_t> data, const uint16_t reg_addr,
+    virtual bool mem_read(uint8_t* data, size_t len, const uint8_t reg_addr,
                           uint8_t dev_addr) = 0;
 
     /**
@@ -48,19 +37,8 @@ public:
      * @param dev_addr address of target device
      * @return true if successful, false otherwise
      */
-    virtual bool mem_write(std::span<const uint8_t> data,
+    virtual bool mem_write(const uint8_t* data, size_t len,
                            const uint8_t reg_addr, uint8_t dev_addr) = 0;
-
-    /**
-     * @brief Writes data to external device that uses 16-bit memory addresses
-     * 
-     * @param data block of memory storing data to write into the bus
-     * @param reg_addr data register of external device to write to
-     * @param dev_addr address of target device
-     * @return true if successful, false otherwise
-     */
-    virtual bool mem_write(std::span<const uint8_t> data,
-                           const uint16_t reg_addr, uint8_t dev_addr) = 0;
 
     /**
      * @brief Read raw data from an I2C bus
@@ -69,7 +47,7 @@ public:
      * @param dev_addr address of target device
      * @return true if successful, false otherwise
      */
-    virtual bool read(std::span<uint8_t> data, uint8_t dev_addr) = 0;
+    virtual bool read(uint8_t* data, size_t len, uint8_t dev_addr) = 0;
 
     /**
      * @brief Write raw data to an I2C bus
@@ -78,8 +56,8 @@ public:
      * @param dev_addr address of target device
      * @return true if successful, false otherwise
      */
-    virtual bool write(std::span<const uint8_t> data, uint8_t dev_addr) = 0;
+    virtual bool write(const uint8_t* data, size_t len, uint8_t dev_addr) = 0;
 
     ~I2c() = default;
 };
-}  // namespace LBR
+}  // namespace MM

@@ -140,7 +140,8 @@ extern "C"
                                This parameter can be a value of @ref TIM_Output_Compare_N_Idle_State
                                @note This parameter is valid only for timer instances supporting break feature. */
 
-        uint32_t ICPolarity; /*!< Specifies the active edge of the input signal.
+        uint32_t
+            ICPolarity; /*!< Specifies the active edge of the input signal.
                                This parameter can be a value of @ref TIM_Input_Capture_Polarity */
 
         uint32_t ICSelection; /*!< Specifies the input.
@@ -155,7 +156,8 @@ extern "C"
   */
     typedef struct
     {
-        uint32_t ICPolarity; /*!< Specifies the active edge of the input signal.
+        uint32_t
+            ICPolarity; /*!< Specifies the active edge of the input signal.
                               This parameter can be a value of @ref TIM_Input_Capture_Polarity */
 
         uint32_t ICSelection; /*!< Specifies the input.

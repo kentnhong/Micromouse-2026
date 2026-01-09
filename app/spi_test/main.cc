@@ -7,9 +7,9 @@
 #include <array>
 #include "board.h"
 //#include "spi_app_bsp.cc"
-//#include "stm32l476xx.h"
+//#include "stm32f4xx.h"
 
-using namespace LBR;
+using namespace MM;
 
 int main(void)
 {
@@ -17,7 +17,7 @@ int main(void)
     BSP_Init();
 
     // Get struct of our ready to use Chip Select Pin and SPI object
-    Board spi_board = Get_Board();
+    Board& spi_board = Get_Board();
 
     // Send command byte 0x90 to read Manufacturer ID for the w25q
     std::array<uint8_t, 4> tx_buffer = {0x90, 0x00, 0x00, 0x00};

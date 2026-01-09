@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <span>
 
-namespace LBR
+namespace MM
 {
 class Spi
 {
@@ -20,4 +20,4 @@ public:
                           std::span<uint8_t> rx_data) = 0;
     virtual ~Spi() = default;
 };
-}  // namespace LBR
+}  // namespace MM

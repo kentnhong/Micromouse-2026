@@ -11,7 +11,7 @@
 #include "gpio.h"
 #include "i2c.h"
 
-namespace LBR
+namespace MM
 {
 
 struct Board
@@ -22,4 +22,4 @@ struct Board
 bool bsp_init(void);
 Board& get_board(void);
 
-}  // namespace LBR
+}  // namespace MM

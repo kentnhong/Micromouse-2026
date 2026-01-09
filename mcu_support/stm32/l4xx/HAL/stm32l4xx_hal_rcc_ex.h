@@ -133,7 +133,8 @@ extern "C"
   */
     typedef struct
     {
-        uint32_t PeriphClockSelection; /*!< The Extended Clock to be configured.
+        uint32_t
+            PeriphClockSelection; /*!< The Extended Clock to be configured.
                                         This parameter can be a value of @ref RCCEx_Periph_Clock_Selection */
 #if defined(RCC_PLLSAI1_SUPPORT)
 

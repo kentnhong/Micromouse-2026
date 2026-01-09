@@ -1,11 +1,11 @@
 #pragma once
 #include "gpio_cs.h"
 #include "spi.h"
-#include "stm32l476xx.h"
+#include "stm32f4xx.h"
 
 //do the cmake
 
-namespace LBR
+namespace MM
 {
 
 struct Board
@@ -17,4 +17,4 @@ struct Board
 bool BSP_Init();
 Board& Get_Board();
 
-}  // namespace LBR
+}  // namespace MM

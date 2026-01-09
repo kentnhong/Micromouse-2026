@@ -8,7 +8,7 @@
 #include "bno055_imu.h"
 #include "board.h"
 
-using namespace LBR;
+using namespace MM;
 
 Bno055Data data;
 uint8_t chip_id = 0;

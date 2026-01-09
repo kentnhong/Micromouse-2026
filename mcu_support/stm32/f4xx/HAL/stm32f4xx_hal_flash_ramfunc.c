@@ -55,8 +55,9 @@
   * @{
   */
 #ifdef HAL_FLASH_MODULE_ENABLED
-#if defined(STM32F410Tx) || defined(STM32F410Cx) || defined(STM32F410Rx) || defined(STM32F411xE) || defined(STM32F446xx) || defined(STM32F412Zx) || defined(STM32F412Vx) || \
-    defined(STM32F412Rx) || defined(STM32F412Cx)
+#if defined(STM32F410Tx) || defined(STM32F410Cx) || defined(STM32F410Rx) || \
+    defined(STM32F411xE) || defined(STM32F446xx) || defined(STM32F412Zx) || \
+    defined(STM32F412Vx) || defined(STM32F412Rx) || defined(STM32F412Cx)
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -93,12 +94,12 @@
   */
 __RAM_FUNC HAL_StatusTypeDef HAL_FLASHEx_StopFlashInterfaceClk(void)
 {
-  /* Enable Power ctrl clock */
-  __HAL_RCC_PWR_CLK_ENABLE();
-  /* Stop the flash interface while System Run */
-  SET_BIT(PWR->CR, PWR_CR_FISSR);
+    /* Enable Power ctrl clock */
+    __HAL_RCC_PWR_CLK_ENABLE();
+    /* Stop the flash interface while System Run */
+    SET_BIT(PWR->CR, PWR_CR_FISSR);
 
-  return HAL_OK;
+    return HAL_OK;
 }
 
 /**
@@ -110,12 +111,12 @@ __RAM_FUNC HAL_StatusTypeDef HAL_FLASHEx_StopFlashInterfaceClk(void)
   */
 __RAM_FUNC HAL_StatusTypeDef HAL_FLASHEx_StartFlashInterfaceClk(void)
 {
-  /* Enable Power ctrl clock */
-  __HAL_RCC_PWR_CLK_ENABLE();
-  /* Start the flash interface while System Run */
-  CLEAR_BIT(PWR->CR, PWR_CR_FISSR);
+    /* Enable Power ctrl clock */
+    __HAL_RCC_PWR_CLK_ENABLE();
+    /* Start the flash interface while System Run */
+    CLEAR_BIT(PWR->CR, PWR_CR_FISSR);
 
-  return HAL_OK;
+    return HAL_OK;
 }
 
 /**
@@ -127,12 +128,12 @@ __RAM_FUNC HAL_StatusTypeDef HAL_FLASHEx_StartFlashInterfaceClk(void)
   */
 __RAM_FUNC HAL_StatusTypeDef HAL_FLASHEx_EnableFlashSleepMode(void)
 {
-  /* Enable Power ctrl clock */
-  __HAL_RCC_PWR_CLK_ENABLE();
-  /* Enable the flash sleep while System Run */
-  SET_BIT(PWR->CR, PWR_CR_FMSSR);
+    /* Enable Power ctrl clock */
+    __HAL_RCC_PWR_CLK_ENABLE();
+    /* Enable the flash sleep while System Run */
+    SET_BIT(PWR->CR, PWR_CR_FMSSR);
 
-  return HAL_OK;
+    return HAL_OK;
 }
 
 /**
@@ -144,12 +145,12 @@ __RAM_FUNC HAL_StatusTypeDef HAL_FLASHEx_EnableFlashSleepMode(void)
   */
 __RAM_FUNC HAL_StatusTypeDef HAL_FLASHEx_DisableFlashSleepMode(void)
 {
-  /* Enable Power ctrl clock */
-  __HAL_RCC_PWR_CLK_ENABLE();
-  /* Disable the flash sleep while System Run */
-  CLEAR_BIT(PWR->CR, PWR_CR_FMSSR);
+    /* Enable Power ctrl clock */
+    __HAL_RCC_PWR_CLK_ENABLE();
+    /* Disable the flash sleep while System Run */
+    CLEAR_BIT(PWR->CR, PWR_CR_FMSSR);
 
-  return HAL_OK;
+    return HAL_OK;
 }
 
 /**
@@ -169,4 +170,3 @@ __RAM_FUNC HAL_StatusTypeDef HAL_FLASHEx_DisableFlashSleepMode(void)
 /**
   * @}
   */
-

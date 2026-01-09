@@ -1,8 +1,7 @@
 #pragma once
-#include "gpio.h"
-//do the cmake
+#include "../../common/drivers/io/gpio.h"
 
-namespace LBR
+namespace MM
 {
 
 struct Board
@@ -13,4 +12,4 @@ struct Board
 bool board_init(void);
 Board& get_board(void);
 
-}  // namespace LBR
+}  // namespace MM
