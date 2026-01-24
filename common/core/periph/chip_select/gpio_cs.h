@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/drivers/io/gpio.h"
+#include "gpio.h"
 
 namespace MM
 {
