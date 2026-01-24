@@ -5,8 +5,7 @@
 #include <cstddef>
 #include "delay.h"
 #include "i2c.h"
-#include "mcu_support/stm32/f4xx/stm32f4xx.h"
-#include "stm32f411xe.h"
+#include "stm32f4xx.h"
 
 namespace MM
 {
@@ -16,8 +15,7 @@ namespace Stmf4
 struct StI2cParams
 {
     I2C_TypeDef* base_addr;
-    uint16_t ccr;   // Clock control register value
-    uint8_t trise;  // Maximum rise time register value
+    uint32_t timingr;
 };
 
 class HwI2c : public I2c
@@ -69,8 +67,12 @@ public:
 
 private:
     I2C_TypeDef* _base_addr;
+<<<<<<< HEAD
     uint16_t _ccr;
     uint8_t _trise;
+=======
+    uint32_t _timingr;
+>>>>>>> 1bf1c97 (working blink + i2c need testing)
 };
 }  // namespace Stmf4
 }  // namespace MM

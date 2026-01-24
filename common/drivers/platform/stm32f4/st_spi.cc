@@ -8,7 +8,7 @@
 
 #include "st_spi.h"
 #include <cstddef>
-#include "common/drivers/time/delay.h"
+#include "common/drivers/delay/delay.h"
 #include "mcu_support/stm32/f4xx/stm32f4xx.h"
 
 namespace MM

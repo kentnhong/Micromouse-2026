@@ -5,7 +5,6 @@
 #include <cstdint>
 #include "gpio.h"
 #include "mcu_support/stm32/f4xx/stm32f4xx.h"
-#include "stm32f411xe.h"
 
 #define ST_GPIO_MAX_PINS 16
 
@@ -16,8 +15,8 @@ namespace Stmf4
 
 enum class GpioMode : uint8_t
 {
-    GPI = 0,
-    GPOUT,
+    GPOUT = 0,
+    GPI,
     AF,
     ANALOG
 };
