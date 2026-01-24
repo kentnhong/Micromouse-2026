@@ -47,14 +47,6 @@ jobs:
         uses: carlosperate/arm-none-eabi-gcc-action@v1
         with:
           release: '15.2.Rel1' # <-- The compiler release to use
-          
-
-      - name: Configure CMake for F411
-        run: |
-          cmake --preset=stm32f411 -DTARGET_APP="" -DCMAKE_BUILD_TYPE="Debug"
-
-      - name: Build for F411
-        run: cd build/stm32f411 && cmake --build .
 
       # - name: Configure CMake for F746
       #   run: |
@@ -77,12 +69,12 @@ jobs:
       # - name: Build for L412
       #   run: cd build/stm32l412 && cmake --build .
 
-      #- name: Configure CMake for L476
+      - name: Configure CMake for F411
         run: |
-          cmake --preset=stm32l476 -DTARGET_APP="" -DCMAKE_BUILD_TYPE="Debug"
-          
-      - name: Build for L476
-        run: cd build/stm32l476 && cmake --build .
+          cmake --preset=stm32f411 -DTARGET_APP="" -DCMAKE_BUILD_TYPE="Debug"
+
+      - name: Build for F411
+        run: cd build/stm32f411 && cmake --build .
 
   # This runs native unit tests that verify functionality of non-HW specific code.
   unit_test:
