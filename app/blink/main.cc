@@ -2,10 +2,6 @@
 #include "board.h"
 #include "gpio.h"
 
-// extern "C"
-// {
-// }
-
 using namespace MM;
 
 int main(int argc, char* argv[])
