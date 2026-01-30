@@ -15,8 +15,8 @@ namespace Stmf4
 
 enum class GpioMode : uint8_t
 {
-    GPOUT = 0,
-    GPI,
+    GPI = 0,
+    GPOUT,
     AF,
     ANALOG
 };
