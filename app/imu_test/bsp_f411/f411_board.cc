@@ -14,8 +14,8 @@ Stmf4::StGpioSettings gpio_settings{
 Stmf4::StGpioParams scl_params{8, GPIOB, gpio_settings};
 Stmf4::StGpioParams sda_params{9, GPIOB, gpio_settings};
 
-Stmf4::HwGpio scl_gpio(scl_params);
-Stmf4::HwGpio sda_gpio(sda_params);
+Stmf4::HwGpio scl(scl_params);
+Stmf4::HwGpio sda(sda_params);
 
 static constexpr uint16_t CCR_100KHZ = 0x1F4;
 static constexpr uint16_t TRISE_100KHZ = 0x2B;
@@ -39,8 +39,8 @@ bool bsp_init()
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
     RCC->APB1ENR |= RCC_APB1ENR_I2C1EN;
 
-    scl_gpio.init();
-    sda_gpio.init();
+    scl.init();
+    sda.init();
     i2c.init();
     rst.init();
 

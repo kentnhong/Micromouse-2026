@@ -19,8 +19,8 @@ Stmf4::StGpioSettings sda_settings{
 
 Stmf4::StGpioParams sda_params{9, GPIOB, sda_settings};  // PB9
 
-Stmf4::HwGpio scl_gpio(scl_params);
-Stmf4::HwGpio sda_gpio(sda_params);
+Stmf4::HwGpio scl(scl_params);
+Stmf4::HwGpio sda(sda_params);
 
 static constexpr uint16_t CCR_100KHZ = 0x1F4;
 static constexpr uint16_t TRISE_100KHZ = 0x2B;
