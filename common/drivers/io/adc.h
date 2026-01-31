@@ -1,11 +1,13 @@
 /**
  * @file adc.h
  * @author Kent Hong
- * @brief Interface for Analog-to-Digital Converter (ADC) drivers
+ * @brief Generic interface for Analog-to-Digital Converter (ADC) drivers
  * 
  */
 
 #pragma once
+
+#include <cstdint>
 
 namespace MM
 {
