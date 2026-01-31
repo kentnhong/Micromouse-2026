@@ -9,22 +9,24 @@ namespace MM
 
 Stmf4::StGpioSettings scl_settings{
     Stmf4::GpioMode::AF, Stmf4::GpioOtype::OPEN_DRAIN, Stmf4::GpioOspeed::LOW,
-    Stmf4::GpioPupd::PULL_UP};
+    Stmf4::GpioPupd::PULL_UP, 4};
 
 Stmf4::StGpioParams scl_params{8, GPIOB, scl_settings};  // PB8
 
 Stmf4::StGpioSettings sda_settings{
     Stmf4::GpioMode::AF, Stmf4::GpioOtype::OPEN_DRAIN, Stmf4::GpioOspeed::LOW,
-    Stmf4::GpioPupd::PULL_UP};
+    Stmf4::GpioPupd::PULL_UP, 4};
 
 Stmf4::StGpioParams sda_params{9, GPIOB, sda_settings};  // PB9
 
-Stmf4::StI2cParams i2c_params{
-    I2C1, 0x10909CEC};  // Timing register for 100kHz @ 16MHz PCLK1
+Stmf4::HwGpio scl_gpio(scl_params);
+Stmf4::HwGpio sda_gpio(sda_params);
 
+static constexpr uint16_t CCR_100KHZ = 0x1F4;
+static constexpr uint16_t TRISE_100KHZ = 0x2B;
+
+Stmf4::StI2cParams i2c_params{I2C1, CCR_100KHZ, TRISE_100KHZ};
 Stmf4::HwI2c i2c(i2c_params);
-Stmf4::HwGpio scl(scl_params);
-Stmf4::HwGpio sda(sda_params);
 
 Board board{.i2c = i2c};
 
