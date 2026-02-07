@@ -6,8 +6,6 @@
 
 #include <array>
 #include "board.h"
-//#include "spi_app_bsp.cc"
-//#include "stm32f4xx.h"
 
 using namespace MM;
 
@@ -28,11 +26,11 @@ int main(void)
     while (1)
     {
         // Drive CS Pin low to allow write
-        spi_board.cs.ChipSelectEnable();
+        spi_board.cs.cs_enable();
         // Loop write to PA7
-        spi_board.spi1.Transfer(tx_buffer, rx_buffer);
+        spi_board.spi1.seq_transfer(tx_buffer, rx_buffer);
         // Drive CS Pin high to end write
-        spi_board.cs.ChipSelectDisable();
+        spi_board.cs.cs_disable();
     }
 
     return 0;

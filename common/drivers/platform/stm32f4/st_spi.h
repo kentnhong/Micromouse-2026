@@ -106,11 +106,11 @@ public:
     explicit HwSpi(SPI_TypeDef* instance_, StSpiSettings& settings_);
 
     // Member Functions
-    bool Init();
-    bool Read(std::span<uint8_t> rx_data) override;
-    bool Write(std::span<uint8_t> tx_data) override;
-    bool Transfer(std::span<uint8_t> tx_data,
-                  std::span<uint8_t> rx_data) override;
+    bool init();
+    bool read(std::span<uint8_t> rx_data) override;
+    bool write(std::span<uint8_t> tx_data) override;
+    bool seq_transfer(std::span<uint8_t> tx_data,
+                      std::span<uint8_t> rx_data) override;
 
 private:
     // Member variables

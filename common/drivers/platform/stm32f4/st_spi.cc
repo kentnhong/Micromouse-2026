@@ -36,7 +36,7 @@ HwSpi::HwSpi(SPI_TypeDef* instance_, StSpiSettings& settings_)
  * @return true 
  * @return false 
  */
-bool HwSpi::Read(std::span<uint8_t> rx_data)
+bool HwSpi::read(std::span<uint8_t> rx_data)
 {
 
     // Check if SPI is already in communication
@@ -77,14 +77,14 @@ bool HwSpi::Read(std::span<uint8_t> rx_data)
 }
 
 /**
- * @brief Write data to a slave device.
+ * @brief write data to a slave device.
  * 
  * @param tx_data 8 byte array of the data to be sent.
  * @param buffer_len Size of array
  * @return true 
  * @return false 
  */
-bool HwSpi::Write(std::span<uint8_t> tx_data)
+bool HwSpi::write(std::span<uint8_t> tx_data)
 {
 
     // Check if SPI is already in communication
@@ -125,7 +125,7 @@ bool HwSpi::Write(std::span<uint8_t> tx_data)
 }
 
 /**
- * @brief Read and Write data to a slave device.
+ * @brief read and Write data to a slave device.
  * 
  * @param tx_data 8 byte array of the data to be sent.
  * @param rx_data 8 byte array to store read data.
@@ -133,7 +133,7 @@ bool HwSpi::Write(std::span<uint8_t> tx_data)
  * @return true 
  * @return false 
  */
-bool HwSpi::Transfer(std::span<uint8_t> tx_data, std::span<uint8_t> rx_data)
+bool HwSpi::seq_transfer(std::span<uint8_t> tx_data, std::span<uint8_t> rx_data)
 {
     // Check if SPI is enabled
     if (!(instance->CR1 & SPI_CR1_SPE))
@@ -213,7 +213,7 @@ bool HwSpi::Transfer(std::span<uint8_t> tx_data, std::span<uint8_t> rx_data)
  * @brief Initializes SPI peripheral and its sck, mosi, miso, and nss pins
  *
  */
-bool HwSpi::Init()
+bool HwSpi::init()
 {
     // TODO: Runtime validation of enum values (will change to compile time checks in the future and maybe make a private function for these checks)
     if (static_cast<uint8_t>(settings.baudrate) > 7)

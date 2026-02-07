@@ -48,7 +48,7 @@ bool BSP_Init()
     RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
 
     // Init SPI periph and check if it was successful
-    result = result && spi1.Init();
+    result = result && spi1.init();
 
     // Init Spi pins
     result = result && sck.init();
@@ -57,7 +57,7 @@ bool BSP_Init()
 
     // Init CS pin
     result = result && cs_gpio.init();
-    chip_select.ChipSelectEnable();
+    chip_select.cs_enable();
 
     return result;
 }

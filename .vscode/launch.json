@@ -34,7 +34,7 @@
         {
             "cwd": "${workspaceFolder}",
             "executable": "${workspaceRoot}/build/stm32f411/app/blink/blink",
-            "name": "DEBUG BLINK F4",
+             "name": "DEBUG BLINK F4",
             "request": "launch",
             "type": "cortex-debug",
             "servertype": "openocd",
