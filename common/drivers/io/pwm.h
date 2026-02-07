@@ -5,13 +5,14 @@
  * @author Bex Saw
 */
 
-#pragma once 
+#pragma once
 #include <cstdint>
-namespace MM 
+
+namespace MM
 {
 class Pwm
 {
-
+public:
     /**
     * @brief Sets the frequency of the PWM timer
     * @param freq Desired frequency in Hz
@@ -29,4 +30,4 @@ class Pwm
     ~Pwm() = default;
 };
 
-} // namespace MM
+}  // namespace MM

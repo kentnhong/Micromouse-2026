@@ -6,15 +6,15 @@
 */
 
 #pragma once
-#include "pwm.h"
-#include "stm32f4xx.h"
 #include <cstdint>
+#include "pwm.h"
+#include "stm32f411xe.h"
 
 namespace MM
 {
-
 namespace Stmf4
 {
+
 /**
 * @brief STM32F4 specific implementation of the Pwm interface
 * @note EDGE_ALIGNED: counter counts up or down depending on DIR bit; flag set when CNT == CCRx
@@ -22,7 +22,7 @@ namespace Stmf4
 *       CENTER_ALIGNED_UP: counter counts up and down; flag set when counting up
 *       CENTER_ALIGNED_UP_DOWN : counter counts up and down; flag set when counting up and down
 */
-enum class PwmMode : uint8_t 
+enum class PwmMode : uint8_t
 {
     EDGE_ALIGNED = 0,
     CENTER_ALIGNED_DOWN,
@@ -37,8 +37,8 @@ enum class PwmMode : uint8_t
 */
 enum class PwmOutputMode : uint8_t
 {
-    PWM_MODE_1 = 6,   
-    PWM_MODE_2 = 7   
+    PWM_MODE_1 = 6,
+    PWM_MODE_2 = 7
 };
 
 /**
@@ -56,17 +56,17 @@ enum class PwmDir : uint8_t
 /**
 * @brief Configuration structure for STM32F4 PWM settings
 */
-struct StPwmSettings 
+struct StPwmSettings
 {
-    PwmMode mode;             
-    PwmOutputMode outputMode;  
-    PwmDir polarity;           
+    PwmMode mode;
+    PwmOutputMode outputMode;
+    PwmDir polarity;
 };
 
 struct StPwmParams
 {
-    TIM_TypeDef* base_addr;  
-    uint8_t channel;    
+    TIM_TypeDef* base_addr;
+    uint8_t channel;
     StPwmSettings settings;
 };
 
@@ -82,7 +82,7 @@ public:
     /**
     * @brief Initializes the PWM timer with the specified settings
     */
-    bool init() override;
+    bool init();
 
     /**
     * @brief Sets the frequency of the PWM timer
@@ -101,12 +101,12 @@ public:
     bool setDutyCycle(uint8_t dutyCycle) override;
 
 private:
-    TIM_TypeDef* base_addr; 
-    uint8_t channel; 
+    TIM_TypeDef* base_addr;
+    uint8_t channel;
     StPwmParams params;
+    StPwmSettings settings;
     uint32_t currentFrequency;
     uint8_t currentDutyCycle;
-
 };
-} // namespace Stmf4
-} // namespace MM
+}  // namespace Stmf4
+}  // namespace MM
