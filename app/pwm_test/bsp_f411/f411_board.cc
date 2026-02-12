@@ -5,18 +5,20 @@
 
 namespace MM
 {
-// Output pin config for Timer 2, Channel 3 (PB8)
+
+// Output pin config for Timer 3, Channel 1 (PA6, D11)
 Stmf4::StGpioSettings pwm_output_settings{
     Stmf4::GpioMode::AF, Stmf4::GpioOtype::PUSH_PULL, Stmf4::GpioOspeed::LOW,
-    Stmf4::GpioPupd::NO_PULL, 2};
+    Stmf4::GpioPupd::NO_PULL, 2}; // AF2 for TIM3 on PA6
 
-const Stmf4::StGpioParams pwm_output_params{8, GPIOB, pwm_output_settings};
-// PWM Config (TIM2 CH3)
+const Stmf4::StGpioParams pwm_output_params{6, GPIOA, pwm_output_settings};
+
+// PWM Config (TIM3 CH1)
 Stmf4::StPwmSettings pwm_settings{Stmf4::PwmMode::EDGE_ALIGNED,
                                   Stmf4::PwmOutputMode::PWM_MODE_1,
-                                  Stmf4::PwmDir::ACTIVE_HIGH};
+                                  Stmf4::PwmDir::UPCOUNTING};
 
-const Stmf4::StPwmParams pwm_params{TIM2, 3, pwm_settings};
+const Stmf4::StPwmParams pwm_params{TIM3, 1, pwm_settings};
 
 // Create PWM GPIO and PWM objects
 Stmf4::HwGpio pwm_output(pwm_output_params);
@@ -27,8 +29,8 @@ Board board{.pwm = pwm};
 bool bsp_init()
 {
     // Enable peripheral clocks
-    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
-    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+    RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
 
     // Initialize PWM and pins
     bool ret = true;

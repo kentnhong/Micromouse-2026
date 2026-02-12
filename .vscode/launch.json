@@ -148,7 +148,36 @@
             "showDevDebugOutput": true,
             "liveWatch": {
                 "enabled": true
-            }
+            },
+        },
+        {
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceRoot}/build/stm32f411/app/pwm_test/pwm_test",
+            "name": "DEBUG PWM F4",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "device": "STM32F411",
+            "svdFile": "${workspaceRoot}/mcu_support/f4xx/STM32F4x1.svd",
+            "searchDir": [
+                "${workspaceRoot}/mcu_support/stm32"
+            ],
+            "runToMain": true,
+            "configFiles": [
+                "${workspaceRoot}/mcu_support/stm32/stlink-dap.cfg",
+                "${workspaceRoot}/mcu_support/stm32/f4xx/stm32f4x.cfg"
+            ],
+            "debuggerArgs": [
+                "-d",
+                "${workspaceRoot}",
+            ],
+            "preRestartCommands": [
+                "add-symbol-file build/stm32f411/app/pwm_test/pwm_test",
+                "load",
+                "enable breakpoint",
+                "monitor reset"
+            ],
+            "showDevDebugOutput": true
         }
     ]
 }

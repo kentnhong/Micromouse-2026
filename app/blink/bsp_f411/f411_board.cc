@@ -11,6 +11,7 @@ Stmf4::StGpioSettings led_settings{
     Stmf4::GpioMode::GPOUT, Stmf4::GpioOtype::PUSH_PULL, Stmf4::GpioOspeed::LOW,
     Stmf4::GpioPupd::NO_PULL, 0};
 
+
 Stmf4::StGpioParams led_params{5,      // pin_num
                                GPIOA,  // base_addr
                                led_settings};

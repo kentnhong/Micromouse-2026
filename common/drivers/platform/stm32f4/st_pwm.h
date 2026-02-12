@@ -28,7 +28,7 @@ enum class PwmMode : uint8_t
     CENTER_ALIGNED_DOWN,
     CENTER_ALIGNED_UP,
     CENTER_ALIGNED_UP_DOWN
-};
+}; 
 
 /**
 * @brief Output compare modes for STM32F4 PWM
@@ -43,14 +43,14 @@ enum class PwmOutputMode : uint8_t
 
 /**
 * @brief Polarity options for STM32F4 PWM
-* @note ACTIVE_HIGH: output is active when high
-        ACTIVE_LOW: output is active when low
+* @note UPCOUNTING: counter counts up
+        DOWNCOUNTING: counter counts down
 */
 
 enum class PwmDir : uint8_t
 {
-    ACTIVE_HIGH = 0,
-    ACTIVE_LOW
+    UPCOUNTING = 0,
+    DOWNCOUNTING
 };
 
 /**
@@ -60,7 +60,7 @@ struct StPwmSettings
 {
     PwmMode mode;
     PwmOutputMode outputMode;
-    PwmDir polarity;
+    PwmDir dir;
 };
 
 struct StPwmParams
@@ -101,12 +101,11 @@ public:
     bool setDutyCycle(uint8_t dutyCycle) override;
 
 private:
-    TIM_TypeDef* base_addr;
-    uint8_t channel;
-    StPwmParams params;
-    StPwmSettings settings;
-    uint32_t currentFrequency;
-    uint8_t currentDutyCycle;
+    TIM_TypeDef* _base_addr;
+    uint8_t _channel;
+    StPwmSettings _settings;
+    uint32_t _currentFrequency;
+    uint8_t _currentDutyCycle;
 };
 }  // namespace Stmf4
 }  // namespace MM
