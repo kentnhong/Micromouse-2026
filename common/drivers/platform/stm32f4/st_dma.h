@@ -107,7 +107,7 @@ public:
     * @return true successful transfer, false otherwise
     */
     bool arm_m2m(uintptr_t source, uintptr_t destination,
-             size_t num_items) override;
+                 size_t num_items) override;
 
     /**
      * @brief Start DMA transfer

@@ -31,9 +31,8 @@ inline uint32_t clear_mask(uint8_t g)
            (1u << (b + 4)) | (1u << (b + 5));
 }
 
-bool assign_group(DMA_TypeDef* base_addr,
-                                DMA_Stream_TypeDef* stream_base_addr,
-                                bool& is_high, uint32_t& group)
+bool assign_group(DMA_TypeDef* base_addr, DMA_Stream_TypeDef* stream_base_addr,
+                  bool& is_high, uint32_t& group)
 {
     for (size_t i = 0; i < dma_lisr.size(); i++)
     {
