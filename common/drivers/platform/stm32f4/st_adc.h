@@ -14,14 +14,35 @@ namespace MM
 {
 namespace Stmf4
 {
+
+enum class AdcResolution : uint8_t
+{
+    TWELVE_BIT = 0,
+    TEN_BIT,
+    EIGHT_BIT,
+    SIX_BIT
+};
+
+enum class AdcDma : uint8_t
+{
+    DMA_DISABLE = 0,
+    DMA_ENABLE
+};
+
+struct StAdcSettings
+{
+    AdcResolution resolution;
+    AdcDma dma;
+};
 struct StAdcParams
 {
+    StAdcSettings settings;
     ADC_TypeDef* base_addr;
 };
 class HwAdc : public Adc
 {
 public:
-    explicit HwAdc(StAdcParams& params);
+    explicit HwAdc(StAdcParams& params_);
 
     /**
      * @brief Initialize ADC peripheral
@@ -43,6 +64,10 @@ public:
      * @return true Read successful, false otherwise
      */
     bool read() override;
+
+private:
+    StAdcSettings settings;
+    ADC_TypeDef* base_addr;
 };
 };  // namespace Stmf4
 };  // namespace MM
