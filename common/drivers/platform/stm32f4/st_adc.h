@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <array>
+#include <cstdint>
 #include "adc.h"
 #include "stm32f411xe.h"
 
@@ -14,6 +16,27 @@ namespace MM
 {
 namespace Stmf4
 {
+
+enum class AdcChannel : uint8_t
+{
+    NONE = 0,
+    CH0,
+    CH1,
+    CH2,
+    CH3,
+    CH4,
+    CH5,
+    CH6,
+    CH7,
+    CH8,
+    CH9,
+    CH10,
+    CH11,
+    CH12,
+    CH13,
+    CH14,
+    CH15
+};
 
 enum class AdcResolution : uint8_t
 {
@@ -34,11 +57,14 @@ struct StAdcSettings
     AdcResolution resolution;
     AdcDma dma;
 };
+
 struct StAdcParams
 {
     StAdcSettings settings;
     ADC_TypeDef* base_addr;
+    std::array<AdcChannel, 16> ch_sequence;
 };
+
 class HwAdc : public Adc
 {
 public:
@@ -68,6 +94,8 @@ public:
 private:
     StAdcSettings settings;
     ADC_TypeDef* base_addr;
+    std::array<AdcChannel, 16> ch_sequence;
+    static constexpr uint32_t kSeqMask = 0x1F;  // 0001 1111
 };
 };  // namespace Stmf4
 };  // namespace MM
