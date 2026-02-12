@@ -95,7 +95,9 @@ private:
     StAdcSettings settings;
     ADC_TypeDef* base_addr;
     std::array<AdcChannel, 16> ch_sequence;
+
     static constexpr uint32_t kSeqMask = 0x1F;  // 0001 1111
+    static constexpr uint8_t kNumSeqBits = 0x05;
 };
 };  // namespace Stmf4
 };  // namespace MM

@@ -21,23 +21,29 @@ bool HwAdc::init()
         uint32_t channel = static_cast<uint32_t>(ch_sequence[idx]) - 1;
         if (idx < 6)
         {
-            // Configure ADC_SQR3
-            base_addr->SQR3 &= ~(kSeqMask << (idx * 5));
+            // Configure ADC_SQR3 SQ1 - SQ6
+            base_addr->SQR3 &= ~(kSeqMask << (idx * kNumSeqBits));
             base_addr->SQR3 |= (channel << (idx * 5));
         }
         else if (idx > 5 && idx < 12)
         {
-            // Configure ADC_SQR2
-            base_addr->SQR2 &= ~(kSeqMask << ((idx - 6) * 5));
-            base_addr->SQR2 |= (channel << ((idx - 6) * 5));
+            // Configure ADC_SQR2 SQ7 - SQ12
+            base_addr->SQR2 &= ~(kSeqMask << ((idx - 6) * kNumSeqBits));
+            base_addr->SQR2 |= (channel << ((idx - 6) * kNumSeqBits));
         }
         else
         {
-            // Configure ADC_SQR1
-            base_addr->SQR1 &= ~(kSeqMask << ((idx - 12) * 5));
-            base_addr->SQR1 |= (channel << ((idx - 12) * 5));
+            // Configure ADC_SQR1 SQ13 - SQ16
+            base_addr->SQR1 &= ~(kSeqMask << ((idx - 12) * kNumSeqBits));
+            base_addr->SQR1 |= (channel << ((idx - 12) * kNumSeqBits));
         }
         idx++;
+    }
+
+    // Edge Case no channels in sequence
+    if (idx == 0)
+    {
+        return false;
     }
 
     // Figure out sequence length in bit mapped value and set the length in ADC_SQR1
