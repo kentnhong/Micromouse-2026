@@ -29,7 +29,6 @@ enum class AdcDma : uint8_t
     DMA_ENABLE
 };
 
-<<<<<<< HEAD
 enum class AdcClkPrescaler : uint8_t
 {
     PCLK2_DIV_2 = 0,
@@ -44,24 +43,13 @@ struct StAdcSettings
     AdcClkPrescaler prescaler;
 };
 
-=======
-struct StAdcSettings
-{
-    AdcResolution resolution;
-    AdcDma dma;
-};
->>>>>>> 0d93109 (first commit)
 struct StAdcParams
 {
     StAdcSettings settings;
     ADC_TypeDef* base_addr;
-<<<<<<< HEAD
     ADC_Common_TypeDef* common_base_addr;
 };
 
-=======
-};
->>>>>>> 0d93109 (first commit)
 class HwAdc : public Adc
 {
 public:
@@ -75,7 +63,6 @@ public:
     bool init();
 
     /**
-<<<<<<< HEAD
      * @brief Continuous conversion of a single adc channel's analog to digital values
      * 
      * @return true Conversion successful, false otherwise
@@ -83,13 +70,6 @@ public:
      * Valid channels for the F411 are 0-15
      */
     bool convert(uint8_t channel) override;
-=======
-     * @brief Continuous conversion of analog to digital values
-     * 
-     * @return true Conversion successful, false otherwise
-     */
-    bool convert() override;
->>>>>>> 0d93109 (first commit)
 
     /**
      * @brief Read converted analog values from ADC buffer
@@ -101,10 +81,7 @@ public:
 private:
     StAdcSettings settings;
     ADC_TypeDef* base_addr;
-<<<<<<< HEAD
     ADC_Common_TypeDef* common_base_addr;
-=======
->>>>>>> 0d93109 (first commit)
 };
 };  // namespace Stmf4
 };  // namespace MM
