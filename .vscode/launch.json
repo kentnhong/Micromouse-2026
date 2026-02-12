@@ -151,6 +151,7 @@
     },
     {
       "cwd": "${workspaceFolder}",
+<<<<<<< HEAD
       "executable": "${workspaceRoot}/build/stm32f411/app/usart_test/usart_test",
       "name": "DEBUG USART F4",
       "request": "launch",
@@ -175,6 +176,8 @@
     },
     {
       "cwd": "${workspaceFolder}",
+=======
+>>>>>>> 0d93109 (first commit)
       "executable": "${workspaceRoot}/build/stm32f411/app/adc_test/adc_test",
       "name": "DEBUG ADC F4",
       "request": "launch",
