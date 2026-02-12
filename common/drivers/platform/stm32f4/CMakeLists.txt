@@ -6,6 +6,7 @@ add_library(hal STATIC
     st_sys_clk.cc
     st_usart.cc
     st_encoder.cc
+    st_adc.cc
 )
 
 target_include_directories(hal PUBLIC
@@ -15,6 +16,7 @@ target_include_directories(hal PUBLIC
     ${CMAKE_SOURCE_DIR}/mcu_support/CMSIS/include
     ${CMAKE_SOURCE_DIR}/common/drivers/time
     ${CMAKE_SOURCE_DIR}/common/drivers/bus
+    ${CMAKE_SOURCE_DIR}/common/drivers/io
     ${CMAKE_SOURCE_DIR}
     )
 
