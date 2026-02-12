@@ -5,14 +5,19 @@ namespace MM
 namespace Stmf4
 {
 HwAdc::HwAdc(StAdcParams& params_)
+<<<<<<< HEAD
     : settings{params_.settings},
       base_addr{params_.base_addr},
       common_base_addr{params_.common_base_addr}
+=======
+    : settings{params_.settings}, base_addr{params_.base_addr}
+>>>>>>> 0d93109 (first commit)
 {
 }
 
 bool HwAdc::init()
 {
+<<<<<<< HEAD
     // Configure PCLK2 prescaler in ADC_CCR
     common_base_addr->CCR &= ~ADC_CCR_ADCPRE;
     switch (settings.prescaler)
@@ -94,6 +99,10 @@ bool HwAdc::convert(uint8_t channel)
 
     // Stop DMA requests
 
+=======
+    // Turn on ADC
+    // Start conversion
+>>>>>>> 0d93109 (first commit)
     return true;
 }
 };  // namespace Stmf4
