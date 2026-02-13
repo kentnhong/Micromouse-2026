@@ -18,7 +18,7 @@ Stmf4::StGpioParams led_params{5,      // pin_num
 
 Stmf4::HwGpio led{led_params};
 
-Board board{.led = static_cast<Gpio&>(led)};
+Board board{.led = led};
 
 Stmf4::HwClk clock{MM::Stmf4::Configuration::HSI_16MHZ};
 

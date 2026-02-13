@@ -6,6 +6,7 @@ add_library(hal STATIC
     st_sys_clk.cc
     st_usart.cc
     st_adc.cc
+    st_dma.cc
 )
 
 target_include_directories(hal PUBLIC
@@ -16,6 +17,7 @@ target_include_directories(hal PUBLIC
     ${CMAKE_SOURCE_DIR}/common/drivers/time
     ${CMAKE_SOURCE_DIR}/common/drivers/bus
     ${CMAKE_SOURCE_DIR}/common/drivers/io
+    ${CMAKE_SOURCE_DIR}/common/drivers/memory
     ${CMAKE_SOURCE_DIR}
     )
 
