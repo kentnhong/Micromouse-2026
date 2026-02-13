@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <cstdint>
+
 namespace MM
 {
 /**
@@ -21,7 +23,7 @@ public:
         * 
         * @return true Conversion successful, false otherwise
         */
-    virtual bool convert() = 0;
+    virtual bool convert(uint8_t channel) = 0;
 
     /**
         * @brief Read converted analog values from ADC buffer
