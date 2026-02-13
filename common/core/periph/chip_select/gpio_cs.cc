@@ -1,15 +1,18 @@
 #include "gpio_cs.h"
 
-MM::GpioChipSelect::GpioChipSelect(MM::Gpio& cs_pin_) : cs_pin{cs_pin_}
+namespace MM
+{
+GpioChipSelect::GpioChipSelect(Gpio& cs_pin_) : cs_pin{cs_pin_}
 {
 }
 
-void MM::GpioChipSelect::cs_enable()
+void GpioChipSelect::cs_enable()
 {
     cs_pin.set(0);
 }
 
-void MM::GpioChipSelect::cs_disable()
+void GpioChipSelect::cs_disable()
 {
     cs_pin.set(1);
 }
+};  // namespace MM
