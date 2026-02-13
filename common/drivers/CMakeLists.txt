@@ -8,7 +8,8 @@ add_library(driver INTERFACE)
 
 target_include_directories(driver INTERFACE
     bus
-    io 
+    io
+    memory 
 )
 
 target_link_libraries(driver INTERFACE

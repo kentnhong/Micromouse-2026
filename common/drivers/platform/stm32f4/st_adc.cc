@@ -7,52 +7,93 @@ namespace Stmf4
 HwAdc::HwAdc(StAdcParams& params_)
     : settings{params_.settings},
       base_addr{params_.base_addr},
-      ch_sequence{params_.ch_sequence}
+      common_base_addr{params_.common_base_addr}
 {
 }
 
 bool HwAdc::init()
 {
-    // Configure ADC sequence registers from channel sequence array
-    uint8_t idx = 0;
-    while (idx < 16 && (ch_sequence[idx] != AdcChannel::NONE))
+    // Configure PCLK2 prescaler in ADC_CCR
+    common_base_addr->CCR &= ~ADC_CCR_ADCPRE;
+    switch (settings.prescaler)
     {
-        // Convert channel from enum to bit mapped value
-        uint32_t channel = static_cast<uint32_t>(ch_sequence[idx]) - 1;
-        if (idx < 6)
-        {
-            // Configure ADC_SQR3 SQ1 - SQ6
-            base_addr->SQR3 &= ~(kSeqMask << (idx * kNumSeqBits));
-            base_addr->SQR3 |= (channel << (idx * 5));
-        }
-        else if (idx > 5 && idx < 12)
-        {
-            // Configure ADC_SQR2 SQ7 - SQ12
-            base_addr->SQR2 &= ~(kSeqMask << ((idx - 6) * kNumSeqBits));
-            base_addr->SQR2 |= (channel << ((idx - 6) * kNumSeqBits));
-        }
-        else
-        {
-            // Configure ADC_SQR1 SQ13 - SQ16
-            base_addr->SQR1 &= ~(kSeqMask << ((idx - 12) * kNumSeqBits));
-            base_addr->SQR1 |= (channel << ((idx - 12) * kNumSeqBits));
-        }
-        idx++;
+        case AdcClkPrescaler::PCLK2_DIV_2:
+            break;
+        case AdcClkPrescaler::PCLK2_DIV_4:
+            common_base_addr->CCR |= ADC_CCR_ADCPRE_0;
+            break;
+        case AdcClkPrescaler::PCLK2_DIV_6:
+            common_base_addr->CCR |= ADC_CCR_ADCPRE_1;
+            break;
+        case AdcClkPrescaler::PCLK2_DIV_8:
+            common_base_addr->CCR |= ADC_CCR_ADCPRE;
     }
 
-    // Edge Case no channels in sequence
-    if (idx == 0)
+    // Set resolution in ADC_CR1
+    base_addr->CR1 &= ~ADC_CR1_RES;
+    switch (settings.resolution)
+    {
+        case AdcResolution::TWELVE_BIT:
+            break;
+        case AdcResolution::TEN_BIT:
+            base_addr->CR1 |= ADC_CR1_RES_0;
+            break;
+        case AdcResolution::EIGHT_BIT:
+            base_addr->CR1 |= ADC_CR1_RES_1;
+            break;
+        case AdcResolution::SIX_BIT:
+            base_addr->CR1 |= ADC_CR1_RES;
+    }
+
+    // Configure right align in ADC_CR2
+    base_addr->CR2 &= ~ADC_CR2_ALIGN;
+
+    // Turn on ADC in ADC_CR2
+    base_addr->CR2 |= ADC_CR2_ADON;
+
+    return true;
+}
+
+bool HwAdc::convert(uint8_t channel)
+{
+    // Check if channel is within valid range of F411 ADC channels
+    if (channel < 0 || channel > 15)
     {
         return false;
     }
 
-    // Figure out sequence length in bit mapped value and set the length in ADC_SQR1
-    uint8_t seq_length = idx - 1;
-    base_addr->SQR1 &= ~(ADC_SQR1_L_Msk);
-    base_addr->SQR1 |= (seq_length << ADC_SQR1_L_Pos) & ADC_SQR1_L_Msk;
+    // Check if a conversion is in progress
+    while (base_addr->SR & ADC_SR_STRT);
 
-    // Turn on ADC
-    // Start conversion
+    // Set channel to be converted in SQ1 in ADC_SQR3
+
+    // Set continuous conversion mode in ADC_CR2
+
+    // Check for overrun
+    if (base_addr->SR & ADC_SR_OVR)
+    {
+        // Reinitialize the DMA (adjust destination address and NDTR counter)
+        // Clear the ADC OVR bit in ADC_SR register
+        // Trigger the ADC to start the conversion
+    }
+
+    // Enable DMA requests
+    base_addr->CR2 |= ADC_CR2_DMA | ADC_CR2_DDS;
+
+    // Set start conversion of regular channels in ADC_CR2
+
+    /*
+    After each conversion:
+        • If a regular group of channels was converted:
+            – The last converted data are stored into the 16-bit ADC_DR register
+            – The EOC (end of conversion) flag is set (cleared by reading the ADC_DR register)
+            – An interrupt is generated if the EOCIE bit is set
+    */
+
+    // Disable continuous conversion
+
+    // Stop DMA requests
+
     return true;
 }
 };  // namespace Stmf4

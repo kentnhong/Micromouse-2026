@@ -7,8 +7,6 @@
 
 #pragma once
 
-#include <array>
-#include <cstdint>
 #include "adc.h"
 #include "stm32f411xe.h"
 
@@ -16,27 +14,6 @@ namespace MM
 {
 namespace Stmf4
 {
-
-enum class AdcChannel : uint8_t
-{
-    NONE = 0,
-    CH0,
-    CH1,
-    CH2,
-    CH3,
-    CH4,
-    CH5,
-    CH6,
-    CH7,
-    CH8,
-    CH9,
-    CH10,
-    CH11,
-    CH12,
-    CH13,
-    CH14,
-    CH15
-};
 
 enum class AdcResolution : uint8_t
 {
@@ -52,17 +29,25 @@ enum class AdcDma : uint8_t
     DMA_ENABLE
 };
 
+enum class AdcClkPrescaler : uint8_t
+{
+    PCLK2_DIV_2 = 0,
+    PCLK2_DIV_4,
+    PCLK2_DIV_6,
+    PCLK2_DIV_8
+};
+
 struct StAdcSettings
 {
     AdcResolution resolution;
-    AdcDma dma;
+    AdcClkPrescaler prescaler;
 };
 
 struct StAdcParams
 {
     StAdcSettings settings;
     ADC_TypeDef* base_addr;
-    std::array<AdcChannel, 16> ch_sequence;
+    ADC_Common_TypeDef* common_base_addr;
 };
 
 class HwAdc : public Adc
@@ -78,11 +63,13 @@ public:
     bool init();
 
     /**
-     * @brief Continuous conversion of analog to digital values
+     * @brief Continuous conversion of a single adc channel's analog to digital values
      * 
      * @return true Conversion successful, false otherwise
+     *
+     * Valid channels for the F411 are 0-15
      */
-    bool convert() override;
+    bool convert(uint8_t channel) override;
 
     /**
      * @brief Read converted analog values from ADC buffer
@@ -94,10 +81,7 @@ public:
 private:
     StAdcSettings settings;
     ADC_TypeDef* base_addr;
-    std::array<AdcChannel, 16> ch_sequence;
-
-    static constexpr uint32_t kSeqMask = 0x1F;  // 0001 1111
-    static constexpr uint8_t kNumSeqBits = 0x05;
+    ADC_Common_TypeDef* common_base_addr;
 };
 };  // namespace Stmf4
 };  // namespace MM
