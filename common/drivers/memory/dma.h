@@ -6,9 +6,12 @@
  */
 #pragma once
 
+<<<<<<< HEAD
 #include <cstddef>
 #include <cstdint>
 
+=======
+>>>>>>> c4336e0 (add dma)
 namespace MM
 {
 class Dma
