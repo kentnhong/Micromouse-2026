@@ -10,6 +10,7 @@ target_include_directories(driver INTERFACE
     bus
     io 
     clock
+    memory 
 )
 
 target_link_libraries(driver INTERFACE
