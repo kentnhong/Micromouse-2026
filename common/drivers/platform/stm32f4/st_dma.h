@@ -43,17 +43,6 @@ enum class DmaWidth : uint8_t
     WORD
 };
 
-enum class DmaInc : uint8_t
-{
-    FIXED = 0,
-    INCREMENT
-};
-
-enum class DmaMode : uint8_t
-{
-    NORMAL = 0,
-    CIRCULAR
-};
 
 enum class DmaDataDir : uint8_t
 {
@@ -65,9 +54,8 @@ enum class DmaDataDir : uint8_t
 struct StDmaSettings
 {
     DmaChSel channel;
+    DmaPriority priority;
     DmaWidth width;
-    DmaInc inc;
-    DmaMode mode;
     DmaDataDir data_dir;
 };
 
