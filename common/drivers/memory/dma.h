@@ -6,8 +6,8 @@
  */
 #pragma once
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 
 namespace MM
 {
@@ -22,14 +22,15 @@ public:
     * 
     * @return true successful transfer, false otherwise
     */
-    virtual bool start(uintptr_t source, uintptr_t destination, size_t num_items) = 0;
+    virtual bool start(uintptr_t source, uintptr_t destination,
+                       size_t num_items) = 0;
 
     /**
-    * @brief Stops DMA transfer after it is complete
+    * @brief Stops DMA transfer in emergency and clears flags
     * 
     * @return true successful stop, false otherwise
     */
-    virtual bool stop() = 0;
+    virtual bool abort() = 0;
 
     /**
      * @brief Destroy the Dma object
