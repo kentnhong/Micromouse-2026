@@ -19,6 +19,7 @@ bool HwDma::init()
 bool HwDma::start(uintptr_t source, uintptr_t destination, size_t num_items)
 {
     /* Check if source and destination addr are valid addrs */
+    // TODO: Clean this up when you have time
     switch (settings.data_dir)
     {
         case DmaDataDir::PERIPH_TO_MEM:
@@ -44,9 +45,7 @@ bool HwDma::start(uintptr_t source, uintptr_t destination, size_t num_items)
                 return false;
             if (destination < kSramBase || destination > kSramEnd)
                 return false;
-            if (!is_aligned(destination))
-                return false;
-            if (!is_aligned(source))
+            if (!is_aligned(destination) || !is_aligned(source))
                 return false;
     }
 
