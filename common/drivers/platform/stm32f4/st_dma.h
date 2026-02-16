@@ -43,7 +43,6 @@ enum class DmaWidth : uint8_t
     WORD
 };
 
-
 enum class DmaDataDir : uint8_t
 {
     PERIPH_TO_MEM = 0,
