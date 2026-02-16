@@ -18,18 +18,20 @@ class Adc
 {
 public:
     /**
-    * @brief Continuous conversion of analog to digital values
+    * @brief Single or continuous conversion of an ADC channel
     * 
+    * @param single True for single. False for continuous.
     * @return true Conversion successful, false otherwise
     */
-    virtual bool convert(uint8_t channel) = 0;
+    virtual bool convert(bool single) = 0;
 
     /**
     * @brief Read converted analog values from ADC buffer
-    * 
+    *
+    * @param val Variable to store adc conversion
     * @return true Read successful, false otherwise
     */
-    virtual bool read() = 0;
+    virtual bool read(uint16_t& val) = 0;
 
     /**
     * @brief Destroy the Adc object

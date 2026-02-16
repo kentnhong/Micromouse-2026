@@ -6,6 +6,7 @@
  */
 #pragma once
 
+#include <array>
 #include "dma.h"
 #include "stm32f4xx.h"
 
@@ -26,8 +27,9 @@ enum class DmaChSel : uint8_t
     CH7
 };
 
-// Add burst transfer config for memory (MBURST) and periph (PBURST)?
+// Add burst transfer config for memory (MBURST) and periph (PBURST)? 8-16 beats might be good for us
 
+// Recommended High Priority for direct mode
 enum class DmaPriority : uint8_t
 {
     LOW = 0,
@@ -78,15 +80,22 @@ public:
     bool init();
 
     /**
-    * @brief Starts DMA transfer from peripheral to memory
+    * @brief Arms DMA for transfer
     * @param source Source address
     * @param destination Destination address
     * @param num_items Number of data items to be transferred
     * 
     * @return true successful transfer, false otherwise
     */
-    bool start(uintptr_t source, uintptr_t destination,
-               size_t num_items) override;
+    bool arm(uintptr_t source, uintptr_t destination,
+             size_t num_items) override;
+
+    /**
+     * @brief Start DMA transfer
+     * 
+     * @return true Transfer successfully started, false otherwise
+     */
+    bool start() override;
 
     /**
     * @brief Stops DMA transfer in emergency and clears flags
@@ -96,41 +105,38 @@ public:
     bool abort() override;
 
 private:
+    enum class DmaState : uint8_t
+    {
+        RESET = 0,  // DMA not initialized
+        READY,      // DMA initialized
+        ARMED,  // DMA has source & destination addr and num bytes to be sent
+        BUSY,   // DMA is in middle of transfer
+    };
+
     /**
      * @brief Clears DMA flags (used before and after transaction)
      * 
-     * @return true 
-     * @return false 
+     * @return true DMA flags cleared, false otherwise
      */
-    bool reset();
+    bool clear_flags();
 
     /**
      * @brief Checks if the selected address is aligned with the width
      * 
      * @param addr 
-     * @return true 
-     * @return false 
+     * @return true aligned, false otherwise
      */
     bool is_aligned(uintptr_t addr)
     {
         return (addr & (static_cast<uint8_t>(settings.width) - 1u)) == 0u;
     }
 
+    DmaState state{
+        DmaState::
+            RESET};  // state is RESET by default when DMA class is instantiated
     StDmaSettings settings;
     DMA_TypeDef* base_addr;
     DMA_Stream_TypeDef* stream_base_addr;
-
-    // Adrresses
-    static constexpr uintptr_t kSramBase = 0x20000000u;
-    static constexpr uintptr_t kSramEnd = 0x20020000u;
-    static constexpr uintptr_t kFlashBase = 0x08000000u;
-    static constexpr uintptr_t kFlashEnd = 0x0807FFFFu;
-    static constexpr uintptr_t kPeriphBase = 0x40000000u;
-    static constexpr uintptr_t kPeriphEnd = 0x5003FFFFu;
-
-    // Counter threshold for DMA_SxNDTR
-    static constexpr uint16_t kMinCount = 1;
-    static constexpr uint16_t kMaxCount = 65535;
 };
 };  // namespace Stmf4
 };  // namespace MM
