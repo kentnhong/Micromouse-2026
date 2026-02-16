@@ -1,5 +1,13 @@
 #include "st_adc.h"
 
+namespace
+{
+constexpr uint32_t kSq1Mask{0xFFFFFFE0};
+constexpr uint8_t kMinCh{0};
+constexpr uint8_t kMaxCh{15};
+constexpr uint8_t kSmpr1Begin{10};
+constexpr uint8_t kSmprBitsPerCh{3};
+};  // namespace
 namespace MM
 {
 namespace Stmf4
@@ -51,48 +59,119 @@ bool HwAdc::init()
     // Turn on ADC in ADC_CR2
     base_addr->CR2 |= ADC_CR2_ADON;
 
+    // Clear overrun interrupt bit
+    base_addr->CR1 &= ~ADC_CR1_OVRIE;
+
+    // Enable overrun interrupt if chosen
+    if (settings.overrun_int == AdcOverrunInt::OVRIE_EN)
+    {
+        base_addr->CR1 |= ADC_CR1_OVRIE;
+    }
+
     return true;
 }
 
-bool HwAdc::convert(uint8_t channel)
+bool HwAdc::convert(bool single)
 {
-    // Check if channel is within valid range of F411 ADC channels
-    if (channel < 0 || channel > 15)
-    {
+    if (settings.source == AdcTriggerSource::EXTERNAL)
         return false;
-    }
-
+    
     // Check if a conversion is in progress
     while (base_addr->SR & ADC_SR_STRT);
 
-    // Set channel to be converted in SQ1 in ADC_SQR3
+    // Disable continuous conversion mode in ADC_CR2
+    base_addr->CR2 &= ~ADC_CR2_CONT;
 
-    // Set continuous conversion mode in ADC_CR2
-
-    // Check for overrun
-    if (base_addr->SR & ADC_SR_OVR)
+    if (!single)
     {
-        // Reinitialize the DMA (adjust destination address and NDTR counter)
-        // Clear the ADC OVR bit in ADC_SR register
-        // Trigger the ADC to start the conversion
+        // Set continuous conversion mode in ADC_CR2
+        base_addr->CR2 |= ADC_CR2_CONT;
     }
 
-    // Enable DMA requests
-    base_addr->CR2 |= ADC_CR2_DMA | ADC_CR2_DDS;
+    // Set start conversion of regular channel in ADC_CR2
+    base_addr->CR2 |= ADC_CR2_SWSTART;
 
-    // Set start conversion of regular channels in ADC_CR2
+    return true;
+}
 
-    /*
-    After each conversion:
-        • If a regular group of channels was converted:
-            – The last converted data are stored into the 16-bit ADC_DR register
-            – The EOC (end of conversion) flag is set (cleared by reading the ADC_DR register)
-            – An interrupt is generated if the EOCIE bit is set
-    */
+bool HwAdc::en_dma_req()
+{
+    if (settings.dma == AdcDma::DMA_ENABLE)
+    {
+        // Enable DMA requests
+        base_addr->CR2 |= ADC_CR2_DMA | ADC_CR2_DDS;
+        return true;
+    }
+    return false;
+}
 
-    // Disable continuous conversion
+bool HwAdc::read(uint16_t& val)
+{
+    // Wait until ADC conversion is finished
+    while ((base_addr->SR & ADC_SR_EOC) == 0);
 
-    // Stop DMA requests
+    // Read from ADC DR
+    val = static_cast<uint16_t>(base_addr->DR);
+
+    return true;
+}
+
+bool HwAdc::set_channel(uint8_t ch)
+{
+    // Check if channel is within valid range of F411 ADC channels
+    if (ch < kMinCh || ch > kMaxCh)
+        return false;
+
+    // Set channel to be converted in SQ1 in ADC_SQR3 (Only one channel conversion at a time for now)
+    base_addr->SQR3 = (base_addr->SQR3 & kSq1Mask) |
+                      (static_cast<uint32_t>(ch) << ADC_SQR3_SQ1_Pos);
+
+    return true;
+}
+
+bool HwAdc::set_cycles(uint8_t ch, AdcSampleTime cycles)
+{
+    // Check if ch is in valid range
+    if (ch < kMinCh || ch > kMaxCh)
+        return false;
+
+    uint8_t pos = ch < kSmpr1Begin ? ch : (ch - kSmpr1Begin);
+
+    if (ch < kSmpr1Begin)
+        base_addr->SMPR2 |=
+            (static_cast<uint32_t>(cycles) << (pos * kSmprBitsPerCh));
+    else
+        base_addr->SMPR1 |=
+            (static_cast<uint32_t>(cycles) << (pos * kSmprBitsPerCh));
+
+    return true;
+}
+
+bool HwAdc::set_ext_trigger(HwAdc::ExternalEvent event,
+                            HwAdc::TriggerPolarity polarity)
+{
+    if (settings.source == AdcTriggerSource::SOFTWARE)
+        return false;
+
+    base_addr->CR2 &= ~(ADC_CR2_EXTSEL | ADC_CR2_EXTEN);
+    base_addr->CR2 |= static_cast<uint32_t>(event) << ADC_CR2_EXTSEL_Pos;
+    base_addr->CR2 |= static_cast<uint32_t>(polarity) << ADC_CR2_EXTEN_Pos;
+
+    return true;
+}
+
+bool HwAdc::ovr_recover(bool dma_reinit)
+{
+    // Check if overrun occurred
+    if (!(base_addr->SR & ADC_SR_OVR))
+        return false;
+
+    // Clear OVR bit
+    base_addr->SR &= ~ADC_SR_OVR;
+
+    // Check if DMA was reinitialized and trigger ADC conversion
+    if (dma_reinit)
+        convert(false);  // Continuous conversion for DMA mode
 
     return true;
 }
