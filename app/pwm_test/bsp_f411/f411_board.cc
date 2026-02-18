@@ -9,7 +9,7 @@ namespace MM
 // Output pin config for Timer 3, Channel 1 (PB4, D5 on Nucleo F411RE)
 Stmf4::StGpioSettings pwm_output_settings{
     Stmf4::GpioMode::AF, Stmf4::GpioOtype::PUSH_PULL, Stmf4::GpioOspeed::LOW,
-    Stmf4::GpioPupd::NO_PULL, 2}; // AF2 for TIM3 on PB4    
+    Stmf4::GpioPupd::NO_PULL, 2};  // AF2 for TIM3 on PB4
 
 const Stmf4::StGpioParams pwm_output_params{4, GPIOB, pwm_output_settings};
 
