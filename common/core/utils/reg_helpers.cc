@@ -3,7 +3,7 @@
 void SetReg(volatile uint32_t* reg, uint32_t enum_val, uint32_t bit_num,
             uint32_t bit_length)
 {
-    uint32_t mask{(0x01 << bit_length) - 1U};
+    uint32_t mask{(1UL << bit_length) - 1UL};
     *reg &= ~(mask << bit_num);
     *reg |= (mask & enum_val) << bit_num;
 }

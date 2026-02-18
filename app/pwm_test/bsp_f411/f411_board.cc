@@ -6,12 +6,12 @@
 namespace MM
 {
 
-// Output pin config for Timer 3, Channel 1 (PA6, D11)
+// Output pin config for Timer 3, Channel 1 (PB4, D5 on Nucleo F411RE)
 Stmf4::StGpioSettings pwm_output_settings{
     Stmf4::GpioMode::AF, Stmf4::GpioOtype::PUSH_PULL, Stmf4::GpioOspeed::LOW,
-    Stmf4::GpioPupd::NO_PULL, 2}; // AF2 for TIM3 on PA6
+    Stmf4::GpioPupd::NO_PULL, 2}; // AF2 for TIM3 on PB4    
 
-const Stmf4::StGpioParams pwm_output_params{6, GPIOA, pwm_output_settings};
+const Stmf4::StGpioParams pwm_output_params{4, GPIOB, pwm_output_settings};
 
 // PWM Config (TIM3 CH1)
 Stmf4::StPwmSettings pwm_settings{Stmf4::PwmMode::EDGE_ALIGNED,
@@ -29,7 +29,7 @@ Board board{.pwm = pwm};
 bool bsp_init()
 {
     // Enable peripheral clocks
-    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
     RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
 
     // Initialize PWM and pins
