@@ -28,7 +28,7 @@ enum class PwmMode : uint8_t
     CENTER_ALIGNED_DOWN,
     CENTER_ALIGNED_UP,
     CENTER_ALIGNED_UP_DOWN
-}; 
+};
 
 /**
 * @brief Output compare modes for STM32F4 PWM

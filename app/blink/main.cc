@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
     Board hw = get_board();
     while (1)
     {
-        hw.led.toggle();    
+        hw.led.toggle();
         for (volatile size_t i = 0; i < 100000; i++);  // Delay
     }
 
