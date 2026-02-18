@@ -120,14 +120,17 @@ private:
     DMA_TypeDef* base_addr;
     DMA_Stream_TypeDef* stream_base_addr;
 
+    // Adrresses
     static constexpr uintptr_t kSramBase = 0x20000000u;
     static constexpr uintptr_t kSramEnd = 0x20020000u;
-
     static constexpr uintptr_t kFlashBase = 0x08000000u;
     static constexpr uintptr_t kFlashEnd = 0x0807FFFFu;
-
     static constexpr uintptr_t kPeriphBase = 0x40000000u;
     static constexpr uintptr_t kPeriphEnd = 0x5003FFFFu;
+
+    // Counter threshold for DMA_SxNDTR
+    static constexpr uint16_t kMinCount = 1;
+    static constexpr uint16_t kMaxCount = 65535;
 };
 };  // namespace Stmf4
 };  // namespace MM

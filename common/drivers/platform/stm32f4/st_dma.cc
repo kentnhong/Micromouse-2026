@@ -106,7 +106,7 @@ bool HwDma::start(uintptr_t source, uintptr_t destination, size_t num_items)
     }
 
     /* Check if counter is within the threshold for DMA_SxNDTR for the F411 */
-    if (num_items < 1 || num_items > 65535)
+    if (num_items < kMinCount || num_items > kMaxCount)
     {
         return false;
     }
