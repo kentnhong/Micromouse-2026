@@ -15,17 +15,17 @@ class Pwm
 public:
     /**
     * @brief Sets the frequency of the PWM timer
-    * @param freq Desired frequency in Hz
+    * @param frequency Desired frequency in Hz
     * @return true if successful, false otherwise
     */
-    virtual bool setFrequency(uint32_t frequency) = 0;
+    virtual bool set_frequency(uint32_t frequency) = 0;
 
     /**
     * @brief Sets the duty cycle of the PWM signal
-    * @param dutyCycle Desired duty cycle as a percentage
+    * @param duty_cycle Desired duty cycle as a percentage (0-100)
     * @return true if successful, false otherwise
     */
-    virtual bool setDutyCycle(uint8_t dutyCycle) = 0;
+    virtual bool set_duty_cycle(uint8_t duty_cycle) = 0;
 
     ~Pwm() = default;
 };
