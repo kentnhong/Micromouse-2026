@@ -11,18 +11,18 @@ int main(int argc, char* argv[])
 
     while (1)
     {
-        hw.pwm.setFrequency(10000);
-        hw.pwm.setDutyCycle(25);
+        hw.pwm.set_frequency(10000);
+        hw.pwm.set_duty_cycle(25);
 
         for (volatile size_t i = 0; i < 4000000; i++);
 
-        hw.pwm.setFrequency(1000);
-        hw.pwm.setDutyCycle(90);
+        hw.pwm.set_frequency(1000);
+        hw.pwm.set_duty_cycle(90);
 
         for (volatile size_t i = 0; i < 4000000; i++);
 
-        hw.pwm.setFrequency(20000);
-        hw.pwm.setDutyCycle(42);
+        hw.pwm.set_frequency(10000);
+        hw.pwm.set_duty_cycle(42);
 
         for (volatile size_t i = 0; i < 4000000; i++);
     }

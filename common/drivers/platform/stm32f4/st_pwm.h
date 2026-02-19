@@ -6,7 +6,6 @@
 */
 
 #pragma once
-#include <cstdint>
 #include "pwm.h"
 #include "stm32f411xe.h"
 
@@ -55,18 +54,31 @@ enum class PwmDir : uint8_t
 
 /**
 * @brief Configuration structure for STM32F4 PWM settings
+* @note Make it scable for future additions like polarity, dead time, etc.
+*
+*/
+enum class PwmChannel : uint8_t
+{
+    CH1 = 1,
+    CH2 = 2,
+    CH3 = 3,
+    CH4 = 4
+};
+
+/**
+* @brief Configuration structure for STM32F4 PWM settings
 */
 struct StPwmSettings
 {
     PwmMode mode;
-    PwmOutputMode outputMode;
+    PwmOutputMode output_mode;
     PwmDir dir;
 };
 
 struct StPwmParams
 {
     TIM_TypeDef* base_addr;
-    uint8_t channel;
+    PwmChannel channel;
     StPwmSettings settings;
 };
 
@@ -77,7 +89,7 @@ public:
     * @brief Constructor for HwPwm
     * @param params_ Configuration parameters for the PWM instance
     */
-    HwPwm(const StPwmParams& params_);
+    explicit HwPwm(const StPwmParams& params_);
 
     /**
     * @brief Initializes the PWM timer with the specified settings
@@ -89,23 +101,23 @@ public:
     * @param frequency Desired frequency in Hz
     * @return true if the frequency was set successfully, false otherwise
     */
-    bool setFrequency(uint32_t frequency) override;
+    bool set_frequency(uint32_t frequency) override;
 
     /**
     * @brief Sets the duty cycle of the PWM signal
-    * @param dutyCycle Desired duty cycle as a percentage (0-100)
+    * @param duty_cycle Desired duty cycle as a percentage (0-100)
     * @return true if the duty cycle was set successfully, false otherwise
     * @note     Edge-aligned: 42 MHz  / (PSC + 1)
                 Center-aligned: 21 MHz  / (PSC + 1)
     */
-    bool setDutyCycle(uint8_t dutyCycle) override;
+    bool set_duty_cycle(uint8_t duty_cycle) override;
 
 private:
-    TIM_TypeDef* _base_addr;
-    uint8_t _channel;
-    StPwmSettings _settings;
-    uint32_t _currentFrequency;
-    uint8_t _currentDutyCycle;
+    TIM_TypeDef* base_addr;
+    PwmChannel channel;
+    StPwmSettings settings;
+    uint32_t current_frequency;
+    uint8_t current_duty_cycle;
 };
 }  // namespace Stmf4
 }  // namespace MM
