@@ -6,7 +6,7 @@ namespace MM
 namespace Stmf4
 {
 // Constants values for PWM calculations and register bit widths
-static constexpr uint32_t pclk_freq = 50000000;  // 50 MHz timer clock
+static constexpr uint32_t pclk_freq = 16000000;  // 16 MHz timer clock
 static constexpr uint8_t TIM_CCMRx_OCxM_BitWidth = 3;
 static constexpr uint8_t TIM_CR1_CMS_BitWidth = 2;
 static constexpr uint8_t TIM_CR1_DIR_BitWidth = 1;
