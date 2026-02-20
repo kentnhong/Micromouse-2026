@@ -3,6 +3,7 @@
 #include "bno055_imu.h"
 #include "st_gpio.h"
 #include "st_i2c.h"
+#include "st_sys_clk.h"
 
 namespace MM
 {
@@ -33,12 +34,15 @@ Stmf4::HwGpio rst(rst_params);
 Bno055 imu(static_cast<MM::I2c&>(i2c), Bno055::ADDR_PRIMARY);
 Board board{.imu = imu};
 
+MM::Stmf4::HwClk clock{};
+
 bool bsp_init()
 {
     // Enable GPIOB and I2C1 clocks
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
     RCC->APB1ENR |= RCC_APB1ENR_I2C1EN;
 
+    clock.init(MM::Stmf4::HwClk::configuration::SYSCLK_HSE_24MHZ);
     scl.init();
     sda.init();
     i2c.init();

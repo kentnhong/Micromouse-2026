@@ -5,10 +5,10 @@
 * @date 2/19/26
 */
 
-#pragma once 
+#pragma once
 #include <cstdint>
 
-namespace MM 
+namespace MM
 {
 /**
  * @class Clock
@@ -24,9 +24,17 @@ namespace MM
 
 class Clock
 {
+public:
+    /**
+     * @brief Retrieves the current system clock frequency
+     * @return The current system clock frequency in Hz
+     */
+    virtual uint32_t get_freq() const = 0;
 
-
-
-}
-
-} // namespace MM
+    /**
+     * @brief Retrieves the current system clock source
+     * @return The current system clock source as a string
+     */
+    virtual const char* get_source() const = 0;
+};
+}  // namespace MM
