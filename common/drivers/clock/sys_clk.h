@@ -5,17 +5,10 @@
 * @date 2/19/26
 */
 
-<<<<<<< HEAD
-#pragma once
-#include <cstdint>
-
-namespace MM
-=======
 #pragma once 
 #include <cstdint>
 
 namespace MM 
->>>>>>> 7eaa7da (skeleton for sysclk driver)
 {
 /**
  * @class Clock
@@ -31,7 +24,6 @@ namespace MM
 
 class Clock
 {
-<<<<<<< HEAD
 public:
     /**
      * @brief Retrieves the current system clock frequency
@@ -46,11 +38,3 @@ public:
     virtual const char* get_source() const = 0;
 };
 }  // namespace MM
-=======
-
-
-
-}
-
-} // namespace MM
->>>>>>> 7eaa7da (skeleton for sysclk driver)

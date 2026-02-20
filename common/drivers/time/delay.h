@@ -19,5 +19,9 @@ void DelayUs(uint32_t us);
     * @brief  Returns the current millisecond tick count (since boot).
     * @return The current millisecond tick count.
     */
+<<<<<<< HEAD
 uint32_t get_ms_ticks();
+=======
+uint32_t GetMsTicks();
+>>>>>>> 06a3469 (system clock complete)
 }  // namespace MM::Utils
