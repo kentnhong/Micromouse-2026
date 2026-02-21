@@ -43,7 +43,6 @@ bool bsp_init()
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
     RCC->APB1ENR |= RCC_APB1ENR_I2C1EN;
 
-    clock.init(MM::Stmf4::HwClk::configuration::SYSCLK_HSE_24MHZ);
     scl.init();
     sda.init();
     i2c.init();
