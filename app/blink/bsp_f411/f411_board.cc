@@ -3,6 +3,7 @@
 #include "../../../common/drivers/platform/stm32f4/st_gpio.h"
 #include "../../../mcu_support/stm32/f4xx/stm32f4xx.h"
 #include "board.h"
+#include "st_sys_clk.h"
 
 namespace MM
 {
@@ -19,9 +20,12 @@ Stmf4::HwGpio led{led_params};
 
 Board board{.led = static_cast<Gpio&>(led)};
 
+MM::Stmf4::HwClk clock{};
+
 bool board_init()
 {
     bool return_val = true;
+    clock.init(MM::Stmf4::HwClk::configuration::HSI_16MHZ);
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
     return_val &= led.init();
     return return_val;

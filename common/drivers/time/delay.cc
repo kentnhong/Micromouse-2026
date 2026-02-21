@@ -7,6 +7,15 @@
 namespace MM::Utils
 {
 
+uint32_t g_ms_ticks = 0;
+
+// SysTick_Handler is defined in st_sys_clk.cc
+// Provide a way for it to increment g_ms_ticks
+extern "C" void IncDelayTicks(void)
+{
+    g_ms_ticks = g_ms_ticks + 1;
+}
+
 void DelayMs(uint32_t ms)
 {
 #ifdef STM32F4xx
