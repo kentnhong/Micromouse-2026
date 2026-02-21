@@ -38,11 +38,11 @@ MM::Stmf4::HwClk clock{};
 
 bool bsp_init()
 {
+    clock.init(MM::Stmf4::HwClk::configuration::SYSCLK_HSE_24MHZ);
     // Enable GPIOB and I2C1 clocks
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
     RCC->APB1ENR |= RCC_APB1ENR_I2C1EN;
 
-    clock.init(MM::Stmf4::HwClk::configuration::SYSCLK_HSE_24MHZ);
     scl.init();
     sda.init();
     i2c.init();

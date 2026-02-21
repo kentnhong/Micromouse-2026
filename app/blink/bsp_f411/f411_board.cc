@@ -25,7 +25,7 @@ MM::Stmf4::HwClk clock{};
 bool board_init()
 {
     bool return_val = true;
-    clock.init(MM::Stmf4::HwClk::configuration::SYSCLK_HSE_24MHZ);
+    clock.init(MM::Stmf4::HwClk::configuration::HSI_16MHZ);
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
     return_val &= led.init();
     return return_val;
