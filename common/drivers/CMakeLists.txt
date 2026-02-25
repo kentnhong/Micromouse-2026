@@ -9,6 +9,7 @@ add_library(driver INTERFACE)
 target_include_directories(driver INTERFACE
     bus
     io 
+    clock
 )
 
 target_link_libraries(driver INTERFACE
