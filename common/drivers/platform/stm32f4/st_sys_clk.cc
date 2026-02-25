@@ -196,25 +196,25 @@ bool HwClk::init(configuration config)
         case configuration::HSI_16MHZ:
             if (!SystemClock_ConfigHSI16())
                 return false;
-            source = "HSI 16 MHz";
+            source = configuration::HSI_16MHZ;
             hz = 16'000'000;
             break;
         case configuration::SYSCLK_HSE_24MHZ:
             if (!SystemClock_ConfigHSE24())
                 return false;
-            source = "HSE 24 MHz";
+            source = configuration::SYSCLK_HSE_24MHZ;
             hz = 24'000'000;
             break;
         case configuration::SYSCLK_HSE_64MHZ:
             if (!SystemClock_ConfigHSE64())
                 return false;
-            source = "HSE 64 MHz";
+            source = configuration::SYSCLK_HSE_64MHZ;
             hz = 64'000'000;
             break;
         case configuration::HSE_8MHZ:
             if (!SystemClock_ConfigHSE8())
                 return false;
-            source = "HSE 8 MHz";
+            source = configuration::HSE_8MHZ;
             hz = 8'000'000;
             break;
         default:

@@ -19,5 +19,5 @@ void DelayUs(uint32_t us);
     * @brief  Returns the current millisecond tick count (since boot).
     * @return The current millisecond tick count.
     */
-uint32_t GetMsTicks();
+uint32_t get_ms_ticks();
 }  // namespace MM::Utils
