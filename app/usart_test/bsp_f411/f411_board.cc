@@ -25,7 +25,7 @@ Stmf4::StUsartSettings usart_settings{Stmf4::UsartOversample::X16,
                                       Stmf4::UsartSampleMode::MAJORITY};
 Stmf4::StUsartParams usart_params{
     USART2,
-    clock.get_freq(),
+    16000000,
     9600,
     usart_settings,
 };
@@ -38,7 +38,7 @@ bool bsp_init()
     bool ret = true;
 
     // SysClock config
-    ret &= clock.init(Stmf4::HwClk::configuration::HSI_16MHZ);
+    //ret &= clock.init(Stmf4::HwClk::configuration::HSI_16MHZ);
 
     // Enable peripheral clocks for GPIOA, USART1, and USART2
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
@@ -66,13 +66,12 @@ Board& get_board()
 // from blocking further interrupts.
 extern "C" void USART2_IRQHandler(void)
 {
-    uint8_t rx_byte;
-    // This is for getting the first byte
+    // Check if data is available
     if (usart.get_addr()->SR & USART_SR_RXNE)
     {
-        if (board.usart.receive(&rx_byte, 1))
+        if (board.usart.receive(rx_byte))
         {
-            // received start ready 1 byte, echo it back
+            // received 1 byte, echo it back
             std::span<const uint8_t> tx_span(&rx_byte, 1);
             board.usart.send(tx_span);
         }

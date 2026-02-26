@@ -8,6 +8,7 @@
 #include "gpio.h"
 #include "usart.h"
 
+extern uint8_t rx_byte;
 namespace MM
 {
 struct Board

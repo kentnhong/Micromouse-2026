@@ -8,7 +8,6 @@
 #pragma once
 #include <cstdint>
 #include <span>
-#include <cmath>
 #include "stm32f4xx.h"
 #include "usart.h"
 
@@ -61,11 +60,9 @@ public:
 
     /**
     * @brief Receive (Read) data from USART
-    * @param data Pointer to buffer where received data will be stored
-    * @param length Length of data to read
-    * @return true if read is successful, false otherwise
+    * @param byte Byte of data to receive
     */
-    bool receive(uint8_t* data, size_t length) override;
+    bool receive(uint8_t& byte) override;
 
     /**
     * @brief Send data to USART

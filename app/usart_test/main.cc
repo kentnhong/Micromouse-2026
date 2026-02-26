@@ -14,7 +14,8 @@ int main(int argc, char** argv)
     while (1)
     {
         board.usart.send(tx_byte);
-        while (!board.usart.receive(&rx_byte, 1));
+        // Busy wait
+        for (volatile uint32_t i = 0; i < 1000000; i++);
     }
 
     return 0;

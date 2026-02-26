@@ -5,6 +5,9 @@ namespace MM
 namespace Stmf4
 {
 
+constexpr uint32_t kDivFracMask{0x7u};
+constexpr uint32_t kMantissaPos{0x4u};
+
 static inline uint32_t usartdiv_calc(uint32_t fck, uint32_t baud, bool over8)
 {
     uint32_t oversample = over8 ? 8 : 16;
@@ -23,9 +26,9 @@ static inline uint32_t usartdiv_calc(uint32_t fck, uint32_t baud, bool over8)
     }
 
     if (over8)
-        frac &= 0x7;
+        frac &= kDivFracMask;
 
-    return (div << 4) | frac;
+    return (div << kMantissaPos) | frac;
 }
 
 StUsart::StUsart(StUsartParams& params_)
@@ -36,34 +39,32 @@ StUsart::StUsart(StUsartParams& params_)
 {
 }
 
-bool StUsart::receive(uint8_t* data, size_t length)
+bool StUsart::receive(uint8_t& byte)
 {
+    // Check if data is available
+    if (!(base_addr->SR & USART_SR_RXNE))
+    {
+        return false;  // No data available
+    }
 
-    // If theirs an overrun error, it will be cleared
+    // Check for overrun error
     if (base_addr->SR & USART_SR_ORE)
     {
-        // Clear ORE flag by reading SR and DR
-        volatile uint32_t temp = base_addr->SR;
-        temp = base_addr->DR;
-        (void)temp;  // Avoid unused variable warning
+        // Read DR to clear ORE flag (current byte is still valid)
+        byte = base_addr->DR;
+        // Clear ORE by reading SR then DR (already done by reading DR above)
+        // Note: An overrun occurred, meaning the next byte was lost
+        return false;  // Indicate error occurred
     }
 
-    // Read data from USART data register and store in buffer
-    for (size_t i = 0; i < length; i++)
-    {
-        // Wait until receive data register is not empty
-        while (!(base_addr->SR & USART_SR_RXNE));
-
-        // Read byte from data register
-        data[i] = base_addr->DR & 0xFF;
-    }
+    // Read the byte
+    byte = base_addr->DR;
 
     return true;
 }
 
 bool StUsart::send(std::span<const uint8_t> txbuf)
 {
-    size_t size = 0;
     for (const auto& byte : txbuf)
     {
         // Wait until transmit data register is empty
@@ -73,7 +74,6 @@ bool StUsart::send(std::span<const uint8_t> txbuf)
 
         // Write byte to data register
         base_addr->DR = byte;
-        size++;
     }
     // Wait until transmission is complete TC=1
     while (!(base_addr->SR & USART_SR_TC));
@@ -91,8 +91,9 @@ bool StUsart::init()
     // Disable USART before configuration
     base_addr->CR1 &= ~USART_CR1_UE;
 
-    // Clear word length and parity bits for 8N1
-    base_addr->CR1 &= ~USART_CR1_M;
+    // Configure for 8N1: 8 data bits, no parity, 1 stop bit
+    base_addr->CR1 &= ~USART_CR1_M;    // 8 data bits
+    base_addr->CR1 &= ~USART_CR1_PCE;  // No parity
 
     // Set Oversampling rate
     bool over8;

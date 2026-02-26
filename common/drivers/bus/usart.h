@@ -15,11 +15,9 @@ class Usart
 public:
     /**
     * @brief Receive (Read) data from USART
-    * @param data Pointer to buffer where received data will be stored
-    * @param length Length of data to read
-    * @return true if read is successful, false otherwise
+    * @param byte Byte of data to receive
     */
-    virtual bool receive(uint8_t* data, size_t length) = 0;
+    virtual bool receive(uint8_t& byte) = 0;
 
     /**
     * @brief Send data to USART
