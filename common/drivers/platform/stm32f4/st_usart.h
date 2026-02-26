@@ -8,6 +8,7 @@
 #pragma once
 #include <cstdint>
 #include <span>
+#include <cmath>
 #include "stm32f4xx.h"
 #include "usart.h"
 
@@ -15,21 +16,48 @@ namespace MM
 {
 namespace Stmf4
 {
+
+// USART setting for how many samples for one bit
+enum class UsartOversample : uint8_t
+{
+    X16 = 0,
+    X8
+};
+
+enum class UsartSampleMode : uint8_t
+{
+    MAJORITY = 0,
+    SINGLE
+};
+
+struct StUsartSettings
+{
+    UsartOversample oversample;
+    UsartSampleMode sample_mode;
+};
+
+struct StUsartParams
+{
+    USART_TypeDef* base_addr;
+    uint32_t clock_freq;
+    uint32_t baud_rate;
+    StUsartSettings settings;
+};
+
 class StUsart : public Usart
 {
 private:
     USART_TypeDef* base_addr;
-    uint16_t uartdiv;
+    StUsartSettings settings;
+    uint32_t clock_freq;
+    uint32_t baud_rate;
 
 public:
     /**
     * @brief Construct a new StUsart object
-    * @param base_addr Base address of the USART peripheral
-    * @param sys_clk System clock frequency in Hz
-    * @param baud_rate Desired USART baud rate in board initialization
+    * @param params_ Usart struct containing params of base addr, clock freq, baud rate, and usart settings
     */
-    explicit StUsart(USART_TypeDef* base_addr, uint32_t sys_clk,
-                     uint32_t baud_rate);
+    explicit StUsart(StUsartParams& params_);
 
     /**
     * @brief Receive (Read) data from USART
@@ -40,11 +68,11 @@ public:
     bool receive(uint8_t* data, size_t length) override;
 
     /**
-    * @brief Transfer (transmit) data to USART
+    * @brief Send data to USART
     * @param txbuf Span containing data to be sent
     * @return true if write is successful, false otherwise
     */
-    bool transfer(std::span<const uint8_t> txbuf) override;
+    bool send(std::span<const uint8_t> txbuf) override;
 
     /**
     * @brief Initializes USART peripheral and its tx and rx pins

@@ -5,9 +5,34 @@ namespace MM
 namespace Stmf4
 {
 
-StUsart::StUsart(USART_TypeDef* base_addr, uint32_t sys_clk,
-                 uint32_t baud_rate)
-    : base_addr(base_addr), uartdiv(sys_clk / baud_rate)
+static inline uint32_t usartdiv_calc(uint32_t fck, uint32_t baud, bool over8)
+{
+    uint32_t oversample = over8 ? 8 : 16;
+
+    uint32_t div = fck / (oversample * baud);
+    uint32_t rem = fck % (oversample * baud);
+
+    uint32_t frac_scale = over8 ? 8 : 16;
+    uint32_t frac =
+        (rem * frac_scale + (oversample * baud) / 2) / (oversample * baud);
+
+    if (frac == frac_scale)
+    {
+        frac = 0;
+        div++;
+    }
+
+    if (over8)
+        frac &= 0x7;
+
+    return (div << 4) | frac;
+}
+
+StUsart::StUsart(StUsartParams& params_)
+    : base_addr{params_.base_addr},
+      settings{params_.settings},
+      clock_freq{params_.clock_freq},
+      baud_rate{params_.baud_rate}
 {
 }
 
@@ -36,7 +61,7 @@ bool StUsart::receive(uint8_t* data, size_t length)
     return true;
 }
 
-bool StUsart::transfer(std::span<const uint8_t> txbuf)
+bool StUsart::send(std::span<const uint8_t> txbuf)
 {
     size_t size = 0;
     for (const auto& byte : txbuf)
@@ -58,7 +83,7 @@ bool StUsart::transfer(std::span<const uint8_t> txbuf)
 
 bool StUsart::init()
 {
-    if (base_addr == nullptr) 
+    if (base_addr == nullptr)
     {
         return false;
     }
@@ -69,8 +94,30 @@ bool StUsart::init()
     // Clear word length and parity bits for 8N1
     base_addr->CR1 &= ~USART_CR1_M;
 
+    // Set Oversampling rate
+    bool over8;
+    if (settings.oversample == UsartOversample::X16)
+    {
+        base_addr->CR1 &= ~USART_CR1_OVER8;
+        over8 = false;
+    }
+    else
+    {
+        base_addr->CR1 |= USART_CR1_OVER8;
+        over8 = true;
+    }
+
+    // Three sample bit method where we take the value of the majority of the 3 middle samples inside the 16 samples
+    if (settings.sample_mode == UsartSampleMode::MAJORITY)
+        base_addr->CR3 &= ~USART_CR3_ONEBIT;
+    else
+        base_addr->CR3 |= USART_CR3_ONEBIT;
+
+    // Calculate usartdiv
+    uint16_t usartdiv = usartdiv_calc(clock_freq, baud_rate, over8);
+
     // Set baud rate
-    base_addr->BRR = uartdiv;
+    base_addr->BRR = usartdiv;
 
     // Set 1 stop bit
     base_addr->CR2 &= ~USART_CR2_STOP;

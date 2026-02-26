@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 
     while (1)
     {
-        board.usart.transfer(tx_byte);
+        board.usart.send(tx_byte);
         while (!board.usart.receive(&rx_byte, 1));
     }
 

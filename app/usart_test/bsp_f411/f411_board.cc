@@ -10,8 +10,8 @@ namespace MM
 
 // USART2 pin config
 Stmf4::StGpioSettings usart_settings{
-    Stmf4::GpioMode::AF, Stmf4::GpioOtype::PUSH_PULL,
-    Stmf4::GpioOspeed::HIGH, Stmf4::GpioPupd::NO_PULL, 7};
+    Stmf4::GpioMode::AF, Stmf4::GpioOtype::PUSH_PULL, Stmf4::GpioOspeed::HIGH,
+    Stmf4::GpioPupd::NO_PULL, 7};
 
 Stmf4::StGpioParams tx_params{2, GPIOA, usart_settings};  // PA2 USART2_TX
 Stmf4::StGpioParams rx_params{3, GPIOA, usart_settings};  // PA3 USART2_RX
@@ -36,7 +36,7 @@ bool bsp_init()
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
     RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
     RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
-    
+
     // Initialize USART and pins
     ret &= tx_gpio.init();
     ret &= rx_gpio.init();
@@ -66,7 +66,7 @@ extern "C" void USART2_IRQHandler(void)
         {
             // received start ready 1 byte, echo it back
             std::span<const uint8_t> tx_span(&rx_byte, 1);
-            board.usart.transfer(tx_span);
+            board.usart.send(tx_span);
         }
     }
 }

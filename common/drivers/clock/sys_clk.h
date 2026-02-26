@@ -5,10 +5,10 @@
 * @date 2/19/26
 */
 
-#pragma once 
+#pragma once
 #include <cstdint>
 
-namespace MM 
+namespace MM
 {
 /**
  * @class Clock
