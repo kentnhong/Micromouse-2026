@@ -6,8 +6,8 @@ namespace Stmf4
 {
 
 StUsart::StUsart(USART_TypeDef* base_addr, uint32_t sys_clk,
-                 uint32_t clock_freq)
-    : base_addr(base_addr), uartdiv(sys_clk / clock_freq)
+                 uint32_t baud_rate)
+    : base_addr(base_addr), uartdiv(sys_clk / baud_rate)
 {
 }
 
@@ -42,7 +42,9 @@ bool StUsart::transfer(std::span<const uint8_t> txbuf)
     for (const auto& byte : txbuf)
     {
         // Wait until transmit data register is empty
-        while (!(base_addr->SR & USART_SR_TXE));
+        while (!(base_addr->SR & USART_SR_TXE))
+        {
+        }
 
         // Write byte to data register
         base_addr->DR = byte;
@@ -56,25 +58,38 @@ bool StUsart::transfer(std::span<const uint8_t> txbuf)
 
 bool StUsart::init()
 {
-    // Clear bits, word length, and parity to default (clear M1 and M0 for 8 data bits)
-    base_addr->CR1 &= ~USART_CR1_UE | ~USART_CR1_M | ~USART_CR1_PCE;
+    if (base_addr == nullptr) 
+    {
+        return false;
+    }
+
+    // Disable USART before configuration
+    base_addr->CR1 &= ~USART_CR1_UE;
+
+    // Clear word length and parity bits for 8N1
+    base_addr->CR1 &= ~USART_CR1_M;
 
     // Set baud rate
     base_addr->BRR = uartdiv;
 
-    // Set stop bits to 1
+    // Set 1 stop bit
     base_addr->CR2 &= ~USART_CR2_STOP;
 
-    // Enable USART peripheral, transmitter, and receiver
-    base_addr->CR1 |= USART_CR1_UE | USART_CR1_TE | USART_CR1_RE;
+    // Enable transmitter, receiver, and USART
+    base_addr->CR1 |= (USART_CR1_TE | USART_CR1_RE | USART_CR1_UE);
 
-    // DMAT and DMAR can be configured (for highspeed data transfer using DMA)
-    base_addr->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
-
-    // Enable USART interrupts RXNE (Receive Data register not empty) interrupt
+    // Enable RXNE interrupt
     base_addr->CR1 |= USART_CR1_RXNEIE;
+
+    // (Optional) Disable DMA unless needed
+    base_addr->CR3 &= ~(USART_CR3_DMAT | USART_CR3_DMAR);
+
     return true;
 }
 
+USART_TypeDef* StUsart::get_addr()
+{
+    return this->base_addr;
+}
 }  // namespace Stmf4
 }  // namespace MM

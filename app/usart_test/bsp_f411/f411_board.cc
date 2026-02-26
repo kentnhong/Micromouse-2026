@@ -2,7 +2,7 @@
 #include <span>
 #include "board.h"
 #include "st_gpio.h"
-#include "st_sys_clock.h"
+#include "st_sys_clk.h"
 #include "st_usart.h"
 
 namespace MM
@@ -10,8 +10,8 @@ namespace MM
 
 // USART2 pin config
 Stmf4::StGpioSettings usart_settings{
-    Stmf4::GpioMode::ALTERNATE, Stmf4::GpioOtype::PUSH_PULL,
-    Stmf4::GpioOspeed::HIGH, Stmf4::GpioPupd::NONE, 7};
+    Stmf4::GpioMode::AF, Stmf4::GpioOtype::PUSH_PULL,
+    Stmf4::GpioOspeed::HIGH, Stmf4::GpioPupd::NO_PULL, 7};
 
 Stmf4::StGpioParams tx_params{2, GPIOA, usart_settings};  // PA2 USART2_TX
 Stmf4::StGpioParams rx_params{3, GPIOA, usart_settings};  // PA3 USART2_RX
@@ -21,6 +21,8 @@ Stmf4::HwGpio rx_gpio(rx_params);
 
 Stmf4::HwClk clock{};
 
+Stmf4::StUsart usart{USART2, clock.get_freq(), 9600};
+
 Board board{.usart = usart, .rx = rx_gpio, .tx = tx_gpio};
 
 bool bsp_init()
@@ -28,12 +30,13 @@ bool bsp_init()
     bool ret = true;
 
     // SysClock config
-    ret &= clock.init(Stmf4::HwClock::configuration::DEFAULT_4MHZ);
+    ret &= clock.init(Stmf4::HwClk::configuration::HSI_16MHZ);
 
-    // Enable peripheral clocks for USART2 and GPIOA
+    // Enable peripheral clocks for GPIOA, USART1, and USART2
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
     RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
-
+    RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
+    
     // Initialize USART and pins
     ret &= tx_gpio.init();
     ret &= rx_gpio.init();
@@ -55,10 +58,11 @@ Board& get_board()
 // from blocking further interrupts.
 extern "C" void USART2_IRQHandler(void)
 {
+    uint8_t rx_byte;
     // This is for getting the first byte
     if (usart.get_addr()->SR & USART_SR_RXNE)
     {
-        if (board.usart.receive(rx_byte))
+        if (board.usart.receive(&rx_byte, 1))
         {
             // received start ready 1 byte, echo it back
             std::span<const uint8_t> tx_span(&rx_byte, 1);

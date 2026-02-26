@@ -6,7 +6,7 @@
 
 #pragma once
 #include "gpio.h"
-#include "uart.h"
+#include "usart.h"
 
 namespace MM
 {

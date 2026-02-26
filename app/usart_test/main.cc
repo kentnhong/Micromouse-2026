@@ -3,7 +3,7 @@
 
 using namespace MM;
 
-std::array<uint8_t, 17> tx_byte{"XuperMouse Action!\n"};
+std::array<uint8_t, 20> tx_byte{"XuperMouse!\r\n"};
 uint8_t rx_byte;
 
 int main(int argc, char** argv)
@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 
     while (1)
     {
-        board.usart.send(tx_byte);
+        board.usart.transfer(tx_byte);
         while (!board.usart.receive(&rx_byte, 1));
     }
 

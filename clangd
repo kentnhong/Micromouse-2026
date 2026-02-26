@@ -1,0 +1,197 @@
+CompileFlags:
+  CompilationDatabase: build/stm32h723
+  Add:
+    - -std=c++20
+    - --target=arm-none-eabi
+    - -mcpu=cortex-m7
+    - -mthumb
+    - -mfpu=fpv5-d16
+    - -mfloat-abi=hard
+    - -DSTM32H723xx
+    - -DSTM32H7
+    - -DUSE_HAL_DRIVER
+    - -D__cpp_lib_span=202002L
+    - -DGNUC
+    - -Darm
+    - -DARM_ARCH_7EM
+    - -Dthumb2
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/13.3.1
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/13.3.1/arm-none-eabi
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/12.3.1
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/12.3.1/arm-none-eabi
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/11.3.1
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/11.3.1/arm-none-eabi
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/10.3.1
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/10.3.1/arm-none-eabi
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/13.3.1/include
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/13.3.1/include-fixed
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/12.3.1/include
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/12.3.1/include-fixed
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/11.3.1/include
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/11.3.1/include-fixed
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/10.3.1/include
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/10.3.1/include-fixed
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/common/drivers/bus
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/common/drivers/io
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/common/drivers/platform/stm32h7
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/common/drivers/time
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/common/core/periph
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/common/core/utils
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/mcu_support/stm32/h7xx
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/mcu_support/stm32/h7xx/HAL
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/mcu_support/CMSIS/include
+
+---
+If:
+  PathMatch: common/drivers/platform/stm32h7/.*
+CompileFlags:
+  Add:
+    - -std=c++20
+    - --target=arm-none-eabi
+    - -mcpu=cortex-m7
+    - -mthumb
+    - -mfpu=fpv5-d16
+    - -mfloat-abi=hard
+    - -DSTM32H723xx
+    - -DSTM32H7
+    - -DUSE_HAL_DRIVER
+    - -D__cpp_lib_span=202002L
+    - -DGNUC
+    - -Darm
+    - -DARM_ARCH_7EM
+    - -Dthumb2
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/13.3.1
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/13.3.1/arm-none-eabi
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/12.3.1
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/12.3.1/arm-none-eabi
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/11.3.1
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/11.3.1/arm-none-eabi
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/10.3.1
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/10.3.1/arm-none-eabi
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/13.3.1/include
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/13.3.1/include-fixed
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/12.3.1/include
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/12.3.1/include-fixed
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/11.3.1/include
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/11.3.1/include-fixed
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/10.3.1/include
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/10.3.1/include-fixed
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/common/drivers/bus
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/common/drivers/io
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/common/drivers/platform/stm32h7
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/common/drivers/time
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/common/core/periph
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/common/core/utils
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/mcu_support/stm32/h7xx
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/mcu_support/stm32/h7xx/HAL
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/mcu_support/CMSIS/include
+
+---
+If:
+  PathMatch: mcu_support/stm32/h7xx/.*
+CompileFlags:
+  Add:
+    - -std=c++20
+    - --target=arm-none-eabi
+    - -mcpu=cortex-m7
+    - -mthumb
+    - -mfpu=fpv5-d16
+    - -mfloat-abi=hard
+    - -DSTM32H723xx
+    - -DSTM32H7
+    - -DUSE_HAL_DRIVER
+    - -D__cpp_lib_span=202002L
+    - -DGNUC
+    - -Darm
+    - -DARM_ARCH_7EM
+    - -Dthumb2
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/13.3.1
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/13.3.1/arm-none-eabi
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/12.3.1
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/12.3.1/arm-none-eabi
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/11.3.1
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/11.3.1/arm-none-eabi
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/10.3.1
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/10.3.1/arm-none-eabi
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/13.3.1/include
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/13.3.1/include-fixed
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/12.3.1/include
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/12.3.1/include-fixed
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/11.3.1/include
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/11.3.1/include-fixed
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/10.3.1/include
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/10.3.1/include-fixed
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/common/drivers/bus
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/common/drivers/io
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/common/drivers/platform/stm32h7
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/common/drivers/time
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/common/core/periph
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/common/core/utils
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/mcu_support/stm32/h7xx
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/mcu_support/stm32/h7xx/HAL
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/mcu_support/CMSIS/include
+
+---
+If:
+  PathMatch: app/.*/.*
+CompileFlags:
+  Add: 
+    - -std=c++20
+    - --target=arm-none-eabi
+    - -mcpu=cortex-m7
+    - -mthumb
+    - -mfpu=fpv5-d16
+    - -mfloat-abi=hard
+    - -DSTM32H723xx
+    - -DSTM32H7
+    - -DUSE_HAL_DRIVER
+    - -DGNUC
+    - -Darm
+    - -DARM_ARCH_7EM
+    - -Dthumb2
+    - -D__cpp_lib_span=202002L
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/13.3.1
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/13.3.1/arm-none-eabi
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/12.3.1
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/12.3.1/arm-none-eabi
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/11.3.1
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/11.3.1/arm-none-eabi
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/10.3.1
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include/c++/10.3.1/arm-none-eabi
+    - -IC:/gcc-arm-none-eabi/arm-none-eabi/include
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/13.3.1/include
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/13.3.1/include-fixed
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/12.3.1/include
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/12.3.1/include-fixed
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/11.3.1/include
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/11.3.1/include-fixed
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/10.3.1/include
+    - -IC:/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/10.3.1/include-fixed
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/common/drivers/bus
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/common/drivers/io
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/common/drivers/platform/stm32h7
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/common/drivers/time
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/common/core/periph
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/common/core/utils
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/mcu_support/stm32/h7xx
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/mcu_support/stm32/h7xx/HAL
+    - -IC:/Users/kent/LBR/GPIO_Branch/Long-Beach-Rocketry-25-26/mcu_support/CMSIS/include
+
+Index:
+  Background: Build
+
+Diagnostics:
+  ClangTidy:
+    Add: 
+        - readability-*
+        - performance-*
+        - bugprone-*
+    Remove:
+        - readability-magic-numbers
+        - readability-uppercase-literal-suffix
+
+Hover:
+  ShowAKA: true

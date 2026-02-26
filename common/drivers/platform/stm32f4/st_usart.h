@@ -26,10 +26,10 @@ public:
     * @brief Construct a new StUsart object
     * @param base_addr Base address of the USART peripheral
     * @param sys_clk System clock frequency in Hz
-    * @param clock_freq Desired USART clock frequency in Hz
+    * @param baud_rate Desired USART baud rate in board initialization
     */
     explicit StUsart(USART_TypeDef* base_addr, uint32_t sys_clk,
-                     uint32_t clock_freq);
+                     uint32_t baud_rate);
 
     /**
     * @brief Receive (Read) data from USART
