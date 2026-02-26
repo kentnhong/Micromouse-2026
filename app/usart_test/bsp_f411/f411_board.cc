@@ -9,19 +9,27 @@ namespace MM
 {
 
 // USART2 pin config
-Stmf4::StGpioSettings usart_settings{
+Stmf4::StGpioSettings gpio_settings{
     Stmf4::GpioMode::AF, Stmf4::GpioOtype::PUSH_PULL, Stmf4::GpioOspeed::HIGH,
     Stmf4::GpioPupd::NO_PULL, 7};
 
-Stmf4::StGpioParams tx_params{2, GPIOA, usart_settings};  // PA2 USART2_TX
-Stmf4::StGpioParams rx_params{3, GPIOA, usart_settings};  // PA3 USART2_RX
+Stmf4::StGpioParams tx_params{2, GPIOA, gpio_settings};  // PA2 USART2_TX
+Stmf4::StGpioParams rx_params{3, GPIOA, gpio_settings};  // PA3 USART2_RX
 
 Stmf4::HwGpio tx_gpio(tx_params);
 Stmf4::HwGpio rx_gpio(rx_params);
 
 Stmf4::HwClk clock{};
 
-Stmf4::StUsart usart{USART2, clock.get_freq(), 9600};
+Stmf4::StUsartSettings usart_settings{Stmf4::UsartOversample::X16,
+                                      Stmf4::UsartSampleMode::MAJORITY};
+Stmf4::StUsartParams usart_params{
+    USART2,
+    clock.get_freq(),
+    9600,
+    usart_settings,
+};
+Stmf4::StUsart usart{usart_params};
 
 Board board{.usart = usart, .rx = rx_gpio, .tx = tx_gpio};
 
