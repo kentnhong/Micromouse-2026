@@ -10,6 +10,11 @@ constexpr uint32_t kMantissaPos{0x4u};
 
 static inline uint32_t usartdiv_calc(uint32_t fck, uint32_t baud, bool over8)
 {
+    /**
+    * @brief the usartdiv_calc
+    * @note Formula: USARTDIV = fck / (oversample * baud)
+    * where oversample is 8 or 16 depending on the OVER8 bit in CR1
+    */
     uint32_t oversample = over8 ? 8 : 16;
 
     uint32_t div = fck / (oversample * baud);
@@ -139,5 +144,6 @@ USART_TypeDef* StUsart::get_addr()
 {
     return this->base_addr;
 }
+
 }  // namespace Stmf4
 }  // namespace MM

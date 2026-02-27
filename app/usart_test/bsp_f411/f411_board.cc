@@ -25,7 +25,7 @@ Stmf4::StUsartSettings usart_settings{Stmf4::UsartOversample::X16,
                                       Stmf4::UsartSampleMode::MAJORITY};
 Stmf4::StUsartParams usart_params{
     USART2,
-    16000000,
+    clock.get_freq(), //  Get the clock frequency from the system clock for accurate baud rate calculation
     9600,
     usart_settings,
 };
@@ -38,7 +38,7 @@ bool bsp_init()
     bool ret = true;
 
     // SysClock config
-    //ret &= clock.init(Stmf4::HwClk::configuration::HSI_16MHZ);
+    ret &= clock.init(Stmf4::HwClk::configuration::HSI_16MHZ);
 
     // Enable peripheral clocks for GPIOA, USART1, and USART2
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;

@@ -19,7 +19,7 @@ namespace Stmf4
 // USART setting for how many samples for one bit
 enum class UsartOversample : uint8_t
 {
-    X16 = 0,
+    X16 = 0, 
     X8
 };
 
@@ -31,7 +31,7 @@ enum class UsartSampleMode : uint8_t
 
 struct StUsartSettings
 {
-    UsartOversample oversample;
+    UsartOversample oversample; 
     UsartSampleMode sample_mode;
 };
 
@@ -57,6 +57,12 @@ public:
     * @param params_ Usart struct containing params of base addr, clock freq, baud rate, and usart settings
     */
     explicit StUsart(StUsartParams& params_);
+
+    /**
+     * @brief Get the USART clock frequency
+     * @return uint32_t Clock frequency in Hz
+     */
+    uint32_t get_clock_freq() const { return clock_freq; }
 
     /**
     * @brief Receive (Read) data from USART
