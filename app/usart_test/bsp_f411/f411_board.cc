@@ -19,26 +19,27 @@ Stmf4::StGpioParams rx_params{3, GPIOA, gpio_settings};  // PA3 USART2_RX
 Stmf4::HwGpio tx_gpio(tx_params);
 Stmf4::HwGpio rx_gpio(rx_params);
 
-Stmf4::HwClk clock{};
+Stmf4::HwClk clock{Stmf4::Configuration::HSI_16MHZ};
 
 Stmf4::StUsartSettings usart_settings{Stmf4::UsartOversample::X16,
                                       Stmf4::UsartSampleMode::MAJORITY};
+
 Stmf4::StUsartParams usart_params{
     USART2,
-    16000000,
+    0,
     9600,
     usart_settings,
 };
-Stmf4::StUsart usart{usart_params};
 
+Stmf4::StUsart usart{usart_params};
 Board board{.usart = usart, .rx = rx_gpio, .tx = tx_gpio};
 
 bool bsp_init()
 {
     bool ret = true;
 
-    // SysClock config
-    //ret &= clock.init(Stmf4::HwClk::configuration::HSI_16MHZ);
+    ret &= clock.init();
+    usart.set_clock_freq(clock.get_freq());
 
     // Enable peripheral clocks for GPIOA, USART1, and USART2
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;

@@ -59,6 +59,22 @@ public:
     explicit StUsart(StUsartParams& params_);
 
     /**
+     * @brief Get the USART clock frequency
+     * @return uint32_t Clock frequency in Hz
+     */
+    uint32_t get_clock_freq() const
+    {
+        return clock_freq;
+    }
+
+    /**
+     * @brief Set the USART clock frequency
+     * @param clk_hz Desired clock frequency in Hz
+     * @return true if the clock frequency was successfully set, false otherwise
+     */
+    bool set_clock_freq(uint32_t clk_hz);
+
+    /**
     * @brief Receive (Read) data from USART
     * @param byte Byte of data to receive
     */

@@ -13,6 +13,9 @@ extern "C"
 
 namespace MM::Stmf4
 {
+HwClk::HwClk(Configuration config) : hz(0), config(config)
+{
+}
 
 /**
 * @brief Setting the system clock to 16 MHz using the internal HSI oscillator. 
@@ -188,33 +191,33 @@ bool SystemClock_ConfigHSE8()
     return true;
 }
 
-bool HwClk::init(configuration config)
+bool HwClk::init()
 {
     HAL_Init();
     switch (config)
     {
-        case configuration::HSI_16MHZ:
+        case Configuration::HSI_16MHZ:
             if (!SystemClock_ConfigHSI16())
                 return false;
-            source = configuration::HSI_16MHZ;
+            config = Configuration::HSI_16MHZ;
             hz = 16'000'000;
             break;
-        case configuration::SYSCLK_HSE_24MHZ:
+        case Configuration::SYSCLK_HSE_24MHZ:
             if (!SystemClock_ConfigHSE24())
                 return false;
-            source = configuration::SYSCLK_HSE_24MHZ;
+            config = Configuration::SYSCLK_HSE_24MHZ;
             hz = 24'000'000;
             break;
-        case configuration::SYSCLK_HSE_64MHZ:
+        case Configuration::SYSCLK_HSE_64MHZ:
             if (!SystemClock_ConfigHSE64())
                 return false;
-            source = configuration::SYSCLK_HSE_64MHZ;
+            config = Configuration::SYSCLK_HSE_64MHZ;
             hz = 64'000'000;
             break;
-        case configuration::HSE_8MHZ:
+        case Configuration::HSE_8MHZ:
             if (!SystemClock_ConfigHSE8())
                 return false;
-            source = configuration::HSE_8MHZ;
+            config = Configuration::HSE_8MHZ;
             hz = 8'000'000;
             break;
         default:

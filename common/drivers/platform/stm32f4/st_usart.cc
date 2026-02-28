@@ -4,12 +4,24 @@ namespace MM
 {
 namespace Stmf4
 {
+StUsart::StUsart(StUsartParams& params_)
+    : base_addr{params_.base_addr},
+      settings{params_.settings},
+      clock_freq{params_.clock_freq},
+      baud_rate{params_.baud_rate}
+{
+}
 
 constexpr uint32_t kDivFracMask{0x7u};
 constexpr uint32_t kMantissaPos{0x4u};
 
 static inline uint32_t usartdiv_calc(uint32_t fck, uint32_t baud, bool over8)
 {
+    /**
+    * @brief the usartdiv_calc
+    * @note Formula: USARTDIV = fck / (oversample * baud)
+    * where oversample is 8 or 16 depending on the OVER8 bit in CR1
+    */
     uint32_t oversample = over8 ? 8 : 16;
 
     uint32_t div = fck / (oversample * baud);
@@ -29,14 +41,6 @@ static inline uint32_t usartdiv_calc(uint32_t fck, uint32_t baud, bool over8)
         frac &= kDivFracMask;
 
     return (div << kMantissaPos) | frac;
-}
-
-StUsart::StUsart(StUsartParams& params_)
-    : base_addr{params_.base_addr},
-      settings{params_.settings},
-      clock_freq{params_.clock_freq},
-      baud_rate{params_.baud_rate}
-{
 }
 
 bool StUsart::receive(uint8_t& byte)
@@ -138,6 +142,12 @@ bool StUsart::init()
 USART_TypeDef* StUsart::get_addr()
 {
     return this->base_addr;
+}
+
+bool StUsart::set_clock_freq(uint32_t clk_hz)
+{
+    clock_freq = clk_hz;
+    return true;
 }
 }  // namespace Stmf4
 }  // namespace MM
