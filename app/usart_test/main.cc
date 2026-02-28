@@ -1,5 +1,6 @@
 #include <array>
 #include "board.h"
+#include "st_usart.h"  // for debugging purposes
 
 using namespace MM;
 
