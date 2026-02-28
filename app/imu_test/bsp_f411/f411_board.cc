@@ -34,11 +34,11 @@ Stmf4::HwGpio rst(rst_params);
 Bno055 imu(static_cast<MM::I2c&>(i2c), Bno055::ADDR_PRIMARY);
 Board board{.imu = imu};
 
-MM::Stmf4::HwClk clock{};
+MM::Stmf4::HwClk clock{MM::Stmf4::Configuration::SYSCLK_HSE_24MHZ};
 
 bool bsp_init()
 {
-    clock.init(MM::Stmf4::HwClk::configuration::SYSCLK_HSE_24MHZ);
+    clock.init();
     // Enable GPIOB and I2C1 clocks
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
     RCC->APB1ENR |= RCC_APB1ENR_I2C1EN;
