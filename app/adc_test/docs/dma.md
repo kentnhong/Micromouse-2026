@@ -19,10 +19,10 @@ Current mode/features: - Normal mode (no circular mode) - Direct mode
 
 ## Design Philosophy
 
-- Keep DMA independent from ADC/SPI/UART drivers\
-- Follow STM32 reference manual requirements\
-- Disable stream before modifying control registers\
-- Clear flags before restarting a stream\
+- Keep DMA independent from ADC/SPI/UART drivers
+- Follow STM32 reference manual requirements
+- Disable stream before modifying control registers
+- Clear flags before restarting a stream
 - Validate address ranges, alignment, and transfer length
 
 ------------------------------------------------------------------------
@@ -160,7 +160,7 @@ To configure DMA correctly:
 ### init()
 
 Configures the stream (channel, priority, width, direction, increment
-modes, etc.).\
+modes, etc.).
 Does **not** start a transfer.
 
 ``` cpp
@@ -173,10 +173,10 @@ dma.init();
 
 Starts a transfer by:
 
-- Disabling the stream and waiting for it to fully stop\
-- Clearing DMA flags\
-- Validating addresses and `num_items`\
-- Writing PAR / M0AR / NDTR\
+- Disabling the stream and waiting for it to fully stop
+- Clearing DMA flags
+- Validating addresses and `num_items`
+- Writing PAR / M0AR / NDTR
 - Enabling the stream
 
 ``` cpp
@@ -189,7 +189,7 @@ dma.start(source, destination, num_items);
 
 Emergency stop:
 
-- Disables the stream and waits for EN == 0\
+- Disables the stream and waits for EN == 0
 - Clears DMA flags
 
 ``` cpp
@@ -203,9 +203,9 @@ burst use cases.
 
 ## Safety Checks
 
-- Address range checks for SRAM / Flash / Peripheral space\
-- NDTR range enforced (1--65535)\
-- Alignment checks based on configured transfer width\
+- Address range checks for SRAM / Flash / Peripheral space
+- NDTR range enforced (1--65535)
+- Alignment checks based on configured transfer width
 - Clears all 5 stream flags before restarting
 
 ------------------------------------------------------------------------
@@ -224,6 +224,6 @@ adc_dma.start(
 
 Used for:
 
-- IR sensor sampling\
-- Batch ADC reads\
+- IR sensor sampling
+- Batch ADC reads
 - Deterministic burst acquisition
