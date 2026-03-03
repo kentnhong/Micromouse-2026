@@ -47,11 +47,29 @@ HwDma::HwDma(const StDmaParams& params_)
 {
 }
 
+// Adrresses
+constexpr uintptr_t kSramBase = 0x20000000u;
+constexpr uintptr_t kSramEnd = 0x20020000u;
+constexpr uintptr_t kFlashBase = 0x08000000u;
+constexpr uintptr_t kFlashEnd = 0x0807FFFFu;
+constexpr uintptr_t kPeriphBase = 0x40000000u;
+constexpr uintptr_t kPeriphEnd = 0x5003FFFFu;
+
+// Counter threshold for DMA_SxNDTR
+constexpr uint16_t kMinCount = 1;
+constexpr uint16_t kMaxCount = 65535;
+
+// Bit Masks
+constexpr uint32_t kNdtrMask = 0xFFFF0000u;
+constexpr uint16_t kNumItemsMask = 0xFFFFu;
+
+// LIFCR and HIFCR flag base positions
 constexpr uint8_t kFlagBase[4] = {0, 6, 16, 22};
-static std::array<DMA_Stream_TypeDef*, 8> dma_lisr = {
+
+static const std::array<DMA_Stream_TypeDef*, 8> dma_lisr = {
     DMA1_Stream0, DMA1_Stream1, DMA1_Stream2, DMA1_Stream3,
     DMA2_Stream0, DMA2_Stream1, DMA2_Stream2, DMA2_Stream3};
-static std::array<DMA_Stream_TypeDef*, 8> dma_hisr = {
+static const std::array<DMA_Stream_TypeDef*, 8> dma_hisr = {
     DMA1_Stream4, DMA1_Stream5, DMA1_Stream6, DMA1_Stream7,
     DMA2_Stream4, DMA2_Stream5, DMA2_Stream6, DMA2_Stream7};
 
