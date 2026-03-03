@@ -73,6 +73,7 @@ struct StAdcSettings
 
 struct StAdcParams
 {
+    Dma& dma;
     StAdcSettings settings;
     ADC_TypeDef* base_addr;
     ADC_Common_TypeDef* common_base_addr;
@@ -174,6 +175,7 @@ public:
     bool ovr_recover(bool dma_reinit);
 
 private:
+    Dma& dma;
     StAdcSettings settings;
     ADC_TypeDef* base_addr;
     ADC_Common_TypeDef* common_base_addr;
