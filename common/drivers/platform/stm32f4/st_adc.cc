@@ -13,7 +13,8 @@ namespace MM
 namespace Stmf4
 {
 HwAdc::HwAdc(StAdcParams& params_)
-    : settings{params_.settings},
+    : dma{params_.dma},
+      settings{params_.settings},
       base_addr{params_.base_addr},
       common_base_addr{params_.common_base_addr}
 {
