@@ -47,6 +47,21 @@ HwDma::HwDma(const StDmaParams& params_)
 {
 }
 
+constexpr uint8_t kFlagBase[4] = {0, 6, 16, 22};
+static std::array<DMA_Stream_TypeDef*, 8> dma_lisr = {
+    DMA1_Stream0, DMA1_Stream1, DMA1_Stream2, DMA1_Stream3,
+    DMA2_Stream0, DMA2_Stream1, DMA2_Stream2, DMA2_Stream3};
+static std::array<DMA_Stream_TypeDef*, 8> dma_hisr = {
+    DMA1_Stream4, DMA1_Stream5, DMA1_Stream6, DMA1_Stream7,
+    DMA2_Stream4, DMA2_Stream5, DMA2_Stream6, DMA2_Stream7};
+
+static inline uint32_t clear_mask(uint8_t g)
+{
+    uint32_t b = kFlagBase[g];
+    return (1u << (b + 0)) | (1u << (b + 2)) | (1u << (b + 3)) |
+           (1u << (b + 4)) | (1u << (b + 5));
+}
+
 bool HwDma::init()
 {
     // Disable stream before modifying other CR fields
