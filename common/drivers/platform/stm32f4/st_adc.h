@@ -73,7 +73,6 @@ struct StAdcSettings
 
 struct StAdcParams
 {
-    Dma& dma;
     StAdcSettings settings;
     ADC_TypeDef* base_addr;
     ADC_Common_TypeDef* common_base_addr;
@@ -92,7 +91,7 @@ public:
         BOTH_EDGES
     };
 
-    enum class ExternalEvent: uint8_t
+    enum class ExternalEvent : uint8_t
     {
         TIM1_CH1 = 0,
         TIM1_CH2,
@@ -175,7 +174,6 @@ public:
     bool ovr_recover(bool dma_reinit);
 
 private:
-    Dma& dma;
     StAdcSettings settings;
     ADC_TypeDef* base_addr;
     ADC_Common_TypeDef* common_base_addr;
