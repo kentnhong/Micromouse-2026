@@ -32,6 +32,7 @@ public:
      */
     virtual bool start() = 0;
 
+
     /**
     * @brief Stops DMA transfer in emergency and clears flags
     *
