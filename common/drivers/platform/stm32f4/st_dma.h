@@ -17,10 +17,10 @@ namespace Stmf4
 
 enum class DmaState : uint8_t
 {
-    RESET = 0, // DMA not initialized
-    READY,     // DMA initialized
-    ARMED,     // DMA has source & destination addr and num bytes to be sent
-    BUSY,      // DMA is in middle of transfer
+    RESET = 0,  // DMA not initialized
+    READY,      // DMA initialized
+    ARMED,      // DMA has source & destination addr and num bytes to be sent
+    BUSY,       // DMA is in middle of transfer
 };
 
 enum class DmaChSel : uint8_t
