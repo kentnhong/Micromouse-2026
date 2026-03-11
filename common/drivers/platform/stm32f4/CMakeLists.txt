@@ -5,6 +5,7 @@ add_library(hal STATIC
     st_pwm.cc
     st_sys_clk.cc
     st_usart.cc
+    st_oc.cc
 )
 
 target_include_directories(hal PUBLIC
