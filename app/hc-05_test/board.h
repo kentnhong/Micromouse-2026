@@ -16,7 +16,7 @@ struct Board
     Usart& usart;
     Gpio& rx;
     Gpio& tx;
-    Gpio& key;  // KEY pin for controlling HC-05 mode
+    //Gpio& key;  // KEY pin for controlling HC-05 mode
 };
 
 bool bsp_init();
