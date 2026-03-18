@@ -15,7 +15,7 @@ namespace Stmf4
 {
 
 /**
-* @brief Encoder modes for STM32F4
+* @brief Encoder modes for STM32F4 Input Capture
 * @note MODE_1: Counter counts on TI1FP1 edge depending on the level
         MODE_2: Counter counts on both TI1 and TI2 edges depending on the level of the other input
         MODE_3: Counter counts on both TI1 and TI2 edges depending on the level of the other input
@@ -34,8 +34,9 @@ enum class EncMode : uint8_t
 */
 enum class EncChannel : uint8_t
 {
-    CH1 = 1,
-    CH2 = 2,
+    CH1 = 0,
+    CH2,
+    BOTH,  // (CH1 | CH2)
 };
 
 /**
@@ -53,10 +54,10 @@ enum class EncInputPolarity : uint8_t
 
 /**
 * @brief Encoder slave mode options for STM32F4
-* @note DISABLED: Encoder is not used as a slave
+* @note DISABLED: Encoder is not used as a slave 
         MODE_1: Encoder is used as a slave in mode 1
-        MODE_2: Encoder is used as a slave in mode 2
-        MODE_3: Encoder is used as a slave in mode 3
+        MODE_2: Encoder is used as a slave in mode 2 
+        MODE_3: Encoder is used as a slave in mode 3 (T1 & T2 edges)
 */
 enum class EncSlaveMode : uint8_t
 {
