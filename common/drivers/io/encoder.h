@@ -1,3 +1,30 @@
-// generic encoder interface
-// This will be used to interface with the encoder and fetch the encoder ticks.
-// This will be used in the encoder test to fetch the encoder ticks and print them to the console.
+/**
+* @file encoder.h
+* @brief Encoder header interface
+* @date 3/17/2026
+* @author Bex Saw
+*/
+
+#pragma once
+#include <cstdint>
+
+namespace MM
+{
+class Encoder
+{
+public:
+    /**
+    * @brief Gets the current encoder ticks.
+    * @return Returns the current encoder ticks.
+    */
+    virtual bool get_ticks() = 0;
+
+    /**
+    * @brief Resets the encoder ticks to zero.
+    * @return Returns true if success.
+    */
+    virtual bool reset_ticks() = 0;
+
+    ~Encoder() = default;
+};
+}  // namespace MM
