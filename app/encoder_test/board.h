@@ -1,2 +1,21 @@
-// This will structure similar to the pwm test, but instead of fetching the pwm values,
-// it will fetch the encoder ticks and print them to the console.
+/**
+* @file board.h
+* @brief BSP interface for Encoder testing
+* @author Bex Saw
+* @date 03/18/2026
+*/
+
+#pragma once
+#include "encoder.h"
+
+namespace MM
+{
+
+struct Board
+{
+    Encoder& encoder;
+};
+
+bool bsp_init(void);
+Board& get_board(void);
+}  // namespace MM

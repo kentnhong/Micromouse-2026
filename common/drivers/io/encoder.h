@@ -17,7 +17,7 @@ public:
     * @brief Gets the current encoder ticks.
     * @return Returns the current encoder ticks.
     */
-    virtual bool get_ticks() = 0;
+    virtual int32_t get_ticks() = 0;
 
     /**
     * @brief Resets the encoder ticks to zero.

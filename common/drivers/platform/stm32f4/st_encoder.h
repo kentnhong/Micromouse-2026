@@ -17,7 +17,7 @@ namespace Stmf4
 /**
 * @brief Encoder modes for STM32F4 Input Capture
 * @note MODE_1: Counter counts on TI1FP1 edge depending on the level
-        MODE_2: Counter counts on both TI1 and TI2 edges depending on the level of the other input
+        MODE_2: Counter counts on TI2FP2 edge depending on the level
         MODE_3: Counter counts on both TI1 and TI2 edges depending on the level of the other input
 */
 enum class EncMode : uint8_t
@@ -99,13 +99,13 @@ public:
     * @brief Read the number of ticks from the encoder
     * @return The number of ticks
     */
-    bool get_ticks(int32_t ticks) const override;
+    int32_t get_ticks() override;
 
     /**
     * @brief Resets the encoder ticks to zero
     * @return True if the reset was successful, false otherwise
     */
-    bool reset_ticks(int32_t ticks) override;
+    bool reset_ticks() override;
 
 private:
     TIM_TypeDef* base_addr;

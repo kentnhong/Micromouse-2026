@@ -10,9 +10,9 @@ namespace Stmf4
 static constexpr uint8_t kTimCcmrxCcsBitWidth = 2;
 static constexpr uint8_t kTimSmcrSmsBitWidth = 3;
 
-HwEncoder::HwEncoder(const StEncParams& params)
+HwEncoder::HwEncoder(const StEncoderParams& params)
     : base_addr{params.base_addr},
-      channel{params.channel},
+      channel{params.settings.channel},
       settings{params.settings},
       current_ticks{0},
       prev_ticks{0}
@@ -52,28 +52,39 @@ bool HwEncoder::init()
     // Configure both CH1 and CH2 for encoder mode
     if (channel == EncChannel::BOTH)
     {
+        // Clear CC1S and CC2S bits to select the input for both channels
+        base_addr->CCMR1 &= ~(TIM_CCMR1_CC1S_Msk | TIM_CCMR1_CC2S_Msk);
+
         // Set CC1S and CC2S
         SetReg(&base_addr->CCMR1, static_cast<uint32_t>(settings.mode),
                TIM_CCMR1_CC1S_Pos, kTimCcmrxCcsBitWidth);
         SetReg(&base_addr->CCMR1, static_cast<uint32_t>(settings.mode),
                TIM_CCMR1_CC2S_Pos, kTimCcmrxCcsBitWidth);
 
-        // Set polarity for both channels
+        // Clear polarity bits for both channels
         base_addr->CCER &=
             ~(TIM_CCER_CC1P | TIM_CCER_CC1NP | TIM_CCER_CC2P | TIM_CCER_CC2NP);
 
-        // Set polarity for both channels
-        // TODO: fix the polarity this is so wrong
-        if (settings.polarity == EncInputPolarity::FALLING)
+        uint32_t polarity_bits = 0;
+        switch (settings.polarity)
         {
-            base_addr->CCER |= (TIM_CCER_CC1P | TIM_CCER_CC2P);
+            case EncInputPolarity::RISING:
+                break;
+            case EncInputPolarity::FALLING:
+                polarity_bits = TIM_CCER_CC1P | TIM_CCER_CC2P;
+                break;
+            case EncInputPolarity::BOTH:
+                polarity_bits = TIM_CCER_CC1P | TIM_CCER_CC1NP | TIM_CCER_CC2P |
+                                TIM_CCER_CC2NP;
+                break;
         }
+        base_addr->CCER |= polarity_bits;
 
         // Set encoder mode (SMS bits)
         SetReg(&base_addr->SMCR, static_cast<uint32_t>(settings.mode),
                TIM_SMCR_SMS_Pos, kTimSmcrSmsBitWidth);
 
-        // Enable timer
+        // Enable timer counter
         base_addr->CR1 |= TIM_CR1_CEN;
         return true;
     }
@@ -125,15 +136,21 @@ bool HwEncoder::init()
     return true;
 }
 
-bool HwEncoder::get_ticks(int32_t ticks) const
+int32_t HwEncoder::get_ticks()
 {
-    // TODO: Get the ticks from the hardware encoder and update current_ticks and prev_ticks accordingly
-    return true;
+    // Read the current encoder ticks from the timer's CNT register
+    prev_ticks = current_ticks;
+    current_ticks = static_cast<int32_t>(base_addr->CNT);
+
+    return current_ticks;
 }
 
-bool HwEncoder::reset_ticks(int32_t ticks)
+bool HwEncoder::reset_ticks()
 {
-    // TODO: Reset the tick count of the hardware encoder
+    // Reset the encoder ticks to zero
+    base_addr->CNT = 0;
+    current_ticks = 0;
+    prev_ticks = 0;
     return true;
 }
 
