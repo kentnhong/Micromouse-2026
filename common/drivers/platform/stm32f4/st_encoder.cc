@@ -12,6 +12,7 @@ static constexpr uint8_t kTimSmcrSmsBitWidth = 3;
 
 HwEncoder::HwEncoder(const StEncoderParams& params)
     : base_addr{params.base_addr},
+      channel{params.settings.channel},
       settings{params.settings},
       current_ticks{0},
       prev_ticks{0}
