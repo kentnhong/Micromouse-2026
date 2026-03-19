@@ -12,7 +12,6 @@ static constexpr uint8_t kTimSmcrSmsBitWidth = 3;
 
 HwEncoder::HwEncoder(const StEncoderParams& params)
     : base_addr{params.base_addr},
-      channel{params.settings.channel},
       settings{params.settings},
       current_ticks{0},
       prev_ticks{0}
@@ -38,8 +37,10 @@ bool HwEncoder::init()
     // Timer & Channel validatity
     if (is_timer_1_to_5(base_addr))
     {
-        // Encoder mode with CH1 and CH2 only - return false if other channels used
-        if (channel != EncChannel::CH1 && channel != EncChannel::CH2)
+
+        // Encoder mode with CH1 and CH2 or BOTH only - return false if other channels used
+        if (channel != EncChannel::CH1 && channel != EncChannel::CH2 &&
+            channel != EncChannel::BOTH)
         {
             return false;
         }
@@ -124,7 +125,6 @@ bool HwEncoder::init()
             // Set the slave mode for CH2
             SetReg(&base_addr->SMCR, static_cast<uint32_t>(settings.slave_mode),
                    TIM_SMCR_SMS_Pos, kTimSmcrSmsBitWidth);
-
             break;
         default:
             return false;
@@ -139,9 +139,7 @@ bool HwEncoder::init()
 int32_t HwEncoder::get_ticks()
 {
     // Read the current encoder ticks from the timer's CNT register
-    prev_ticks = current_ticks;
     current_ticks = static_cast<int32_t>(base_addr->CNT);
-
     return current_ticks;
 }
 

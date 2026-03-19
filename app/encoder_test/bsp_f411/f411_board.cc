@@ -5,12 +5,15 @@
 namespace MM
 {
 
-// Input Configuration for Timer
+// Input Configuration for Timer (TIM2 encoder: PB3=CH1, PB10=CH2, both AF1)
 Stmf4::StGpioSettings enc_input_settings{
-    Stmf4::GpioMode::GPI, Stmf4::GpioOtype::PUSH_PULL, Stmf4::GpioOspeed::LOW,
-    Stmf4::GpioPupd::PULL_UP, 0};
+    Stmf4::GpioMode::AF, Stmf4::GpioOtype::PUSH_PULL, Stmf4::GpioOspeed::LOW,
+    Stmf4::GpioPupd::PULL_UP, 1};
 
-const Stmf4::StGpioParams enc_input_params{5, GPIOB, enc_input_settings};
+const Stmf4::StGpioParams enc_input_params_1{
+    3, GPIOB, enc_input_settings};  // PB3 (TIM2_CH1)
+const Stmf4::StGpioParams enc_input_params_2{
+    10, GPIOB, enc_input_settings};  // PB10 (TIM2_CH2)
 
 // Encoder Config (TIM2, BOTH Channel)
 Stmf4::StEncoderSettings encoder_settings{
@@ -20,7 +23,8 @@ Stmf4::StEncoderSettings encoder_settings{
 const Stmf4::StEncoderParams encoder_params{TIM2, encoder_settings};
 
 // Create Encoder GPIO & Encoder object
-Stmf4::HwGpio encoder_output(enc_input_params);
+Stmf4::HwGpio encoder_ch1(enc_input_params_1);
+Stmf4::HwGpio encoder_ch2(enc_input_params_2);
 Stmf4::HwEncoder encoder(encoder_params);
 
 Board board{.encoder = encoder};
@@ -34,7 +38,8 @@ bool bsp_init()
     // Intialize encoder and pins
     bool ret = true;
 
-    ret = ret && encoder_output.init();
+    ret = ret && encoder_ch1.init();
+    ret = ret && encoder_ch2.init();
     ret = ret && encoder.init();
 
     return ret;
