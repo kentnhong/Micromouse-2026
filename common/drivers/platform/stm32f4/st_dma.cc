@@ -3,11 +3,7 @@
 namespace
 {
 // Adrresses
-constexpr uintptr_t kSramBase = 0x20000000u;
 constexpr uintptr_t kSramEnd = 0x20020000u;
-constexpr uintptr_t kFlashBase = 0x08000000u;
-constexpr uintptr_t kFlashEnd = 0x0807FFFFu;
-constexpr uintptr_t kPeriphBase = 0x40000000u;
 constexpr uintptr_t kPeriphEnd = 0x5003FFFFu;
 
 // Counter threshold for DMA_SxNDTR
@@ -129,9 +125,9 @@ bool HwDma::arm(uintptr_t source, uintptr_t destination, size_t num_items)
     switch (settings.data_dir)
     {
         case DmaDataDir::PERIPH_TO_MEM:
-            if (source < kPeriphBase || source > kPeriphEnd)
+            if (source < PERIPH_BASE || source > kPeriphEnd)
                 return false;
-            if (destination < kSramBase || destination > kSramEnd)
+            if (destination < SRAM_BASE || destination > kSramEnd)
                 return false;
             if (!is_aligned(destination))
                 return false;
@@ -141,10 +137,10 @@ bool HwDma::arm(uintptr_t source, uintptr_t destination, size_t num_items)
             stream_base_addr->M0AR = destination;
             break;
         case DmaDataDir::MEM_TO_PERIPH:
-            if (!((source >= kSramBase && source <= kSramEnd) ||
-                  (source >= kFlashBase && source <= kFlashEnd)))
+            if (!((source >= SRAM_BASE && source <= kSramEnd) ||
+                  (source >= FLASH_BASE && source <= FLASH_END)))
                 return false;
-            if (destination < kPeriphBase || destination > kPeriphEnd)
+            if (destination < PERIPH_BASE || destination > kPeriphEnd)
                 return false;
             if (!is_aligned(source))
                 return false;
@@ -154,10 +150,10 @@ bool HwDma::arm(uintptr_t source, uintptr_t destination, size_t num_items)
             stream_base_addr->PAR = destination;
             break;
         case DmaDataDir::MEM_TO_MEM:
-            if (!((source >= kSramBase && source <= kSramEnd) ||
-                  (source >= kFlashBase && source <= kFlashEnd)))
+            if (!((source >= SRAM_BASE && source <= kSramEnd) ||
+                  (source >= FLASH_BASE && source <= FLASH_END)))
                 return false;
-            if (destination < kSramBase || destination > kSramEnd)
+            if (destination < SRAM_BASE || destination > kSramEnd)
                 return false;
             if (!is_aligned(destination) || !is_aligned(source))
                 return false;
