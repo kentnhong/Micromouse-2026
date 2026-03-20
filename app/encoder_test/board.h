@@ -7,6 +7,7 @@
 
 #pragma once
 #include "encoder.h"
+#include "gpio.h"
 
 namespace MM
 {
