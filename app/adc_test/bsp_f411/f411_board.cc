@@ -15,6 +15,16 @@ bool board_init()
 // Interrupt Handler for ADC overrun
 extern "C" void ADC_IRQHandler()
 {
+    // Possible ISR for handling ADC OVR
+    /*
+     * stop timer-triggered conversions
+     * stop or disable the ADC/DMA path
+     * clear the ADC overrun flag
+     * reset your IR sequencing state
+     * reset or re-arm DMA
+     * turn all LEDs off
+     * restart from sensor 0 / ambient sample 1
+     */
 }
 
 // Restart adc dma stream
