@@ -9,25 +9,34 @@ Drv8231::Drv8231(Gpio& in1, Gpio& in2, Pwm& pwm)
 {
 }
 
+bool Drv8231::init()
+{
+    // Set initial state to COAST
+    set_direction(Direction::COAST);
+    set_speed(0);
+
+    return true;
+}
+
 void Drv8231::set_direction(Direction dir)
 {
     switch (dir)
     {
         case Direction::COAST:
-            in1_pin.set_low();
-            in2_pin.set_low();
+            in1_pin.set(0);
+            in2_pin.set(0);
             break;
         case Direction::FORWARD:
-            in1_pin.set_high();
-            in2_pin.set_low();
+            in1_pin.set(1);
+            in2_pin.set(0);
             break;
         case Direction::REVERSE:
-            in1_pin.set_low();
-            in2_pin.set_high();
+            in1_pin.set(0);
+            in2_pin.set(1);
             break;
         case Direction::BRAKE:
-            in1_pin.set_high();
-            in2_pin.set_high();
+            in1_pin.set(1);
+            in2_pin.set(1);
             break;
     }
 }

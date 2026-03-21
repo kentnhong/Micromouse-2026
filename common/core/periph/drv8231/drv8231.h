@@ -49,6 +49,8 @@ public:
      */
     void set_speed(uint8_t speed);
 
+    bool init();
+
 private:
     Gpio& in1_pin;
     Gpio& in2_pin;

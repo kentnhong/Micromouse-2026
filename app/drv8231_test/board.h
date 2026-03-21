@@ -6,6 +6,7 @@
  */
 
 #pragma once
+
 #include "delay.h"
 #include "drv8231.h"
 #include "gpio.h"
