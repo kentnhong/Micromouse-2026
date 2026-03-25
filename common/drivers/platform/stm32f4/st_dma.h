@@ -98,6 +98,13 @@ public:
     bool start() override;
 
     /**
+    * @brief Checks if active transfer completed and returns DMA to READY.
+    *
+    * @return true transfer complete, false otherwise
+    */
+    bool complete() override;
+
+    /**
     * @brief Stops DMA transfer in emergency and clears flags
     * 
     * @return true successful stop, false otherwise

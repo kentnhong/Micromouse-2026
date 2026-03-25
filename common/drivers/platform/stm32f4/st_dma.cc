@@ -30,6 +30,41 @@ static inline uint32_t clear_mask(uint8_t g)
     return (1u << (b + 0)) | (1u << (b + 2)) | (1u << (b + 3)) |
            (1u << (b + 4)) | (1u << (b + 5));
 }
+
+static bool find_stream_group(DMA_TypeDef* base_addr,
+                              DMA_Stream_TypeDef* stream_base_addr,
+                              bool& is_high, uint32_t& group)
+{
+    for (size_t i = 0; i < dma_lisr.size(); i++)
+    {
+        if (stream_base_addr == dma_lisr[i])
+        {
+            DMA_TypeDef* expected = (i < 4) ? DMA1 : DMA2;
+            if (base_addr != expected)
+                return false;
+
+            is_high = false;
+            group = static_cast<uint32_t>(i % 4);
+            return true;
+        }
+    }
+
+    for (size_t i = 0; i < dma_hisr.size(); i++)
+    {
+        if (stream_base_addr == dma_hisr[i])
+        {
+            DMA_TypeDef* expected = (i < 4) ? DMA1 : DMA2;
+            if (base_addr != expected)
+                return false;
+
+            is_high = true;
+            group = static_cast<uint32_t>(i % 4);
+            return true;
+        }
+    }
+
+    return false;
+}
 };  // namespace
 
 namespace MM
@@ -192,6 +227,46 @@ bool HwDma::start()
     return true;
 }
 
+// TODO: Verify logic tomorrow
+bool HwDma::complete()
+{
+    if (state != DmaState::BUSY)
+        return false;
+
+    bool is_high = false;
+    uint32_t group = 0;
+    if (!find_stream_group(base_addr, stream_base_addr, is_high, group))
+        return false;
+
+    const uint32_t base_bit = kFlagBase[group];
+    const uint32_t tcif_mask = (1u << (base_bit + 5));
+    const uint32_t error_mask = (1u << (base_bit + 0)) |
+                                (1u << (base_bit + 2)) | (1u << (base_bit + 3));
+    const uint32_t status = is_high ? base_addr->HISR : base_addr->LISR;
+
+    if ((status & error_mask) != 0u)
+    {
+        (void)clear_flags();
+        state = DmaState::READY;
+        return false;
+    }
+
+    const bool stream_disabled = ((stream_base_addr->CR & DMA_SxCR_EN) == 0u);
+    const bool ndtr_done = (stream_base_addr->NDTR == 0u);
+    const bool tcif_set = ((status & tcif_mask) != 0u);
+
+    if (tcif_set || (stream_disabled && ndtr_done))
+    {
+        if (!clear_flags())
+            return false;
+
+        state = DmaState::READY;
+        return true;
+    }
+
+    return false;
+}
+
 bool HwDma::abort()
 {
     // Check if DMA is in a transfer
@@ -218,35 +293,17 @@ bool HwDma::abort()
 
 bool HwDma::clear_flags()
 {
-    // Check if stream_base_addr is in dma_lisr
-    for (size_t i = 0; i < dma_lisr.size(); i++)
-    {
-        if (stream_base_addr == dma_lisr[i])
-        {
-            DMA_TypeDef* expected = (i < 4) ? DMA1 : DMA2;
-            if (base_addr != expected)
-                return false;
-            uint32_t g = static_cast<uint32_t>(i % 4);
-            base_addr->LIFCR = clear_mask(g);
-            return true;
-        }
-    }
+    bool is_high = false;
+    uint32_t group = 0;
+    if (!find_stream_group(base_addr, stream_base_addr, is_high, group))
+        return false;
 
-    // Check if stream_base_addr is in dma_hisr
-    for (size_t i = 0; i < dma_hisr.size(); i++)
-    {
-        if (stream_base_addr == dma_hisr[i])
-        {
-            DMA_TypeDef* expected = (i < 4) ? DMA1 : DMA2;
-            if (base_addr != expected)
-                return false;
-            uint32_t g = static_cast<uint32_t>(i % 4);
-            base_addr->HIFCR = clear_mask(g);
-            return true;
-        }
-    }
+    if (is_high)
+        base_addr->HIFCR = clear_mask(group);
+    else
+        base_addr->LIFCR = clear_mask(group);
 
-    return false;
+    return true;
 }
 
 };  // namespace Stmf4
