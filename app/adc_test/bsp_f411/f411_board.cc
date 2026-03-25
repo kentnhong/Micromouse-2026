@@ -1,4 +1,14 @@
 #include "board.h"
+#include "st_adc.h"
+#include "st_dma.h"
+
+namespace MM
+{
+namespace Stmf4
+{
+    StGpioSettings ir_led_settings{GpioMode::GPOUT, GpioOtype::PUSH_PULL, GpioOspeed::MEDIUM, GpioPupd::NO_PULL, };
+};
+};
 
 namespace MM
 {
