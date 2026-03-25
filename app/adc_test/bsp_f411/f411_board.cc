@@ -1,6 +1,7 @@
 #include "board.h"
 #include "st_adc.h"
 #include "st_dma.h"
+#include "st_gpio.h"
 
 namespace MM
 {
