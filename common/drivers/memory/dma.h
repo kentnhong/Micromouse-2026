@@ -32,6 +32,14 @@ public:
      */
     virtual bool start() = 0;
 
+    /**
+    * @brief Checks whether an active transfer completed.
+    *
+    * @return true transfer completed and driver transitioned to READY,
+    *         false transfer still in progress or error
+    */
+    virtual bool complete() = 0;
+
 
     /**
     * @brief Stops DMA transfer in emergency and clears flags

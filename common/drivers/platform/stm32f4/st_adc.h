@@ -136,7 +136,7 @@ public:
      * 
      * @return true success, false otherwise
      */
-    bool en_dma_req();
+    bool en_dma_req() override;
 
     /**
      * @brief Set ADC Channel to be converted
