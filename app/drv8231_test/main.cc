@@ -20,21 +20,21 @@ int main(int argc, char* argv[])
         hw.drv8231.set_direction(Drv8231::Direction::FORWARD);
         hw.drv8231.set_speed(128);  // 50% speed
 
-        Utils::DelayMs(2000);  // Run forward for 2 seconds
+        hw.drv8231.get_state();  // Should return 1 (FORWARD)
 
         hw.drv8231.set_direction(Drv8231::Direction::REVERSE);
         hw.drv8231.set_speed(128);  // 50% speed
 
-        Utils::DelayMs(2000);  // Run reverse for 2 seconds
+        hw.drv8231.get_state();  // Should return 2 (REVERSE)
 
         hw.drv8231.set_direction(Drv8231::Direction::BRAKE);
 
-        Utils::DelayMs(1000);  // Brake for 1 second
+        hw.drv8231.get_state();  // Should return 3 (BRAKE)
 
         hw.drv8231.set_direction(Drv8231::Direction::COAST);
         hw.drv8231.set_speed(0);  // Stop the motor
 
-        Utils::DelayMs(2000);  // Coast for 2 seconds
+        hw.drv8231.get_state();  // Should return 0 (COAST)
     }
 
     return 0;

@@ -39,11 +39,17 @@ void Drv8231::set_direction(Direction dir)
             in2_pin.set(1);
             break;
     }
+    state = static_cast<int>(dir);
 }
 
 void Drv8231::set_speed(uint8_t speed)
 {
     pwm.set_duty_cycle(speed);
+}
+
+int Drv8231::get_state() const
+{
+    return state;
 }
 
 }  // namespace MM

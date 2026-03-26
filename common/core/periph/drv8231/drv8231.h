@@ -23,10 +23,10 @@ public:
     */
     enum class Direction
     {
-        COAST = 0,
-        FORWARD,
-        REVERSE,
-        BRAKE
+        COAST = 0u,
+        FORWARD = 1u,
+        REVERSE = 2u,
+        BRAKE = 3u
     };
 
     /**
@@ -49,12 +49,15 @@ public:
      */
     void set_speed(uint8_t speed);
 
+    int get_state() const;
+
     bool init();
 
 private:
     Gpio& in1_pin;
     Gpio& in2_pin;
     Pwm& pwm;
+    int state;
 };
 
 }  // namespace MM
