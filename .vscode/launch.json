@@ -34,7 +34,7 @@
         {
             "cwd": "${workspaceFolder}",
             "executable": "${workspaceRoot}/build/stm32f411/app/blink/blink",
-             "name": "DEBUG BLINK F4",
+            "name": "DEBUG BLINK F4",
             "request": "launch",
             "type": "cortex-debug",
             "servertype": "openocd",
@@ -231,6 +231,35 @@
             ],
             "preRestartCommands": [
                 "add-symbol-file build/stm32f411/app/encoder_test/encoder_test",
+                "load",
+                "enable breakpoint",
+                "monitor reset"
+            ],
+            "showDevDebugOutput": true
+        },
+        {
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceRoot}/build/stm32f411/app/drv8231_test/drv8231_test",
+            "name": "DEBUG DRV8231 F4",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "device": "STM32F411",
+            "svdFile": "${workspaceRoot}/mcu_support/f4xx/STM32F4x1.svd",
+            "searchDir": [
+                "${workspaceRoot}/mcu_support/stm32"
+            ],
+            "runToMain": true,
+            "configFiles": [
+                "${workspaceRoot}/mcu_support/stm32/stlink-dap.cfg",
+                "${workspaceRoot}/mcu_support/stm32/f4xx/stm32f4x.cfg"
+            ],
+            "debuggerArgs": [
+                "-d",
+                "${workspaceRoot}",
+            ],
+            "preRestartCommands": [
+                "add-symbol-file build/stm32f411/app/drv8231_test/drv8231_test",
                 "load",
                 "enable breakpoint",
                 "monitor reset"
