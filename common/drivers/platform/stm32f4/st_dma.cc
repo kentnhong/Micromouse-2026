@@ -306,5 +306,23 @@ bool HwDma::clear_flags()
     return true;
 }
 
+bool HwDma::is_aligned(uintptr_t addr)
+{
+    uintptr_t bytes = 1;
+
+    switch (settings.width)
+    {
+        case DmaWidth::BYTE:
+            break;
+        case DmaWidth::HALF_WORD:
+            bytes = 2;
+            break;
+        case DmaWidth::WORD:
+            bytes = 4;
+    }
+
+    return (addr & (bytes - 1u)) == 0u;
+}
+
 };  // namespace Stmf4
 };  // namespace MM

@@ -133,10 +133,7 @@ private:
      * @param addr 
      * @return true aligned, false otherwise
      */
-    bool is_aligned(uintptr_t addr)
-    {
-        return (addr & (static_cast<uint8_t>(settings.width) - 1u)) == 0u;
-    }
+    bool is_aligned(uintptr_t addr);
 
     DmaState state{
         DmaState::

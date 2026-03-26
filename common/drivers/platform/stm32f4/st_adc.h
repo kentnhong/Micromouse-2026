@@ -76,6 +76,7 @@ struct StAdcParams
     StAdcSettings settings;
     ADC_TypeDef* base_addr;
     ADC_Common_TypeDef* common_base_addr;
+    // TODO: Add Dma interface in here to use in HwAdc
 };
 
 class HwAdc : public Adc
