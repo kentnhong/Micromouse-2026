@@ -31,19 +31,12 @@ public:
     * @param val Variable to store adc conversion
     * @return true Read successful, false otherwise
     */
-    virtual bool read(uint16_t& val) = 0;
-
-    /**
-    * @brief Enables DMA requests from ADC.
-    *
-    * @return true configuration applied, false otherwise
-    */
-    virtual bool en_dma_req() = 0;
+    virtual bool read(uint32_t& val) = 0;
 
     /**
     * @brief Destroy the Adc object
     * 
     */
-    ~Adc() = default;
+    virtual ~Adc() = default;
 };
 };  // namespace MM

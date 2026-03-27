@@ -162,7 +162,7 @@ bool HwAdc::en_dma_req()
     return false;
 }
 
-bool HwAdc::read(uint16_t& val)
+bool HwAdc::read(uint32_t& val)
 {
     // Wait until ADC conversion is finished
     while ((base_addr->SR & ADC_SR_EOC) == 0);

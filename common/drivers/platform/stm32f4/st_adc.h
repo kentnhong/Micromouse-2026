@@ -138,14 +138,14 @@ public:
      * 
      * @return true Read successful, false otherwise
      */
-    bool read(uint16_t& val) override;
+    bool read(uint32_t& val) override;
 
     /**
      * @brief Enable DMA for ADC (might have to enable DMA again if overrun, that's why its not in init)
      * 
      * @return true success, false otherwise
      */
-    bool en_dma_req() override;
+    bool en_dma_req();
 
     /**
      * @brief Set external ADC trigger event and trigger polarity
