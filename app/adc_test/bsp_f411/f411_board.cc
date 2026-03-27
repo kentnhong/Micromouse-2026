@@ -58,9 +58,9 @@ bool board_init()
 
 bool board_recover()
 {
+    // Could use atomic instead of disabling interrupts
     __disable_irq();
     g_adc_ovr = false;
-    __enable_irq();
     /*
      * stop timer-triggered conversions
      * stop or disable the ADC/DMA path
@@ -70,6 +70,7 @@ bool board_recover()
      * turn all LEDs off
      * restart from sensor 0 / ambient sample 1
      */
+    __enable_irq();
     return true;
 }
 
