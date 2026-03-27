@@ -7,8 +7,9 @@
 
 #pragma once
 
+#include <span>
+
 #include "adc.h"
-#include "dma.h"
 #include "stm32f411xe.h"
 
 namespace MM
@@ -50,7 +51,7 @@ enum class AdcClkPrescaler : uint8_t
     PCLK2_DIV_8
 };
 
-enum class AdcSampleTime : uint8_t
+enum class AdcCycles : uint8_t
 {
     CYCLES_3 = 0,
     CYCLES_15,
@@ -62,6 +63,12 @@ enum class AdcSampleTime : uint8_t
     CYCLES_480
 };
 
+struct AdcChCycles
+{
+    uint8_t ch;
+    AdcCycles cycles;
+};
+
 struct StAdcSettings
 {
     AdcResolution resolution;
@@ -69,6 +76,8 @@ struct StAdcSettings
     AdcTriggerSource source;
     AdcOverrunInt overrun_int;
     AdcDma dma;
+    std::span<const uint8_t> sequence{};
+    std::span<const AdcChCycles> ch_cycles{};
 };
 
 struct StAdcParams
@@ -129,7 +138,7 @@ public:
      * 
      * @return true Read successful, false otherwise
      */
-    bool read(uint16_t& val) override;
+    bool read(uint32_t& val) override;
 
     /**
      * @brief Enable DMA for ADC (might have to enable DMA again if overrun, that's why its not in init)
@@ -137,25 +146,6 @@ public:
      * @return true success, false otherwise
      */
     bool en_dma_req();
-
-    /**
-     * @brief Set ADC Channel to be converted
-     * 
-     * @param channel ADC Channel to be converted
-     * @return true channel set successfully, false otherwise
-     * @note We dont support CH 16-18 at this time for the temperature sensor
-     */
-    bool set_channel(uint8_t ch);
-
-    /**
-     * @brief Set the sample time (cycles) for the specified ADC channel
-     * 
-     * @param ch ADC Channel
-     * @param sample_time Sample Time in Cycles
-     * @return true success, false otherwise
-     * @note We dont support CH 16-18 at this time for the temperature sensor
-     */
-    bool set_cycles(uint8_t ch, AdcSampleTime cycles);
 
     /**
      * @brief Set external ADC trigger event and trigger polarity
@@ -174,9 +164,25 @@ public:
     bool ovr_recover(bool dma_reinit);
 
 private:
+    /**
+     * @brief Set ADC channel at a specific regular sequence rank (1-16)
+     */
+    bool set_channel(uint8_t rank, uint8_t ch);
+
+    /**
+     * @brief Set the sample time (cycles) for the specified ADC channel
+     * 
+     * @param ch ADC Channel
+     * @param cycles Sample Time in Cycles
+     * @return true success, false otherwise
+     * @note We dont support CH 16-18 at this time for the temperature sensor
+     */
+    bool set_cycles(uint8_t ch, AdcCycles cycles);
+
     StAdcSettings settings;
     ADC_TypeDef* base_addr;
     ADC_Common_TypeDef* common_base_addr;
+    std::span<const AdcChCycles> ch_cycles;
 };
 };  // namespace Stmf4
 };  // namespace MM

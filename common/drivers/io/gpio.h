@@ -36,6 +36,8 @@ public:
      * @return Returns bool of the input register.
      */
     virtual bool read() = 0;
+
+    
     /* 
      * Default destructor. The constructor will be in the hw definition.
      */

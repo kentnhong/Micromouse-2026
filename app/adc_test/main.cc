@@ -1,9 +1,29 @@
 #include "adc.h"
 #include "board.h"
+#include "delay.h"
 
-//using namespace MM;
+#include <array>
+
+#include "stm32f411xe.h"
+
+using namespace MM;
+
+namespace
+{
+constexpr size_t kNumSamples = 4;
+}  // namespace
 
 int main(int argc, char* argv[])
 {
-    while (1);
+    [[maybe_unused]] bool result = true;
+
+    result &= board_init();
+    [[maybe_unused]] Board& board = get_board();
+
+    // DMA destination buffer to inspect in debugger.
+    [[maybe_unused]] std::array<uint16_t, kNumSamples> samples{0, 0, 0, 0};
+
+    while (1)
+    {
+    }
 }

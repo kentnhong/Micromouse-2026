@@ -17,18 +17,53 @@ constexpr uint16_t kNumItemsMask = 0xFFFFu;
 // LIFCR and HIFCR flag base positions
 constexpr uint8_t kFlagBase[4] = {0, 6, 16, 22};
 
-static const std::array<DMA_Stream_TypeDef*, 8> dma_lisr = {
+const std::array<DMA_Stream_TypeDef*, 8> dma_lisr = {
     DMA1_Stream0, DMA1_Stream1, DMA1_Stream2, DMA1_Stream3,
     DMA2_Stream0, DMA2_Stream1, DMA2_Stream2, DMA2_Stream3};
-static const std::array<DMA_Stream_TypeDef*, 8> dma_hisr = {
+const std::array<DMA_Stream_TypeDef*, 8> dma_hisr = {
     DMA1_Stream4, DMA1_Stream5, DMA1_Stream6, DMA1_Stream7,
     DMA2_Stream4, DMA2_Stream5, DMA2_Stream6, DMA2_Stream7};
 
-static inline uint32_t clear_mask(uint8_t g)
+inline uint32_t clear_mask(uint8_t g)
 {
     uint32_t b = kFlagBase[g];
     return (1u << (b + 0)) | (1u << (b + 2)) | (1u << (b + 3)) |
            (1u << (b + 4)) | (1u << (b + 5));
+}
+
+bool assign_group(DMA_TypeDef* base_addr,
+                                DMA_Stream_TypeDef* stream_base_addr,
+                                bool& is_high, uint32_t& group)
+{
+    for (size_t i = 0; i < dma_lisr.size(); i++)
+    {
+        if (stream_base_addr == dma_lisr[i])
+        {
+            DMA_TypeDef* expected = (i < 4) ? DMA1 : DMA2;
+            if (base_addr != expected)
+                return false;
+
+            is_high = false;
+            group = static_cast<uint32_t>(i % 4);
+            return true;
+        }
+    }
+
+    for (size_t i = 0; i < dma_hisr.size(); i++)
+    {
+        if (stream_base_addr == dma_hisr[i])
+        {
+            DMA_TypeDef* expected = (i < 4) ? DMA1 : DMA2;
+            if (base_addr != expected)
+                return false;
+
+            is_high = true;
+            group = static_cast<uint32_t>(i % 4);
+            return true;
+        }
+    }
+
+    return false;
 }
 };  // namespace
 
@@ -39,7 +74,8 @@ namespace Stmf4
 HwDma::HwDma(const StDmaParams& params_)
     : settings{params_.settings},
       base_addr{params_.base_addr},
-      stream_base_addr{params_.stream_base_addr}
+      stream_base_addr{params_.stream_base_addr},
+      periph_addr{params_.periph_addr}
 {
 }
 
@@ -90,7 +126,7 @@ bool HwDma::init()
         stream_base_addr->CR &= ~DMA_SxCR_PINC;
     }
 
-    // Disable circular mode in DMA_SxCR
+    // Disable circular mode in DMA_SxCR (TODO: change when we add an option to support circular mode for DMA)
     stream_base_addr->CR &= ~DMA_SxCR_CIRC;
 
     // Set data transfer direction in DMA_SxCR
@@ -106,62 +142,115 @@ bool HwDma::init()
     // Enable direct mode in DMA_SxFCR
     stream_base_addr->FCR &= ~DMA_SxFCR_DMDIS;
 
+    // If using periph to mem or mem to periph data dir, write base_addr into dma periph addr reg
+    if (settings.data_dir != DmaDataDir::MEM_TO_MEM)
+    {
+        if (!is_aligned(periph_addr))
+            return false;
+        if (periph_addr < PERIPH_BASE || periph_addr > kPeriphEnd)
+            return false;
+        stream_base_addr->PAR = periph_addr;
+    }
+
     state = DmaState::READY;
     return true;
 }
 
-bool HwDma::arm(uintptr_t source, uintptr_t destination, size_t num_items)
+bool HwDma::arm_p2m(uintptr_t destination, size_t num_items)
 {
     // Check if dma is initialized; allow re-arm from ARMED state for overrun recovery
     if (state != DmaState::READY && state != DmaState::ARMED)
+        return false;
+
+    // Check if data direction is set correctly
+    if (settings.data_dir != DmaDataDir::PERIPH_TO_MEM)
         return false;
 
     // Disable stream and wait until it is actually disabled
     stream_base_addr->CR &= ~DMA_SxCR_EN;
     while (stream_base_addr->CR & DMA_SxCR_EN);
 
-    /* Check if source and destination addr are valid addrs and write the addrs to the respective registers*/
-    // TODO: Clean this up when you have time
-    switch (settings.data_dir)
+    /* Check if source and destination addr are valid addrs and write the addrs to the respective registers */
+    if (destination < SRAM_BASE || destination > kSramEnd)
+        return false;
+    if (!is_aligned(destination))
+        return false;
+    // Write destination addr to DMA_SxM0AR
+    stream_base_addr->M0AR = static_cast<uint32_t>(destination);
+
+    /* Check if counter is within the threshold for DMA_SxNDTR for the F411 */
+    if (num_items < kMinCount || num_items > kMaxCount)
     {
-        case DmaDataDir::PERIPH_TO_MEM:
-            if (source < PERIPH_BASE || source > kPeriphEnd)
-                return false;
-            if (destination < SRAM_BASE || destination > kSramEnd)
-                return false;
-            if (!is_aligned(destination))
-                return false;
-            // Write source addr to DMA_SxPAR
-            stream_base_addr->PAR = source;
-            // Write destination addr to DMA_SxM0AR
-            stream_base_addr->M0AR = destination;
-            break;
-        case DmaDataDir::MEM_TO_PERIPH:
-            if (!((source >= SRAM_BASE && source <= kSramEnd) ||
-                  (source >= FLASH_BASE && source <= FLASH_END)))
-                return false;
-            if (destination < PERIPH_BASE || destination > kPeriphEnd)
-                return false;
-            if (!is_aligned(source))
-                return false;
-            // Write source addr to DMA_SxM0AR
-            stream_base_addr->M0AR = source;
-            // Write destination addr to DMA_SxPAR
-            stream_base_addr->PAR = destination;
-            break;
-        case DmaDataDir::MEM_TO_MEM:
-            if (!((source >= SRAM_BASE && source <= kSramEnd) ||
-                  (source >= FLASH_BASE && source <= FLASH_END)))
-                return false;
-            if (destination < SRAM_BASE || destination > kSramEnd)
-                return false;
-            if (!is_aligned(destination) || !is_aligned(source))
-                return false;
-            // Write source addr to DMA_SxPAR
-            stream_base_addr->PAR = source;
-            // Write destination addr to DMA_SxM0AR
-            stream_base_addr->M0AR = destination;
+        return false;
     }
+    stream_base_addr->NDTR = (stream_base_addr->NDTR & kNdtrMask) |
+                             (static_cast<uint32_t>(num_items) & kNumItemsMask);
+
+    state = DmaState::ARMED;
+    return true;
+}
+
+bool HwDma::arm_m2p(uintptr_t source, size_t num_items)
+{
+    // Check if dma is initialized; allow re-arm from ARMED state for overrun recovery
+    if (state != DmaState::READY && state != DmaState::ARMED)
+        return false;
+
+    // Check if data direction is set correctly
+    if (settings.data_dir != DmaDataDir::MEM_TO_PERIPH)
+        return false;
+
+    // Disable stream and wait until it is actually disabled
+    stream_base_addr->CR &= ~DMA_SxCR_EN;
+    while (stream_base_addr->CR & DMA_SxCR_EN);
+
+    /* Check if source and destination addr are valid addrs and write the addrs to the respective registers */
+    if (!((source >= SRAM_BASE && source <= kSramEnd) ||
+          (source >= FLASH_BASE && source <= FLASH_END)))
+        return false;
+    if (!is_aligned(source))
+        return false;
+    // Write source addr to DMA_SxM0AR
+    stream_base_addr->M0AR = static_cast<uint32_t>(source);
+
+    /* Check if counter is within the threshold for DMA_SxNDTR for the F411 */
+    if (num_items < kMinCount || num_items > kMaxCount)
+    {
+        return false;
+    }
+    stream_base_addr->NDTR = (stream_base_addr->NDTR & kNdtrMask) |
+                             (static_cast<uint32_t>(num_items) & kNumItemsMask);
+
+    state = DmaState::ARMED;
+    return true;
+}
+
+bool HwDma::arm_m2m(uintptr_t source, uintptr_t destination, size_t num_items)
+{
+    // Check if dma is initialized; allow re-arm from ARMED state for overrun recovery
+    if (state != DmaState::READY && state != DmaState::ARMED)
+        return false;
+
+    // Check if data direction is set correctly
+    if (settings.data_dir != DmaDataDir::MEM_TO_MEM)
+        return false;
+
+    // Disable stream and wait until it is actually disabled
+    stream_base_addr->CR &= ~DMA_SxCR_EN;
+    while (stream_base_addr->CR & DMA_SxCR_EN);
+
+    /* Check if source and destination addr are valid addrs and write the addrs to the respective registers */
+    if (!((source >= SRAM_BASE && source <= kSramEnd) ||
+          (source >= FLASH_BASE && source <= FLASH_END)))
+        return false;
+    if (destination < SRAM_BASE || destination > kSramEnd)
+        return false;
+    if (!is_aligned(destination) || !is_aligned(source))
+        return false;
+    // Write source addr to DMA_SxPAR
+    stream_base_addr->PAR = static_cast<uint32_t>(source);
+    // Write destination addr to DMA_SxM0AR
+    stream_base_addr->M0AR = static_cast<uint32_t>(destination);
 
     /* Check if counter is within the threshold for DMA_SxNDTR for the F411 */
     if (num_items < kMinCount || num_items > kMaxCount)
@@ -192,6 +281,46 @@ bool HwDma::start()
     return true;
 }
 
+// TODO: Verify logic tomorrow
+bool HwDma::complete()
+{
+    if (state != DmaState::BUSY)
+        return false;
+
+    bool is_high = false;
+    uint32_t group = 0;
+    if (!assign_group(base_addr, stream_base_addr, is_high, group))
+        return false;
+
+    const uint32_t base_bit = kFlagBase[group];
+    const uint32_t tcif_mask = (1u << (base_bit + 5));
+    const uint32_t error_mask = (1u << (base_bit + 0)) |
+                                (1u << (base_bit + 2)) | (1u << (base_bit + 3));
+    const uint32_t status = is_high ? base_addr->HISR : base_addr->LISR;
+
+    if ((status & error_mask) != 0u)
+    {
+        (void)clear_flags();
+        state = DmaState::READY;
+        return false;
+    }
+
+    const bool stream_disabled = ((stream_base_addr->CR & DMA_SxCR_EN) == 0u);
+    const bool ndtr_done = (stream_base_addr->NDTR == 0u);
+    const bool tcif_set = ((status & tcif_mask) != 0u);
+
+    if (tcif_set || (stream_disabled && ndtr_done))
+    {
+        if (!clear_flags())
+            return false;
+
+        state = DmaState::READY;
+        return true;
+    }
+
+    return false;
+}
+
 bool HwDma::abort()
 {
     // Check if DMA is in a transfer
@@ -218,35 +347,35 @@ bool HwDma::abort()
 
 bool HwDma::clear_flags()
 {
-    // Check if stream_base_addr is in dma_lisr
-    for (size_t i = 0; i < dma_lisr.size(); i++)
+    bool is_high = false;
+    uint32_t group = 0;
+    if (!assign_group(base_addr, stream_base_addr, is_high, group))
+        return false;
+
+    if (is_high)
+        base_addr->HIFCR = clear_mask(group);
+    else
+        base_addr->LIFCR = clear_mask(group);
+
+    return true;
+}
+
+bool HwDma::is_aligned(uintptr_t addr)
+{
+    uintptr_t bytes = 1;
+
+    switch (settings.width)
     {
-        if (stream_base_addr == dma_lisr[i])
-        {
-            DMA_TypeDef* expected = (i < 4) ? DMA1 : DMA2;
-            if (base_addr != expected)
-                return false;
-            uint32_t g = static_cast<uint32_t>(i % 4);
-            base_addr->LIFCR = clear_mask(g);
-            return true;
-        }
+        case DmaWidth::BYTE:
+            break;
+        case DmaWidth::HALF_WORD:
+            bytes = 2;
+            break;
+        case DmaWidth::WORD:
+            bytes = 4;
     }
 
-    // Check if stream_base_addr is in dma_hisr
-    for (size_t i = 0; i < dma_hisr.size(); i++)
-    {
-        if (stream_base_addr == dma_hisr[i])
-        {
-            DMA_TypeDef* expected = (i < 4) ? DMA1 : DMA2;
-            if (base_addr != expected)
-                return false;
-            uint32_t g = static_cast<uint32_t>(i % 4);
-            base_addr->HIFCR = clear_mask(g);
-            return true;
-        }
-    }
-
-    return false;
+    return (addr & (bytes - 1u)) == 0u;
 }
 
 };  // namespace Stmf4
