@@ -15,14 +15,32 @@ class Dma
 {
 public:
     /**
-    * @brief Arms DMA for transfer
+     * @brief Arms DMA for Peripheral to Memory transfer
+     * 
+     * @param destination Destination address
+     * @param num_items Number of data items to be transferred
+     * @return true successful arm, false otherwise
+     */
+    virtual bool arm_p2m(uintptr_t destination, size_t num_items) = 0;
+
+    /**
+     * @brief Arms DMA for Memory to Peripheral transfer
+     * 
+     * @param source Source address
+     * @param num_items Number of data items to be transferred
+     * @return true successful arm, false otherwise
+     */
+    virtual bool arm_m2p(uintptr_t source, size_t num_items) = 0;
+
+    /**
+    * @brief Arms DMA for Memory to Memory transfer
     * @param source Source address
     * @param destination Destination address
     * @param num_items Number of data items to be transferred
     * 
-    * @return true successful transfer, false otherwise
+    * @return true successful arm, false otherwise
     */
-    virtual bool arm(uintptr_t source, uintptr_t destination,
+    virtual bool arm_m2m(uintptr_t source, uintptr_t destination,
                      size_t num_items) = 0;
 
     /**

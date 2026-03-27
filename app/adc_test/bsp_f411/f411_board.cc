@@ -4,6 +4,9 @@
 #include "st_gpio.h"
 #include "st_sys_clk.h"
 
+// ADC IRQ will set this to true if there is overrun, then we can just handle it with board_recover()
+volatile bool g_adc_ovr = false;
+
 namespace MM
 {
 namespace Stmf4
@@ -29,7 +32,9 @@ HwAdc adc{adc_params};
 namespace MM
 {
 
-Board board{.adc = MM::Stmf4::adc, .dma = MM::Stmf4::dma, .ir_led = MM::Stmf4::ir_led};
+Board board{.adc = MM::Stmf4::adc,
+            .dma = MM::Stmf4::dma,
+            .ir_led = MM::Stmf4::ir_led};
 Stmf4::HwClk clk{Stmf4::Configuration::HSI_16MHZ};
 
 bool board_init()
@@ -51,6 +56,23 @@ bool board_init()
     return result;
 }
 
+bool board_recover()
+{
+    __disable_irq();
+    g_adc_ovr = false;
+    __enable_irq();
+    /*
+     * stop timer-triggered conversions
+     * stop or disable the ADC/DMA path
+     * clear the ADC overrun flag
+     * reset your IR sequencing state
+     * reset or re-arm DMA
+     * turn all LEDs off
+     * restart from sensor 0 / ambient sample 1
+     */
+    return true;
+}
+
 Board& get_board()
 {
     return board;
@@ -61,26 +83,6 @@ Board& get_board()
 // Interrupt Handler for ADC overrun
 extern "C" void ADC_IRQHandler()
 {
-    // Possible ISR for handling ADC OVR
-    /*
-     * stop timer-triggered conversions
-     * stop or disable the ADC/DMA path
-     * clear the ADC overrun flag
-     * reset your IR sequencing state
-     * reset or re-arm DMA
-     * turn all LEDs off
-     * restart from sensor 0 / ambient sample 1
-     */
+    // Set global interrupt flag to true for ADC overrun
+    g_adc_ovr = true;
 }
-
-// Restart adc dma stream
-
-// Start adc dma stream
-
-// // Check for overrun (we are going to reinit the DMA stream, clear ADC OVR, and restart ADC conversions in the BSP via OVR interrupt)
-//     if (base_addr->SR & ADC_SR_OVR)
-//     {
-//         // Reinitialize the DMA (adjust destination address and NDTR counter)
-//         // Clear the ADC OVR bit in ADC_SR register
-//         // Trigger the ADC to start the conversion
-//     }

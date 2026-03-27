@@ -2,12 +2,38 @@
 
 namespace
 {
-constexpr uint32_t kSq1Mask{0xFFFFFFE0};
+// Each SQx field in SQR registers is 5 bits wide (stores channel index 0..18).
+constexpr uint32_t kSqrBitsMask{0x1F};
+// F411 regular external channels we support.
 constexpr uint8_t kMinCh{0};
 constexpr uint8_t kMaxCh{15};
+// Regular conversion rank range on STM32F4 is 1..16.
+constexpr uint8_t kMinRank{1};
+constexpr uint8_t kMaxRank{16};
+// SQRx registers hold 6 ranks each (SQR3: 1-6, SQR2: 7-12, SQR1: 13-16).
+constexpr uint8_t kRanksPerReg{6};
+// Bit width of one rank field in SQRx.
+constexpr uint8_t kSqrBitsPerRank{5};
+// Channel 10+ sample-time fields are in SMPR1; 0..9 are in SMPR2.
 constexpr uint8_t kSmpr1Begin{10};
+// Bit width of one sample-time field in SMPRx.
 constexpr uint8_t kSmprBitsPerCh{3};
+// 3-bit mask for a sample-time field.
+constexpr uint32_t kSmprMask{0x7};
+
+constexpr bool is_valid_ch(uint8_t ch)
+{
+    // Allow only channels this driver currently supports.
+    return ch >= kMinCh && ch <= kMaxCh;
+}
+
+constexpr bool is_valid_rank(uint8_t rank)
+{
+    // Regular sequence ranks are 1-based and limited to 16 entries.
+    return rank >= kMinRank && rank <= kMaxRank;
+}
 };  // namespace
+
 namespace MM
 {
 namespace Stmf4
@@ -68,6 +94,37 @@ bool HwAdc::init()
         base_addr->CR1 |= ADC_CR1_OVRIE;
     }
 
+    if (!settings.sequence.empty())
+    {
+        // Hardware supports up to 16 regular conversion ranks.
+        if (settings.sequence.size() > kMaxRank)
+            return false;
+
+        // Start from a known clean sequence mapping.
+        base_addr->SQR3 = 0;
+        base_addr->SQR2 = 0;
+        // Keep unrelated SQR1 bits; clear sequence length and SQ13..SQ16 fields.
+        base_addr->SQR1 &= ~(ADC_SQR1_L | ADC_SQR1_SQ13 | ADC_SQR1_SQ14 |
+                             ADC_SQR1_SQ15 | ADC_SQR1_SQ16);
+        // L stores (number of conversions - 1).
+        base_addr->SQR1 |= (static_cast<uint32_t>(settings.sequence.size() - 1)
+                            << ADC_SQR1_L_Pos);
+
+        // Program ranks in order: sequence[0] -> rank1, sequence[1] -> rank2, ...
+        for (size_t i = 0; i < settings.sequence.size(); i++)
+        {
+            if (!set_channel(static_cast<uint8_t>(i + 1), settings.sequence[i]))
+                return false;
+        }
+    }
+
+    // Apply per-channel sample-time settings after sequence is set.
+    for (const auto& cfg : settings.ch_cycles)
+    {
+        if (!set_cycles(cfg.ch, cfg.cycles))
+            return false;
+    }
+
     return true;
 }
 
@@ -75,7 +132,7 @@ bool HwAdc::convert(bool single)
 {
     if (settings.source == AdcTriggerSource::EXTERNAL)
         return false;
-    
+
     // Check if a conversion is in progress
     while (base_addr->SR & ADC_SR_STRT);
 
@@ -116,33 +173,58 @@ bool HwAdc::read(uint16_t& val)
     return true;
 }
 
-bool HwAdc::set_channel(uint8_t ch)
+bool HwAdc::set_channel(uint8_t rank, uint8_t ch)
 {
-    // Check if channel is within valid range of F411 ADC channels
-    if (ch < kMinCh || ch > kMaxCh)
+    // Reject invalid rank/channel before touching registers.
+    if (!is_valid_rank(rank) || !is_valid_ch(ch))
         return false;
 
-    // Set channel to be converted in SQ1 in ADC_SQR3 (Only one channel conversion at a time for now)
-    base_addr->SQR3 = (base_addr->SQR3 & kSq1Mask) |
-                      (static_cast<uint32_t>(ch) << ADC_SQR3_SQ1_Pos);
+    // Convert 1-based rank to 0-based index.
+    const uint8_t idx = static_cast<uint8_t>(rank - 1);
+    // Position of this rank field inside SQRx register.
+    const uint8_t shift =
+        static_cast<uint8_t>((idx % kRanksPerReg) * kSqrBitsPerRank);
+    // Mask for only this rank field.
+    const uint32_t mask = (kSqrBitsMask << shift);
+
+    // Pick target SQR register from rank range.
+    volatile uint32_t* sqr = &base_addr->SQR3;
+    if (rank > 12)
+        sqr = &base_addr->SQR1;
+    else if (rank > 6)
+        sqr = &base_addr->SQR2;
+
+    // Clear previous channel at this rank and write the new channel id.
+    *sqr = (*sqr & ~mask) | (static_cast<uint32_t>(ch) << shift);
 
     return true;
 }
 
-bool HwAdc::set_cycles(uint8_t ch, AdcSampleTime cycles)
+bool HwAdc::set_cycles(uint8_t ch, AdcCycles cycles)
 {
     // Check if ch is in valid range
-    if (ch < kMinCh || ch > kMaxCh)
+    if (!is_valid_ch(ch))
         return false;
 
+    // Map channel to SMPR field index (0..9 in SMPR2, 10..15 in SMPR1).
     uint8_t pos = ch < kSmpr1Begin ? ch : (ch - kSmpr1Begin);
+    // Bit offset of that channel's 3-bit sample-time field.
+    const uint8_t shift = static_cast<uint8_t>(pos * kSmprBitsPerCh);
+    // Mask for only this channel field.
+    const uint32_t mask = (kSmprMask << shift);
 
     if (ch < kSmpr1Begin)
-        base_addr->SMPR2 |=
-            (static_cast<uint32_t>(cycles) << (pos * kSmprBitsPerCh));
+    {
+        // Update field in SMPR2 for channels 0..9.
+        base_addr->SMPR2 &= ~mask;
+        base_addr->SMPR2 |= (static_cast<uint32_t>(cycles) << shift);
+    }
     else
-        base_addr->SMPR1 |=
-            (static_cast<uint32_t>(cycles) << (pos * kSmprBitsPerCh));
+    {
+        // Update field in SMPR1 for channels 10..15.
+        base_addr->SMPR1 &= ~mask;
+        base_addr->SMPR1 |= (static_cast<uint32_t>(cycles) << shift);
+    }
 
     return true;
 }

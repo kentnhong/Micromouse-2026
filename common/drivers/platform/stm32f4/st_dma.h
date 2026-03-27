@@ -65,6 +65,7 @@ struct StDmaParams
     StDmaSettings settings;
     DMA_TypeDef* base_addr;
     DMA_Stream_TypeDef* stream_base_addr;
+    uint32_t periph_addr = 0;
 };
 
 class HwDma : public Dma
@@ -80,14 +81,32 @@ public:
     bool init();
 
     /**
-    * @brief Arms DMA for transfer
+     * @brief Arms DMA for Peripheral to Memory transfer
+     * 
+     * @param destination Destination address
+     * @param num_items Number of data items to be transferred
+     * @return true successful arm, false otherwise
+     */
+    bool arm_p2m(uintptr_t destination, size_t num_items) override;
+
+    /**
+     * @brief Arms DMA for Memory to Peripheral transfer
+     * 
+     * @param source Source address
+     * @param num_items Number of data items to be transferred
+     * @return true successful arm, false otherwise
+     */
+    bool arm_m2p(uintptr_t source, size_t num_items) override;
+
+    /**
+    * @brief Arms DMA for Memory to Memory transfer
     * @param source Source address
     * @param destination Destination address
     * @param num_items Number of data items to be transferred
     * 
     * @return true successful transfer, false otherwise
     */
-    bool arm(uintptr_t source, uintptr_t destination,
+    bool arm_m2m(uintptr_t source, uintptr_t destination,
              size_t num_items) override;
 
     /**
@@ -141,6 +160,7 @@ private:
     StDmaSettings settings;
     DMA_TypeDef* base_addr;
     DMA_Stream_TypeDef* stream_base_addr;
+    uintptr_t periph_addr;
 };
 };  // namespace Stmf4
 };  // namespace MM
