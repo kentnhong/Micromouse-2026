@@ -41,4 +41,9 @@ void DelayUs(uint32_t us)
 #endif
 }
 
+uint32_t get_ms_ticks()
+{
+    return g_ms_ticks;
+}
+
 }  // namespace MM::Utils

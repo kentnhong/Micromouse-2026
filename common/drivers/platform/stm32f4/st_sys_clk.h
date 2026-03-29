@@ -25,7 +25,7 @@ enum class Configuration
     SYSCLK_HSE_64MHZ,  // Higher performance option (via PLL)
     HSE_8MHZ           // External crystal at 8 MHz (on STM32F4 boards)
 };
-class HwClk
+class HwClk : public Clock
 {
 public:
     /**
@@ -45,7 +45,7 @@ public:
      * @brief Retrieves the current system clock frequency
      * @return The current system clock frequency in Hz
      */
-    uint32_t get_freq() const
+    uint32_t get_freq() const override
     {
         return hz;
     }
