@@ -19,10 +19,10 @@ StGpioParams ir_led_params{4, GPIOA, ir_led_settings};
 HwGpio ir_led{ir_led_params};
 
 // ADC1 channel 8 maps to PB0 on STM32F411.
-StGpioSettings ir_sensor_adc_settings{GpioMode::ANALOG, GpioOtype::PUSH_PULL,
-                                      GpioOspeed::LOW, GpioPupd::NO_PULL, 0};
-StGpioParams ir_sensor_adc_params{0, GPIOB, ir_sensor_adc_settings};
-HwGpio ir_sensor_adc{ir_sensor_adc_params};
+StGpioSettings phototrans_settings{GpioMode::ANALOG, GpioOtype::PUSH_PULL,
+                                   GpioOspeed::LOW, GpioPupd::NO_PULL, 0};
+StGpioParams phototrans_params{0, GPIOB, phototrans_settings};
+HwGpio phototrans{phototrans_params};
 
 StDmaSettings dma_settings{DmaChSel::CH0, DmaPriority::VERY_HIGH,
                            DmaWidth::HALF_WORD, DmaDataDir::PERIPH_TO_MEM};
@@ -67,7 +67,7 @@ bool board_init()
 {
     bool result = true;
 
-    // Defensive: keep watchdog IRQ disabled during adc_test bring-up.
+    // Keep watchdog IRQ disabled during adc_test bring-up
     NVIC_DisableIRQ(WWDG_IRQn);
     NVIC_ClearPendingIRQ(WWDG_IRQn);
 
@@ -75,14 +75,14 @@ bool board_init()
     result &= Stmf4::clk.init();
 
     // Init Periph Clks
-    RCC->AHB1ENR |= (RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN |
-                     RCC_AHB1ENR_DMA2EN);
+    RCC->AHB1ENR |=
+        (RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN | RCC_AHB1ENR_DMA2EN);
     RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
     RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;
 
     // Init Periphs
     result &= Stmf4::ir_led.init();
-    result &= Stmf4::ir_sensor_adc.init();
+    result &= Stmf4::phototrans.init();
     result &= Stmf4::dma.init();
     result &= Stmf4::adc.init();
     result &= Stmf4::usart.init();
