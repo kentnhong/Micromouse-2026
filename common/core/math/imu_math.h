@@ -23,10 +23,9 @@ struct Quaternion
 struct Bno055Data
 {
     Vec3 accel{};
-    Vec3 gyro{};      
-    Vec3 euler{};     
+    Vec3 gyro{};
+    Vec3 euler{};
     Quaternion quat{};
-
 };
 
 }  // namespace MM

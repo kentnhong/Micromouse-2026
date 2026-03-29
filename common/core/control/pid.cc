@@ -11,6 +11,7 @@ PID::PID(const Val& speed, const Val& turn)
 bool PID::update(const Input& input, const Target& target, float dt_sec, MotorOutput& output)
 {
     // TODO: Implement PID update logic
+    // Update because we need to compute the control signal based on the current sensor readings and target values
     return true;  
 }
 
