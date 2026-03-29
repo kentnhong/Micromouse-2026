@@ -20,4 +20,13 @@ struct Quaternion
     float w, x, y, z;
 };
 
+struct Bno055Data
+{
+    Vec3 accel{};
+    Vec3 gyro{};      
+    Vec3 euler{};     
+    Quaternion quat{};
+
+};
+
 }  // namespace MM
