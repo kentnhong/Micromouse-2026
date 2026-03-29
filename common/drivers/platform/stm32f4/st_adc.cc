@@ -88,6 +88,9 @@ bool HwAdc::init()
     // Clear overrun interrupt bit
     base_addr->CR1 &= ~ADC_CR1_OVRIE;
 
+    // Enable DMA req if chosen
+    en_dma_req();
+
     // Enable overrun interrupt if chosen
     if (settings.overrun_int == AdcOverrunInt::OVRIE_EN)
     {
@@ -101,11 +104,13 @@ bool HwAdc::init()
             return false;
 
         // Start from a known clean sequence mapping.
-        base_addr->SQR3 = 0;
-        base_addr->SQR2 = 0;
-        // Keep unrelated SQR1 bits; clear sequence length and SQ13..SQ16 fields.
+        base_addr->SQR3 &= ~(ADC_SQR3_SQ6 | ADC_SQR3_SQ5 | ADC_SQR3_SQ4 |
+                             ADC_SQR3_SQ3 | ADC_SQR3_SQ2 | ADC_SQR3_SQ1);
+        base_addr->SQR2 &= ~(ADC_SQR2_SQ12 | ADC_SQR2_SQ11 | ADC_SQR2_SQ10 |
+                             ADC_SQR2_SQ9 | ADC_SQR2_SQ8 | ADC_SQR2_SQ7);
         base_addr->SQR1 &= ~(ADC_SQR1_L | ADC_SQR1_SQ13 | ADC_SQR1_SQ14 |
                              ADC_SQR1_SQ15 | ADC_SQR1_SQ16);
+
         // L stores (number of conversions - 1).
         base_addr->SQR1 |= (static_cast<uint32_t>(settings.sequence.size() - 1)
                             << ADC_SQR1_L_Pos);
@@ -128,25 +133,32 @@ bool HwAdc::init()
     return true;
 }
 
-bool HwAdc::convert(bool single)
+bool HwAdc::convert(bool single, size_t samples)
 {
     if (settings.source == AdcTriggerSource::EXTERNAL)
         return false;
-    // Check if a conversion is in progress
-    while (base_addr->SR & ADC_SR_STRT);
-
-    // Disable continuous conversion mode in ADC_CR2
-    base_addr->CR2 &= ~ADC_CR2_CONT;
 
     if (!single)
     {
         // Set continuous conversion mode in ADC_CR2
         base_addr->CR2 |= ADC_CR2_CONT;
+        // Check if a conversion is in progress
+        while (base_addr->SR & ADC_SR_STRT);
+        // Set start conversion of regular channel in ADC_CR2
+        base_addr->CR2 |= ADC_CR2_SWSTART;
     }
-
-    // Set start conversion of regular channel in ADC_CR2
-    base_addr->CR2 |= ADC_CR2_SWSTART;
-
+    else
+    {
+        // Disable continuous conversion mode in ADC_CR2
+        base_addr->CR2 &= ~ADC_CR2_CONT;
+        for (size_t i = 0; i < samples; i++)
+        {
+            // Check if a conversion is in progress
+            while (base_addr->SR & ADC_SR_STRT);
+            // Set start conversion of regular channel in ADC_CR2
+            base_addr->CR2 |= ADC_CR2_SWSTART;
+        }
+    }
     return true;
 }
 
@@ -241,7 +253,7 @@ bool HwAdc::set_ext_trigger(HwAdc::ExternalEvent event,
     return true;
 }
 
-bool HwAdc::ovr_recover(bool dma_reinit)
+bool HwAdc::ovr_recover()
 {
     // Check if overrun occurred
     if (!(base_addr->SR & ADC_SR_OVR))
@@ -249,10 +261,6 @@ bool HwAdc::ovr_recover(bool dma_reinit)
 
     // Clear OVR bit
     base_addr->SR &= ~ADC_SR_OVR;
-
-    // Check if DMA was reinitialized and trigger ADC conversion
-    if (dma_reinit)
-        convert(false);  // Continuous conversion for DMA mode
 
     return true;
 }

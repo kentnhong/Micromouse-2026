@@ -76,7 +76,8 @@ struct StAdcSettings
     AdcTriggerSource source;
     AdcOverrunInt overrun_int;
     AdcDma dma;
-    std::span<const uint8_t> sequence{};
+    std::span<const uint8_t>
+        sequence{};  // The order in which ADC channels are converted in the sequence
     std::span<const AdcChCycles> ch_cycles{};
 };
 
@@ -129,9 +130,10 @@ public:
     * @brief Single or continuous conversion of an ADC channel
     * 
     * @param single True for single. False for continuous.
+    * @param samples How many ADC samples for single shot conversions (obsolete if single is set to false)
     * @return true Conversion successful, false otherwise
     */
-    bool convert(bool single) override;
+    bool convert(bool single, size_t samples) override;
 
     /**
      * @brief Read converted analog values from ADC buffer (for non-DMA)
@@ -157,18 +159,21 @@ public:
     bool set_ext_trigger(ExternalEvent event, TriggerPolarity polarity);
 
     /**
-     * @brief Recovers ADC from OVR state when DMA is used
+     * @brief Recovers ADC from OVR state
      * 
      * @return true ADC recovered, false otherwise
      */
-    bool ovr_recover(bool dma_reinit);
+    bool ovr_recover();
+
+    /**
+     * @brief Set ADC channel at a specific sequence position
+     *
+     * @param rank Order of ADC channel to be converted for a sequence of conversions
+     * @param ch ADC channel
+     */
+    bool set_channel(uint8_t rank, uint8_t ch) override;
 
 private:
-    /**
-     * @brief Set ADC channel at a specific regular sequence rank (1-16)
-     */
-    bool set_channel(uint8_t rank, uint8_t ch);
-
     /**
      * @brief Set the sample time (cycles) for the specified ADC channel
      * 
@@ -182,7 +187,6 @@ private:
     StAdcSettings settings;
     ADC_TypeDef* base_addr;
     ADC_Common_TypeDef* common_base_addr;
-    std::span<const AdcChCycles> ch_cycles;
 };
 };  // namespace Stmf4
 };  // namespace MM
