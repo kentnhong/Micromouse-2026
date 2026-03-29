@@ -20,6 +20,8 @@ constexpr uint8_t kSmpr1Begin{10};
 constexpr uint8_t kSmprBitsPerCh{3};
 // 3-bit mask for a sample-time field.
 constexpr uint32_t kSmprMask{0x7};
+// Bounded poll limit to prevent hard lock if ADC state is unexpected.
+constexpr uint32_t kStrtPollLimit{1000000};
 
 constexpr bool is_valid_ch(uint8_t ch)
 {
@@ -142,8 +144,6 @@ bool HwAdc::convert(bool single, size_t samples)
     {
         // Set continuous conversion mode in ADC_CR2
         base_addr->CR2 |= ADC_CR2_CONT;
-        // Check if a conversion is in progress
-        while (base_addr->SR & ADC_SR_STRT);
         // Set start conversion of regular channel in ADC_CR2
         base_addr->CR2 |= ADC_CR2_SWSTART;
     }
@@ -153,8 +153,15 @@ bool HwAdc::convert(bool single, size_t samples)
         base_addr->CR2 &= ~ADC_CR2_CONT;
         for (size_t i = 0; i < samples; i++)
         {
-            // Check if a conversion is in progress
-            while (base_addr->SR & ADC_SR_STRT);
+            // Best-effort wait for active conversion to finish before retriggering.
+            uint32_t polls = 0;
+            while ((base_addr->SR & ADC_SR_STRT) != 0u)
+            {
+                polls++;
+                if (polls >= kStrtPollLimit)
+                    break;
+            }
+
             // Set start conversion of regular channel in ADC_CR2
             base_addr->CR2 |= ADC_CR2_SWSTART;
         }

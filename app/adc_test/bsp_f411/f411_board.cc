@@ -18,6 +18,12 @@ StGpioSettings ir_led_settings{GpioMode::GPOUT, GpioOtype::PUSH_PULL,
 StGpioParams ir_led_params{4, GPIOA, ir_led_settings};
 HwGpio ir_led{ir_led_params};
 
+// ADC1 channel 8 maps to PB0 on STM32F411.
+StGpioSettings ir_sensor_adc_settings{GpioMode::ANALOG, GpioOtype::PUSH_PULL,
+                                      GpioOspeed::LOW, GpioPupd::NO_PULL, 0};
+StGpioParams ir_sensor_adc_params{0, GPIOB, ir_sensor_adc_settings};
+HwGpio ir_sensor_adc{ir_sensor_adc_params};
+
 StDmaSettings dma_settings{DmaChSel::CH0, DmaPriority::VERY_HIGH,
                            DmaWidth::HALF_WORD, DmaDataDir::PERIPH_TO_MEM};
 StDmaParams dma_params{
@@ -26,7 +32,7 @@ StDmaParams dma_params{
 HwDma dma{dma_params};
 
 std::array<uint8_t, 1> adc_seq{8};
-AdcChCycles ch_cycles{.ch = 8, .cycles = AdcCycles::CYCLES_3};
+AdcChCycles ch_cycles{.ch = 8, .cycles = AdcCycles::CYCLES_480};
 std::array<AdcChCycles, 1> adc_ch_cycles{ch_cycles};
 
 StAdcSettings adc_settings{AdcResolution::TWELVE_BIT,
@@ -61,15 +67,22 @@ bool board_init()
 {
     bool result = true;
 
+    // Defensive: keep watchdog IRQ disabled during adc_test bring-up.
+    NVIC_DisableIRQ(WWDG_IRQn);
+    NVIC_ClearPendingIRQ(WWDG_IRQn);
+
     // Init SYSCLK/HCLK and configure prescalers for APB1 and APB2
     result &= Stmf4::clk.init();
 
     // Init Periph Clks
-    RCC->AHB1ENR |= (RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_DMA2EN);
+    RCC->AHB1ENR |= (RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN |
+                     RCC_AHB1ENR_DMA2EN);
+    RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
     RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;
 
     // Init Periphs
     result &= Stmf4::ir_led.init();
+    result &= Stmf4::ir_sensor_adc.init();
     result &= Stmf4::dma.init();
     result &= Stmf4::adc.init();
     result &= Stmf4::usart.init();
@@ -119,5 +132,11 @@ extern "C" void USART2_IRQHandler(void)
             board.usart.send(tx_span);
         }
     }
+}
+
+extern "C" void WWDG_IRQHandler(void)
+{
+    // Clear early wakeup interrupt flag and return.
+    WWDG->SR = 0u;
 }
 };  // namespace MM
