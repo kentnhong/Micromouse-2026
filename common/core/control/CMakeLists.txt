@@ -4,4 +4,6 @@ add_library(pid STATIC
 
 target_include_directories(pid PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/common/core/math
+    ${CMAKE_SOURCE_DIR}/common/core/periph # If PID needs to read sensors directly.
 )

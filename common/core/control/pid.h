@@ -7,43 +7,64 @@
 
 #pragma once
 #include <cstdint>
+#include "imu_math.h"
+#include "pid_math.h"
 
 /*
- - Input: target value: desired distance, angle, or speed
- - Input: Measured value: actual distance, angle, or speed
-          from sensors: encoder counts, utils/systicks, imu for angle (gyro), etc.
- ** External Flash will have saved params (PID constants, calibration data, etc.)
+ - Input:
  ** Logs + run history of multiple runs (for tuning and debugging)
  - Output: control signal: motor power, steering angle, etc.
 */
 
 namespace MM
 {
-class PID
+
+/**
+* @brief The PID controller inputs (IMU (gyro) and encoders) 
+* @param encoder The encoder input values
+* @param imu The IMU input values
+*/
+struct Input
 {
+    EncoderInput encoder;
+    Bno055Data imu;
+};
+
+struct Output
+{
+    float left_motor_output, right_motor_output;
+};
+
+class PIDMath : public PID
+{
+
 public:
-    explicit PID(float kp, float ki, float kd);
+    // Constructor fetch all inputs + PID constants from flash
+    explicit PID(Bno055Data& imu_data, EncoderInput& enc_data, Val& pid);
 
-    // Straight line movement - distance from encoders
+    /**
+    * @brief Update the PID controller with the current measured value and return the control signal
+    * @param input The current sensor readings (IMU and encoder data)
+    * @param target The target values for distance and angle
+    * @param output The output control signals for the motors
+    */
+    bool update(const Input& input, const Target& target, Output& output);
 
-    // Turning - angle from gyro
-
-    // Speed control - speed from encoders or IMU
-
-    // Update the PID controller with the current measured value and return the control signal
-
-    // Reset the PID controller (e.g., when starting a new movement or after reaching the target)
-
-    // Set new PID constants (e.g., for tuning)
-
-    // Get current PID constants (e.g., for logging or debugging) from flash
-
-    // Get current error values (e.g., for logging or debugging)
-
-    // etc. 
+    /**
+    * @brief Reset the PID controller 
+    */
+    bool reset();
 
 private:
-    // constants
-    
+    /**
+    * @brief Set the output limits for the PID controller 
+    * @param min_output The minimum output value (e.g., -100 for full reverse)
+    * @param max_output The maximum output value (e.g., 100 for full forward)
+    */
+    bool set_output_limits(float min_output, float max_output);
+
+    // PID values and error values
+    Val pid_val;
+    Error pid_error;
 };
-}
+}  // namespace MM
