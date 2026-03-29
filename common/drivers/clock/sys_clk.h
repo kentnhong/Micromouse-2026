@@ -35,6 +35,6 @@ public:
      * @brief Retrieves the current system clock source
      * @return The current system clock source as a string
      */
-    virtual const char* get_source() const = 0;
+    // virtual const char* get_source() const = 0;
 };
 }  // namespace MM
