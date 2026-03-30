@@ -20,4 +20,12 @@ struct Quaternion
     float w, x, y, z;
 };
 
+struct Bno055Data
+{
+    Vec3 accel{};
+    Vec3 gyro{}; // PID will use gyro for yaw control
+    Vec3 euler{};
+    Quaternion quat{};
+};
+
 }  // namespace MM
