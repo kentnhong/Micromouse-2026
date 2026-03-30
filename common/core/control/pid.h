@@ -30,14 +30,12 @@ struct Input
 
 struct Target
 {
-    float speed = 0.0f;
-    float yaw = 0.0f;
+    float speed, yaw;
 };
 
 struct MotorOutput
 {
-    float left = 0.0f;
-    float right = 0.0f;
+    float left, right;
 };
 
 public:
@@ -81,7 +79,7 @@ private:
     // Separate PID loops for speed and turning control
     struct Loop
     {
-        Val pid{};      // Contains Kp (P), Ki (I), Kd (D) gains
+        Val pid{};      
         State state;    // Holds integral and previous error for I and D terms
     };
 
