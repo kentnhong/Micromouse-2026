@@ -6,18 +6,15 @@
 */
 
 #pragma once
+
 #include <cstdint>
 #include "imu_math.h"
 #include "pid_math.h"
 #include "enc_math.h"
 
-/*
- - Input:
- ** Logs + run history of multiple runs (for tuning and debugging)
- - Output: control signal: motor power, steering angle, etc.
-*/
-
 namespace MM
+{
+class PID
 {
 
 /**
@@ -43,9 +40,6 @@ struct MotorOutput
     float right = 0.0f;
 };
 
-class PID
-{
-
 public:
     // Constructor fetch all inputs + PID constants from flash
     explicit PID(const Val& speed, const Val& turn);
@@ -66,31 +60,32 @@ public:
     /**
      * @brief Set motor output clamp range
      */
-    void set_output_limits(float min_output, float max_output);
+    bool set_output_limits(float min_output, float max_output);
 
     /**
      * @brief Set integral clamp range
      */
-    void set_integral_limit(float integral_limit);
+    bool set_integral_limit(float integral_limit);
 
 
 private:
 
-    // Integral stores accumulated error for I term
-    // prev_error stores last error for D term  
+    // Integral stores accumulated error for Integral term
+    // prev_error stores last error for Derivative term  
     struct State
     {
-        float integral = 0.0f;
-        float prev_error = 0.0f; 
+        float integral = 0.0f;   // I: Accumulated error (Integral term)
+        float prev_error = 0.0f; // D: Previous error (Derivative term)
     };
 
     // Separate PID loops for speed and turning control
     struct Loop
     {
-        Val pid{};
-        State state;
+        Val pid{};      // Contains Kp (P), Ki (I), Kd (D) gains
+        State state;    // Holds integral and previous error for I and D terms
     };
 
+    // Computes PID output using P, I, D terms
     float compute_pid(Loop& loop, float error, float dt_sec);
 
     // This is need for integral windup prevention and to ensure output is within motor limits
@@ -101,8 +96,8 @@ private:
     // Normalize angle to [-180, 180] degrees for consistent error calculation
     static float limit_angle(float angle_deg);
 
-    Loop speed{};
-    Loop turn{};
+    Loop speed{}; // PID loop for speed control (P, I, D all used)
+    Loop turn{};  // PID loop for turning/yaw control (P, I, D all used)
 
     // Output limits for motor control signal
     float min_output{-100.0f};
