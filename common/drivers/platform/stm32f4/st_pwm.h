@@ -80,6 +80,7 @@ struct StPwmParams
     TIM_TypeDef* base_addr;
     PwmChannel channel;
     StPwmSettings settings;
+    uint32_t p_clk;
 };
 
 class HwPwm : public Pwm
@@ -101,7 +102,7 @@ public:
     * @param frequency Desired frequency in Hz
     * @return true if the frequency was set successfully, false otherwise
     */
-    bool set_frequency(uint32_t frequency) override;
+    bool set_frequency(uint32_t frequency);
 
     /**
     * @brief Sets the duty cycle of the PWM signal
@@ -116,6 +117,7 @@ private:
     TIM_TypeDef* base_addr;
     PwmChannel channel;
     StPwmSettings settings;
+    uint32_t p_clk;
     uint32_t current_frequency;
     uint8_t current_duty_cycle;
 };

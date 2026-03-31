@@ -17,7 +17,8 @@ Stmf4::StPwmSettings pwm_settings{Stmf4::PwmMode::EDGE_ALIGNED,
                                   Stmf4::PwmOutputMode::PWM_MODE_1,
                                   Stmf4::PwmDir::UPCOUNTING};
 
-const Stmf4::StPwmParams pwm_params{TIM3, Stmf4::PwmChannel::CH1, pwm_settings};
+const Stmf4::StPwmParams pwm_params{TIM3, Stmf4::PwmChannel::CH1, pwm_settings,
+                                    16000000};
 
 // Create PWM GPIO and PWM objects
 Stmf4::HwGpio pwm_output(pwm_output_params);
