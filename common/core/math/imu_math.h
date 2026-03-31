@@ -19,5 +19,4 @@ struct Quaternion
 {
     float w, x, y, z;
 };
-
 }  // namespace MM

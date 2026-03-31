@@ -7,15 +7,11 @@ namespace MM
 namespace Stmf4
 {
 // Constants values for PWM calculations and register bit widths
-static constexpr uint32_t kPclkFreq = 16000000;  // 16 MHz timer clock
 static constexpr uint8_t kTimCcmrxOcxmBitWidth = 3;
 static constexpr uint8_t kTimCr1CmsBitWidth = 2;
 static constexpr uint8_t kTimCr1DirBitWidth = 1;
 static constexpr uint8_t kArrVal =
     99;  // counts 0..99 => 100 ticks per PWM period
-static constexpr uint32_t kMaxFreqEdgeAligned = kPclkFreq / (kArrVal + 1);
-static constexpr uint32_t kMaxFreqCenterAligned =
-    kPclkFreq / (2 * (kArrVal + 1));
 
 // Helper functions to check timer type for channel validity and mode rules
 static inline bool is_timer_1_to_5(TIM_TypeDef* t)
@@ -31,7 +27,7 @@ HwPwm::HwPwm(const StPwmParams& params)
     : base_addr{params.base_addr},
       channel{params.channel},
       settings{params.settings},
-      current_frequency{kPclkFreq},
+      current_frequency{params.p_clk},
       current_duty_cycle{0}
 {
 }
@@ -166,13 +162,13 @@ bool HwPwm::set_frequency(uint32_t frequency)
     }
 
     if ((settings.mode == PwmMode::EDGE_ALIGNED) &&
-        (frequency > kMaxFreqEdgeAligned))
+        (frequency > p_clk / (kArrVal + 1)))
     {
         return false;
     }
 
     if ((settings.mode != PwmMode::EDGE_ALIGNED) &&
-        (frequency > kMaxFreqCenterAligned))
+        (frequency > p_clk / (2 * (kArrVal + 1))))
     {
         return false;
     }
@@ -183,8 +179,7 @@ bool HwPwm::set_frequency(uint32_t frequency)
     const uint64_t denom = static_cast<uint64_t>(frequency) * arrp1;
 
     // Rounded division: psc_val = round(pclk / denom)
-    uint64_t psc_val =
-        (static_cast<uint64_t>(kPclkFreq) + (denom / 2ULL)) / denom;
+    uint64_t psc_val = (static_cast<uint64_t>(p_clk) + (denom / 2ULL)) / denom;
 
     // Center-aligned: same PSC/ARR → need half PSC+1
     if (settings.mode != PwmMode::EDGE_ALIGNED)
