@@ -8,7 +8,6 @@
 #include <chrono>
 #include <cstdint>
 #include "oc.h"
-
 struct StOcParams
 {
     uint32_t timer_freq;
@@ -28,6 +27,8 @@ public:
     bool set_compare(std::chrono::microseconds compare_us);
 
 private:
+    uint32_t timer_freq;
+    uint32_t pclk;
     // If changing period in different time unit, have to change all period member variables to match
     std::chrono::microseconds period_us;
 };
