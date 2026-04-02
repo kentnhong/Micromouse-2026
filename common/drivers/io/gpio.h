@@ -40,6 +40,6 @@ public:
     /* 
      * Default destructor. The constructor will be in the hw definition.
      */
-    ~Gpio() = default;
+    virtual ~Gpio() = default;
 };
 }  // namespace MM
