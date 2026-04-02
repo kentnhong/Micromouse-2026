@@ -25,6 +25,6 @@ public:
     */
     virtual bool reset_ticks() = 0;
 
-    ~Encoder() = default;
+    virtual ~Encoder() = default;
 };
 }  // namespace MM
