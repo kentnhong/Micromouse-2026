@@ -21,17 +21,7 @@ namespace MM
 class Elapsed
 {
 public:
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-/**
-=======
     /**
->>>>>>> 662638f (add elapsed time for ensure the PID controller updates are based on accurate)
-=======
-
-/**
->>>>>>> f98ad1e (clangd conflict)
  * @brief Compute elapsed time in seconds since the last call to this function
  * @return Elapsed time in seconds
  */

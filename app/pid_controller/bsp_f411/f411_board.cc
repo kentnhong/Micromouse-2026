@@ -1,12 +1,8 @@
-
 #include <tuple>
 #include "../board.h"
 #include "bno055_imu.h"
 #include "drv8231.h"
 #include "pid.h"
-#include "../board.h"
-#include "bno055_imu.h"
-#include "drv8231.h"
 #include "st_encoder.h"
 #include "st_gpio.h"
 #include "st_i2c.h"
@@ -16,21 +12,12 @@
 namespace MM
 {
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 0867819 (PID accessor)
 static constexpr uint16_t CCR_100KHZ = 0x1F4;
 static constexpr uint16_t TRISE_100KHZ = 0x2B;
 constexpr Val kWheelPid{250.0f, 5.0f, 0.0f};
 constexpr Val kYawPid{0.0f, 0.0f, 0.0f};
 constexpr float kTargetSpeedMps = 0.10f;
 
-<<<<<<< HEAD
-=======
->>>>>>> 983c61d (pid bsp + main.cc)
-=======
->>>>>>> 0867819 (PID accessor)
 /* PWM */
 
 Stmf4::StGpioSettings pwm_output_settings{
@@ -85,15 +72,6 @@ Stmf4::StGpioSettings gpio_settings{
 Stmf4::StGpioParams scl_params{8, GPIOB, gpio_settings};  // PB8 = I2C1_SCL
 Stmf4::StGpioParams sda_params{9, GPIOB, gpio_settings};  // PB9 = I2C1_SDA
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-static constexpr uint16_t CCR_100KHZ = 0x1F4;
-static constexpr uint16_t TRISE_100KHZ = 0x2B;
-
->>>>>>> 983c61d (pid bsp + main.cc)
-=======
->>>>>>> 0867819 (PID accessor)
 Stmf4::StI2cParams i2c_params{I2C1, CCR_100KHZ, TRISE_100KHZ};
 
 Stmf4::StGpioSettings rst_settings{
@@ -131,10 +109,6 @@ Board board{.imu = imu,
             .in1 = in1,
             .in2 = in2};
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 0867819 (PID accessor)
 /* PID */
 
 static PID::PIDConfig config{
@@ -147,11 +121,6 @@ static PID::Input input{};
 static PID::MotorOutput output{};
 static PID::Target target{kTargetSpeedMps, kTargetSpeedMps, 0.0f};
 
-<<<<<<< HEAD
-=======
->>>>>>> 983c61d (pid bsp + main.cc)
-=======
->>>>>>> 0867819 (PID accessor)
 bool bsp_init()
 {
     // Enable GPIOA, GPIOB, TIM2, TIM3, and I2C1 clocks
@@ -178,8 +147,6 @@ bool bsp_init()
 
     // BNO055
     rst.set(0);  // Hold BNO055 in reset
-<<<<<<< HEAD
-<<<<<<< HEAD
     Utils::DelayMs(10);
     rst.set(1);           // Release reset
     Utils::DelayMs(650);  // Wait for BNO055 to boot
@@ -190,34 +157,10 @@ bool bsp_init()
     return true;
 }
 
-=======
-    MM::Utils::DelayMs(10);
-    rst.set(1);               // Release reset
-    MM::Utils::DelayMs(650);  // Wait for BNO055 to boot
-=======
-    Utils::DelayMs(10);
-    rst.set(1);           // Release reset
-    Utils::DelayMs(650);  // Wait for BNO055 to boot
->>>>>>> 0867819 (PID accessor)
-
-    imu.init();
-    drv8231.init();
-
-    return true;
-}
-<<<<<<< HEAD
->>>>>>> 983c61d (pid bsp + main.cc)
-=======
-
->>>>>>> 0867819 (PID accessor)
 Board& get_board()
 {
     return board;
 }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 0867819 (PID accessor)
 
 /* Accessors for PID */
 
@@ -226,9 +169,4 @@ std::tuple<PID&, PID::Input&, PID::MotorOutput&, PID::Target&> get_pid_bundle()
 {
     return std::tie(pid, input, output, target);
 }
-<<<<<<< HEAD
-=======
->>>>>>> 983c61d (pid bsp + main.cc)
-=======
->>>>>>> 0867819 (PID accessor)
 }  // namespace MM
