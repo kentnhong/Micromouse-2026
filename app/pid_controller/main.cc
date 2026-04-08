@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
     bsp_init();
     Board& hw = get_board();
 
-    auto [pid, input, output, target] = get_pid_bundle();
+    auto [pid, output, target] = get_pid_bundle();
 
     // PWM duty cycles for left and right motors
     uint8_t left_pwm = 0;
@@ -34,12 +34,13 @@ int main(int argc, char* argv[])
     {
         int32_t ticks = hw.encoder.get_ticks();
 
-        input.encoder.left_ticks = ticks;
-        input.encoder.right_ticks = ticks;
+        EncoderInput encoder;
+        encoder.left_ticks = ticks;
+        encoder.right_ticks = ticks;
 
-        hw.imu.read_all(input.imu);  // yaw
+        // IMU removed: yaw now only from encoder or setpoint
 
-        pid.update(input, target, 0.0f, output);
+        pid.update(encoder, target, 0.0f, output);
 
         pid.output_to_pwm_duty_cycle(output, left_pwm, right_pwm);
 

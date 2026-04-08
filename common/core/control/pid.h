@@ -8,7 +8,6 @@
 #pragma once
 
 #include <cstdint>
-#include "bno055_imu.h"
 #include "elapsed.h"
 #include "enc_math.h"
 #include "pid_math.h"
@@ -25,22 +24,10 @@ namespace MM
 class PID
 {
 public:
-    /**
-* @brief The PID controller inputs (IMU (gyro) and encoders) 
-* @param encoder The encoder input values
-* @param imu The IMU input values
-*/
-    struct Input
-    {
-        EncoderInput encoder;
-        Bno055Data imu;
-    };
-
     struct Target
     {
         float left_speed;
         float right_speed;
-        float yaw;  // desired yaw angle (deg)
     };
 
     struct MotorOutput
@@ -52,19 +39,18 @@ public:
     {
         Val left;
         Val right;
-        Val yaw;
     };
 
     explicit PID(const PIDConfig& config);
 
     /**
     * @brief Update the PID controller with the current measured value and return the control signal
-    * @param input The current sensor readings (IMU and encoder data)
+    * @param encoder The current encoder readings for both wheels
     * @param target The target values for distance and angle
     * @param dt_sec The time step for the update (in seconds) 
     * @param output The output control signals for the motors
     */
-    bool update(const Input& input, const Target& target, float dt_sec,
+    bool update(const EncoderInput& encoder, const Target& target, float dt_sec,
                 MotorOutput& output);
 
     /**
@@ -115,6 +101,7 @@ public:
 private:
     // Integral stores accumulated error for Integral term
     // prev_error stores last error for Derivative term
+
     struct Context
     {
         float integral = 0.0f;    // I: Accumulated error (Integral term)
@@ -135,11 +122,10 @@ private:
     static float limit_range(float value, float min_value, float max_value);
     static uint8_t clamp_duty_cycle(float duty_cycle);
 
-    static float limit_angle(float angle);
+    // static float limit_angle(float angle);
 
     Loop left{};   // PID loop for left wheel
     Loop right{};  // PID loop for right wheel
-    Loop yaw{};    // PID loop for yaw (heading)
 
     // Output limits for motor control signal
     float min_output{-100.0f};
