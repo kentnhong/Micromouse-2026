@@ -1,3 +1,4 @@
+#include <ctime>
 #include <tuple>
 #include "../board.h"
 #include "bno055_imu.h"
@@ -15,7 +16,6 @@ namespace MM
 static constexpr uint16_t CCR_100KHZ = 0x1F4;
 static constexpr uint16_t TRISE_100KHZ = 0x2B;
 constexpr Val kWheelPid{250.0f, 5.0f, 0.0f};
-constexpr Val kYawPid{0.0f, 0.0f, 0.0f};
 constexpr float kTargetSpeedMps = 0.10f;
 
 /* PWM */
@@ -63,32 +63,9 @@ Stmf4::StEncoderSettings encoder_settings{
 
 const Stmf4::StEncoderParams encoder_params{TIM2, encoder_settings};
 
-/* IMU */
+/* Clock */
 
-Stmf4::StGpioSettings gpio_settings{
-    Stmf4::GpioMode::AF, Stmf4::GpioOtype::OPEN_DRAIN, Stmf4::GpioOspeed::LOW,
-    Stmf4::GpioPupd::PULL_UP, 4};
-
-Stmf4::StGpioParams scl_params{8, GPIOB, gpio_settings};  // PB8 = I2C1_SCL
-Stmf4::StGpioParams sda_params{9, GPIOB, gpio_settings};  // PB9 = I2C1_SDA
-
-Stmf4::StI2cParams i2c_params{I2C1, CCR_100KHZ, TRISE_100KHZ};
-
-Stmf4::StGpioSettings rst_settings{
-    Stmf4::GpioMode::GPOUT, Stmf4::GpioOtype::PUSH_PULL, Stmf4::GpioOspeed::LOW,
-    Stmf4::GpioPupd::NO_PULL, 0};
-
-Stmf4::StGpioParams rst_params{0, GPIOA, rst_settings};
-
-Stmf4::HwClk clock{MM::Stmf4::Configuration::HSI_16MHZ};
-
-/* Params for all of the hardware objects */
-Stmf4::HwI2c i2c(i2c_params);
-Stmf4::HwGpio scl(scl_params);
-Stmf4::HwGpio sda(sda_params);
-Stmf4::HwGpio rst(rst_params);
-
-Bno055 imu(static_cast<MM::I2c&>(i2c), Bno055::ADDR_PRIMARY);
+Stmf4::HwClk clock(Stmf4::Configuration::HSI_16MHZ);
 
 Stmf4::HwGpio in1(in1_params);
 Stmf4::HwGpio in2(in2_params);
@@ -101,9 +78,8 @@ Stmf4::HwGpio encoder_ch1(enc_input_params_1);
 Stmf4::HwGpio encoder_ch2(enc_input_params_2);
 
 Drv8231 drv8231(in1, in2, pwm);
-Board board{.imu = imu,
-            .i2c = i2c,
-            .encoder = encoder,
+
+Board board{.encoder = encoder,
             .pwm = pwm,
             .drv8231 = drv8231,
             .in1 = in1,
@@ -114,12 +90,11 @@ Board board{.imu = imu,
 static PID::PIDConfig config{
     .left = kWheelPid,
     .right = kWheelPid,
-    .yaw = kYawPid,
 };
+
 static PID pid(config);
-static PID::Input input{};
 static PID::MotorOutput output{};
-static PID::Target target{kTargetSpeedMps, kTargetSpeedMps, 0.0f};
+static PID::Target target{kTargetSpeedMps, kTargetSpeedMps};
 
 bool bsp_init()
 {
@@ -131,9 +106,6 @@ bool bsp_init()
     clock.init();
 
     // Initialize GPIOs
-    scl.init();
-    sda.init();
-    rst.init();
     in1.init();
     in2.init();
     pwm_output.init();
@@ -141,17 +113,8 @@ bool bsp_init()
     encoder_ch2.init();
 
     // Initialize peripherals
-    i2c.init();
     pwm.init();
     encoder.init();
-
-    // BNO055
-    rst.set(0);  // Hold BNO055 in reset
-    Utils::DelayMs(10);
-    rst.set(1);           // Release reset
-    Utils::DelayMs(650);  // Wait for BNO055 to boot
-
-    imu.init();
     drv8231.init();
 
     return true;
@@ -165,8 +128,8 @@ Board& get_board()
 /* Accessors for PID */
 
 // PID-related objects
-std::tuple<PID&, PID::Input&, PID::MotorOutput&, PID::Target&> get_pid_bundle()
+std::tuple<PID&, PID::MotorOutput&, PID::Target&> get_pid_bundle()
 {
-    return std::tie(pid, input, output, target);
+    return std::tie(pid, output, target);
 }
 }  // namespace MM

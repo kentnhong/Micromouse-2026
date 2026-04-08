@@ -18,18 +18,18 @@ namespace MM
  */
 struct Val
 {
-    float p, i, d;
+    float kp, ki, kd;
 };
 
 /**
  * @brief Struct to hold the current error values for the PID controller
- * p_err - current proportional error
- * i_error - accumulated integral error
- * d_error - current derivative error
+ * kp_err - current proportional error
+ * ki_error - accumulated integral error
+ * kd_error - current derivative error
 */
 struct Error
 {
-    float p_err, i_error, d_error;
+    float kp_err, ki_error, kd_error;
 };
 
 }  // namespace MM

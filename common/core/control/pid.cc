@@ -11,70 +11,46 @@ static constexpr float kWheelCircumference =
 static constexpr float kTicksPerRevolution =
     12 * 4;  // 12 ticks per revolution from encoder, x4 for quadrature encoding
 
-static inline float quaternion_to_yaw(const Bno055Data& imu_data)
-{
-    // Convert quaternion to yaw angle (in degrees)
-    float q0 = imu_data.quat.w;
-    float q1 = imu_data.quat.x;
-    float q2 = imu_data.quat.y;
-    float q3 = imu_data.quat.z;
-
-    // Yaw calculation (We want absolute yaw, not angular velocity)
-    float yaw_rad = std::atan2(2.0f * (q0 * q3 + q1 * q2),
-                               1.0f - 2.0f * (q2 * q2 + q3 * q3));
-
-    return yaw_rad * (kMaxAngle / std::numbers::pi);  // Convert to degrees
-}
-
 PID::PID(const PIDConfig& config)
 {
     this->left.pid = config.left;
     this->right.pid = config.right;
-    this->yaw.pid = config.yaw;
     this->left.state = Context{};
     this->right.state = Context{};
-    this->yaw.state = Context{};
 }
 
-bool PID::update(const Input& input, const Target& target, float dt_sec,
-                 MotorOutput& output)
+bool PID::update(const EncoderInput& encoder, const Target& target,
+                 float dt_sec, MotorOutput& output)
 {
     // Convert encoder ticks to velocity (m/s)
     float left_velocity = 0.0f;
     float right_velocity = 0.0f;
-    ticks_to_velocity(input.encoder, left_velocity, right_velocity);
+    ticks_to_velocity(encoder, left_velocity, right_velocity);
 
-    // Per-wheel PID: calculate error for each wheel
+    // Per-wheel PID: calculate error for each wheel (no yaw)
     float left_error = target.left_speed - left_velocity;
     float right_error = target.right_speed - right_velocity;
 
-    // Yaw PID: calculate yaw error (target - measured)
-    float yaw_error = limit_angle(target.yaw - quaternion_to_yaw(input.imu));
-    float yaw_output = compute_pid(this->yaw, yaw_error, dt_sec);
-
-    // Compute PID outputs for each wheel
     float left_output = compute_pid(this->left, left_error, dt_sec);
     float right_output = compute_pid(this->right, right_error, dt_sec);
 
-    // Mix yaw correction into wheel outputs
-    output.left = left_output - yaw_output;
-    output.right = right_output + yaw_output;
+    output.left = left_output;
+    output.right = right_output;
 
     return true;
 }
 
-float PID::limit_angle(float angle)
-{
-    while (angle > 180.0f) angle -= 360.0f;
-    while (angle < -180.0f) angle += 360.0f;
-    return angle;
-}
+// float PID::limit_angle(float angle)
+// {
+//     while (angle > 180.0f) angle -= 360.0f;
+//     while (angle < -180.0f) angle += 360.0f;
+//     return angle;
+// }
 
 bool PID::reset()
 {
     this->left.state = Context{};
     this->right.state = Context{};
-    this->yaw.state = Context{};
     return true;
 }
 
@@ -120,20 +96,20 @@ float PID::compute_pid(Loop& loop, float error, float dt_sec)
 {
 
     // Proportional
-    // P = p * error
-    float P = loop.pid.p * error;
+    // P = kp * error
+    float P = loop.pid.kp * error;
 
     // Integral
-    // I = i * integral(error * dt)
+    // I = ki * integral(error * dt)
     loop.state.integral += error * dt_sec;
     loop.state.integral =
         limit_range(loop.state.integral, -integral_limit, integral_limit);
-    float I = loop.pid.i * loop.state.integral;
+    float I = loop.pid.ki * loop.state.integral;
 
     // Derivative
-    // D = d * (error - prev_error) / dt
+    // D = kd * (error - prev_error) / dt
     float derivative = (error - loop.state.prev_error) / dt_sec;
-    float D = loop.pid.d * derivative;
+    float D = loop.pid.kd * derivative;
 
     // Save error for next derivative calculation
     loop.state.prev_error = error;
