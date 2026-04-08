@@ -11,12 +11,27 @@ int main(int argc, char* argv[])
     // current ticks
     int32_t current_ticks = 0;
     int32_t prev_ticks = 0;
+
     while (1)
     {
-        // Test encoder getting ticks and resetting ticks
-        current_ticks = hw.encoder.get_ticks();
+        // loops thru the ticks
+        for (int i = 0; i < 100; i++)  // About 1 second at 100Hz
+        {
+            current_ticks = hw.encoder.get_ticks();
+        }
+
+        // Calculate velocity
+        int32_t velocity =
+            (current_ticks - prev_ticks) * 100;  // ticks per second
+        prev_ticks = current_ticks;
+
+        // Calculate distance
+        float distance = current_ticks * 0.01f;  // Assuming 0.01m per tick
+
         (void)current_ticks;
         (void)prev_ticks;
+        (void)velocity;
+        (void)distance;
     }
 
     return 0;
