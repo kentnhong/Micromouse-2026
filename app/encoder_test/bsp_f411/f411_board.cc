@@ -1,6 +1,7 @@
 #include "board.h"
 #include "st_encoder.h"
 #include "st_gpio.h"
+#include "st_sys_clk.h"
 
 namespace MM
 {
@@ -11,10 +12,10 @@ Stmf4::StGpioSettings encoder_gpio_settings{
     Stmf4::GpioMode::AF, Stmf4::GpioOtype::PUSH_PULL, Stmf4::GpioOspeed::LOW,
     Stmf4::GpioPupd::PULL_UP, 1};
 
-const Stmf4::StGpioParams enc_input_params_1{0, GPIOA,
-                                             encoder_gpio_settings};  // PA0 channel A
-const Stmf4::StGpioParams enc_input_params_2{1, GPIOA,
-                                             encoder_gpio_settings};  // PA1 Channel B
+const Stmf4::StGpioParams enc_input_params_1{
+    0, GPIOA, encoder_gpio_settings};  // PA0 channel A
+const Stmf4::StGpioParams enc_input_params_2{
+    1, GPIOA, encoder_gpio_settings};  // PA1 Channel B
 
 // Encoder Config (TIM2, BOTH Channel)
 Stmf4::StEncoderSettings encoder_settings{
@@ -22,7 +23,6 @@ Stmf4::StEncoderSettings encoder_settings{
     Stmf4::EncInputPolarity::RISING, Stmf4::EncSlaveMode::DISABLED};
 
 const Stmf4::StEncoderParams encoder_params{TIM2, encoder_settings};
-
 
 // Create Encoder GPIO & Encoder object
 Stmf4::HwGpio encoder_ch1(enc_input_params_1);
