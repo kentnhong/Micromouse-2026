@@ -7,7 +7,13 @@ int main(int argc, char* argv[])
 {
     bsp_init();
     Board hw = get_board();
-    //
+
+    /**
+     * TODO: The motor has a 15:1 gear ratio and the encoder produces 12 ticks per motor shaft revolution.
+     * This means there are 12 * 15 = 180 encoder ticks per output shaft revolution.
+     * For RPM calculation, use instantaneous (short interval) measurements instead of averaging over a full minute.
+     */
+    
     // current ticks
     int32_t current_ticks = 0;
     int32_t prev_ticks = 0;
