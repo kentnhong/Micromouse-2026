@@ -3,6 +3,7 @@
 namespace MM
 {
 
+<<<<<<< HEAD
 Navigation::Navigation() : state(State::STOPPED)
 {
 }
@@ -89,3 +90,6 @@ void Navigation::execute(MotionController& motion, const IrValues& ir)
 }
 
 }  // namespace MM
+=======
+} // namespace MM
+>>>>>>> ea30492 (navigation)

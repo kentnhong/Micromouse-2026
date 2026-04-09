@@ -9,7 +9,6 @@
 
 #include "delay.h"
 #include "gpio.h"
-#include "i2c.h"
 #include "ircontroller.h"
 #include "nav.h"
 
