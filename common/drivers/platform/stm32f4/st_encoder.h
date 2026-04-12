@@ -22,9 +22,9 @@ namespace Stmf4
 */
 enum class EncMode : uint8_t
 {
-    MODE_1 = 0,
-    MODE_2,
-    MODE_3,
+    MODE_1 = 1,
+    MODE_2 = 2,
+    MODE_3 = 3,
 };
 
 /**
