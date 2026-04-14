@@ -19,7 +19,7 @@ const Stmf4::StGpioParams enc_input_params_2{
 
 // Encoder Config (TIM2, BOTH Channel)
 Stmf4::StEncoderSettings encoder_settings{
-    Stmf4::EncMode::MODE_1, Stmf4::EncChannel::BOTH,
+    Stmf4::EncMode::MODE_3, Stmf4::EncChannel::BOTH,
     Stmf4::EncInputPolarity::RISING, Stmf4::EncSlaveMode::DISABLED};
 
 const Stmf4::StEncoderParams encoder_params{TIM2, encoder_settings};
