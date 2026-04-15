@@ -53,11 +53,11 @@ static inline uint32_t EncoderPolarityToCcer(EncInputPolarity polarity,
         case EncInputPolarity::RISING:
             if (channel == EncChannel::CH1)
             {
-                return 0u; // Rising edge is default, so no bits need to be set
+                return 0u;  // Rising edge is default, so no bits need to be set
             }
             if (channel == EncChannel::CH2)
             {
-                return 0u; // Rising edge is default, so no bits need to be set
+                return 0u;  // Rising edge is default, so no bits need to be set
             }
         case EncInputPolarity::BOTH:
             return 0u;
