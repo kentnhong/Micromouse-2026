@@ -8,6 +8,7 @@ using namespace MM;
 
 static constexpr float kWheelDiameterCm = 1.4f;
 static constexpr float kGearRatio = 15.0f;
+//static constexpr float kGearRatio = 50.0f;
 
 // BSP uses TIM2 encoder mode 3 on both channels, so count all quadrature edges.
 static constexpr float kEncoderCountsPerMotorRev = 12.0f;
@@ -16,9 +17,8 @@ static constexpr float kEncoderCountsPerMotorRev = 12.0f;
 static constexpr uint32_t kSampleTimeUs = 100'000;
 
 static constexpr float kTicksPerOutputRev =
-    kGearRatio * kEncoderCountsPerMotorRev;  // 180 ticks per rev
+    kGearRatio * kEncoderCountsPerMotorRev;  // # ticks per rev
 
-// Expected: (1.4cm * pi) / 180 ticks = 0.0244 cm/tick
 static constexpr float kCmPerTick =
     (kWheelDiameterCm * std::numbers::pi_v<float>) / kTicksPerOutputRev;
 
