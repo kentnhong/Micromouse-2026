@@ -24,6 +24,8 @@ Stmf4::StEncoderSettings encoder_settings{
 
 const Stmf4::StEncoderParams encoder_params{TIM2, encoder_settings};
 
+// TODO: Config the encoder Frequency take in at 1MHz (1 tick per microsecond) for better timing resolution.
+
 // Create Encoder GPIO & Encoder object
 Stmf4::HwGpio encoder_ch1(enc_input_params_1);
 Stmf4::HwGpio encoder_ch2(enc_input_params_2);
@@ -43,7 +45,7 @@ bool bsp_init()
     bool ret = true;
 
     ret = ret && clock.init();
-    SysTick_Config(SystemCoreClock / 1000);
+    SysTick_Config(SystemCoreClock / 100000000); // Configure SysTick for 1 microsecond ticks (1 MHz)
 
     ret = ret && encoder_ch1.init();
     ret = ret && encoder_ch2.init();

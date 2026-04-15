@@ -43,9 +43,13 @@ int main(int argc, char* argv[])
 
         int32_t end_ticks = hw.encoder.get_ticks();
         int32_t delta_ticks = end_ticks - start_ticks;
+        
         float delta_time_sec = static_cast<float>(delta_time_ms) / 1000.0f;
+
         float ticks_per_sec = static_cast<float>(delta_ticks) / delta_time_sec;
+
         float rpm = (60.0f / kTicksPerOutputRev) * ticks_per_sec;
+
         float velocity_cm_per_sec = kCmPerTick * ticks_per_sec;
         float distance_cm = kCmPerTick * static_cast<float>(delta_ticks);
 
