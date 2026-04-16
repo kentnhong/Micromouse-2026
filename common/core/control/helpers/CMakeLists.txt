@@ -1,4 +1,4 @@
-add_library(helpers STATIC elapsed.cc trapezoidal.cc)
+add_library(helpers STATIC trapezoidal.cc)
 
 target_include_directories(helpers PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}

@@ -5,14 +5,12 @@
 * @date 3/31/2026
 */
 
-#include <tuple>
 #include <numbers>
+#include <tuple>
 #include "board.h"
 #include "enc_sample.h"
 #include "pid.h"
 #include "trapezoidal.h"
-#include "elapsed.h"
-
 
 using namespace MM;
 
@@ -22,7 +20,8 @@ static constexpr float kWheelDiameterMm = 14.0f;
 static constexpr float kGearRatio = 15.25f;
 static constexpr float kTicksPerMotorRev = 12.0f;
 static constexpr float kTicksToMm =
-    (kWheelDiameterMm * std::numbers::pi_v<float>) / (kGearRatio * kTicksPerMotorRev);
+    (kWheelDiameterMm * std::numbers::pi_v<float>) /
+    (kGearRatio * kTicksPerMotorRev);
 static constexpr uint8_t kStraight = 0;
 
 int main(int argc, char* argv[])
@@ -36,9 +35,6 @@ int main(int argc, char* argv[])
 
     uint8_t left_pwm = 0;
     uint8_t right_pwm = 0;
-
-    // Get dt_sec
-    Elapsed::get_dt_sec();  
 
     // Get the encoder timing configuration based on the desired sample time
     const Sample::EncoderTiming encoder_timing =
@@ -60,9 +56,8 @@ int main(int argc, char* argv[])
         total_encoder.left_ticks += sample_encoder.left_ticks;
         total_encoder.right_ticks += sample_encoder.right_ticks;
 
-        const Trapezoidal::VelocitySetpoint setpoint =
-            profile.trapezoidal(kTargetDistanceMm, total_encoder, kTicksToMm,
-                                kStraight);
+        const Trapezoidal::VelocitySetpoint setpoint = profile.trapezoidal(
+            kTargetDistanceMm, total_encoder, kTicksToMm, kStraight);
 
         // Convert the velocity setpoints from mm/s to m/s for the PID controller
         target.left_speed = setpoint.left / kMmPerMeter;
