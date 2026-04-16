@@ -1,0 +1,11 @@
+# Doxyfile for Micromouse-2026
+# Minimal config, edit as needed
+PROJECT_NAME           = "Micromouse-2026"
+OUTPUT_DIRECTORY       = .docs/doxygen
+RECURSIVE              = YES
+INPUT                  = ./app ./common ./mcu_support ./external
+FILE_PATTERNS          = *.h *.cc
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+QUIET                  = YES
+EXTRACT_ALL            = YES
