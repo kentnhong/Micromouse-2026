@@ -5,11 +5,16 @@
 namespace MM
 {
 
-static constexpr float kMaxAngle = 180.0f;
-static constexpr float kWheelCircumference =
-    std::numbers::pi * 0.0381f;  // 1.5 inch diameter wheel => C = pi * d
-static constexpr float kTicksPerRevolution =
-    12 * 4;  // 12 ticks per revolution from encoder, x4 for quadrature encoding
+static constexpr float kWheelDiameterCm = 2.79f;
+static constexpr float kGearRatio = 15.0f;
+static constexpr float kTicksPerRev = 12.0f;
+
+static constexpr float kTicksPerOutputRev =
+    kGearRatio * kTicksPerRev;  // 180 ticks/output rev
+static constexpr float kWheelCircumferenceCm =
+    kWheelDiameterCm * std::numbers::pi_v<float>;  // 8.765 cm/rev
+static constexpr float kCmPerTick =
+    kWheelCircumferenceCm / kTicksPerOutputRev;  // 0.0487 cm/tick
 
 PID::PID(const PIDConfig& config)
 {
@@ -150,6 +155,9 @@ uint8_t PID::clamp_duty_cycle(float duty_cycle)
 bool PID::ticks_to_velocity(const EncoderInput& encoder, float& left_velocity,
                             float& right_velocity)
 {
+    //TODO: Changing the finding the velocity method from the m-method to mt-method to reduce noise. 
+    //      This will require storing the previous tick counts as static variables.
+    
     static int32_t prev_l_ticks = 0;
     static int32_t prev_r_ticks = 0;
 
@@ -161,12 +169,9 @@ bool PID::ticks_to_velocity(const EncoderInput& encoder, float& left_velocity,
     prev_l_ticks = encoder.left_ticks;
     prev_r_ticks = encoder.right_ticks;
 
-    left_velocity =
-        (delta_left_ticks / static_cast<float>(kTicksPerRevolution)) *
-        kWheelCircumference / dt_sec;
-    right_velocity =
-        (delta_right_ticks / static_cast<float>(kTicksPerRevolution)) *
-        kWheelCircumference / dt_sec;
+    // Use new static constexpr values for conversion (cm/s)
+    left_velocity = (delta_left_ticks * kCmPerTick) / dt_sec;
+    right_velocity = (delta_right_ticks * kCmPerTick) / dt_sec;
 
     return true;
 }
