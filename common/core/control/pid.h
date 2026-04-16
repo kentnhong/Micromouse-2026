@@ -116,7 +116,13 @@ private:
         Context state;
     };
 
-    // Computes PID output using P, I, D terms
+    /**
+    * @brief Compute the PID control signal for a given loop, error, and time step
+    * @param loop The PID loop containing the configuration and state
+    * @param error The current error value (setpoint - measurement)
+    * @param dt_sec The time step for the update (in seconds)
+    * @return The computed control signal for the motor (before clamping)
+    */
     float compute_pid(Loop& loop, float error, float dt_sec);
 
     // Range from -100 to 100 for motor power percentage
