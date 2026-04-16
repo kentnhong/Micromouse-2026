@@ -15,6 +15,8 @@ namespace MM
 struct Board
 {
     Encoder& encoder;
+    Gpio& enc_ch1;
+    Gpio& enc_ch2;
 };
 
 bool bsp_init(void);

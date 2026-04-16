@@ -1,31 +1,21 @@
 #include "board.h"
 #include "st_encoder.h"
 #include "st_gpio.h"
+#include "st_sys_clk.h"
 
 namespace MM
 {
 
-// Input configuration for TIM2 encoder mode using TI1/TI2 on PA0/PA1 (AF1).
-Stmf4::StGpioSettings enc_input_settings{
-    Stmf4::GpioMode::AF, Stmf4::GpioOtype::PUSH_PULL, Stmf4::GpioOspeed::LOW,
+// GPIO settings for encoder input (change AF/INPUT)
+
+Stmf4::StGpioSettings encoder_gpio_settings{
+    Stmf4::GpioMode::AF, Stmf4::GpioOtype::PUSH_PULL, Stmf4::GpioOspeed::HIGH,
     Stmf4::GpioPupd::PULL_UP, 1};
 
 const Stmf4::StGpioParams enc_input_params_1{
-    0, GPIOA, enc_input_settings};  // PA0 (TIM2_CH1)
+    0, GPIOA, encoder_gpio_settings};  // PA0 channel A
 const Stmf4::StGpioParams enc_input_params_2{
-    1, GPIOA, enc_input_settings};  // PA1 (TIM2_CH2)
-
-/* Dummy inputs so we can test loopback */
-
-// Dummy quadrature outputs for loopback testing.
-// Stmf4::StGpioSettings dummy_output_settings{
-//    Stmf4::GpioMode::GPOUT, Stmf4::GpioOtype::PUSH_PULL, Stmf4::GpioOspeed::LOW,
-//    Stmf4::GpioPupd::NO_PULL, 0};
-
-// const Stmf4::StGpioParams dummy_output_params_1{
-//     4, GPIOB, dummy_output_settings};  // PB4 -> jumper to PA0
-// const Stmf4::StGpioParams dummy_output_params_2{
-//     5, GPIOB, dummy_output_settings};  // PB5 -> jumper to PA1
+    1, GPIOA, encoder_gpio_settings};  // PA1 Channel B
 
 // Encoder Config (TIM2, BOTH Channel)
 Stmf4::StEncoderSettings encoder_settings{
@@ -37,11 +27,10 @@ const Stmf4::StEncoderParams encoder_params{TIM2, encoder_settings};
 // Create Encoder GPIO & Encoder object
 Stmf4::HwGpio encoder_ch1(enc_input_params_1);
 Stmf4::HwGpio encoder_ch2(enc_input_params_2);
-//Stmf4::HwGpio dummy_ch1(dummy_output_params_1);
-//Stmf4::HwGpio dummy_ch2(dummy_output_params_2);
 Stmf4::HwEncoder encoder(encoder_params);
+Stmf4::HwClk clock{MM::Stmf4::Configuration::HSI_16MHZ};
 
-Board board{.encoder = encoder};
+Board board{.encoder = encoder, .enc_ch1 = encoder_ch1, .enc_ch2 = encoder_ch2};
 
 bool bsp_init()
 {
@@ -53,10 +42,10 @@ bool bsp_init()
     // Intialize encoder and pins
     bool ret = true;
 
+    ret = ret && clock.init();
+
     ret = ret && encoder_ch1.init();
     ret = ret && encoder_ch2.init();
-    // ret = ret && dummy_ch1.init();
-    // ret = ret && dummy_ch2.init();
     ret = ret && encoder.init();
 
     return ret;

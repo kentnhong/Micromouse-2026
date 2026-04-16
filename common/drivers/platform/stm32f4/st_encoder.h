@@ -6,8 +6,11 @@
 */
 
 #pragma once
+#include <cstdint>
+#include <functional>
 #include "encoder.h"
 #include "stm32f411xe.h"
+#include "stm32f4xx_hal.h"
 
 namespace MM
 {
@@ -22,9 +25,9 @@ namespace Stmf4
 */
 enum class EncMode : uint8_t
 {
-    MODE_1 = 0,
-    MODE_2,
-    MODE_3,
+    MODE_1 = 1,
+    MODE_2 = 2,
+    MODE_3 = 3,
 };
 
 /**
@@ -106,6 +109,35 @@ public:
     * @return True if the reset was successful, false otherwise
     */
     bool reset_ticks() override;
+
+    /**
+    * @brief Initializes the DWT cycle counter for timing measurements
+    * @note Derive down from the SysClock at some HSI/HSE to get accurate timing
+    */
+    bool init_cycle_counter() override;
+
+    /**
+    * @brief Gets the current time in cycles using the DWT cycle counter
+    * @return The current time in cycles
+    */
+    uint32_t get_time_cycles() override;
+
+    /**
+    * @brief Returns the number of cycles per microsecond
+    */
+    uint32_t cycles_per_us() override;
+
+    /**
+    * @brief Measures encoder statistics over a specified sample time in cycles
+    * @param sample_cycles - The number of cycles to sample for
+    * @param ticks_per_output_rev - Encoder ticks per output shaft revolution
+    * @param cm_per_tick - Linear wheel travel per encoder tick
+    * @return An EncoderStats struct containing the measured statistics
+    * @note This function will block for the duration of the sample time while it collects data
+    */
+    EncoderStats measure_encoder_stats(uint32_t sample_cycles,
+                                       float ticks_per_output_rev,
+                                       float cm_per_tick) override;
 
 private:
     TIM_TypeDef* base_addr;

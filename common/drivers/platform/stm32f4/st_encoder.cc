@@ -51,6 +51,14 @@ static inline uint32_t EncoderPolarityToCcer(EncInputPolarity polarity,
     switch (polarity)
     {
         case EncInputPolarity::RISING:
+            if (channel == EncChannel::CH1)
+            {
+                return 0u;  // Rising edge is default, so no bits need to be set
+            }
+            if (channel == EncChannel::CH2)
+            {
+                return 0u;  // Rising edge is default, so no bits need to be set
+            }
         case EncInputPolarity::BOTH:
             return 0u;
         case EncInputPolarity::FALLING:
@@ -184,6 +192,79 @@ bool HwEncoder::reset_ticks()
     current_ticks = 0;
     prev_ticks = 0;
     return true;
+}
+
+bool HwEncoder::init_cycle_counter()
+{
+    // Enable TRC
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+
+    // Reset the cycle counter
+    DWT->CYCCNT = 0;
+
+    // Enable the cycle counter
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+
+    return (DWT->CTRL & DWT_CTRL_CYCCNTENA_Msk) != 0;
+}
+
+uint32_t HwEncoder::get_time_cycles()
+{
+    return DWT->CYCCNT;
+}
+
+uint32_t HwEncoder::cycles_per_us()
+{
+    return SystemCoreClock / 1'000'000u;
+}
+
+EncoderStats HwEncoder::measure_encoder_stats(uint32_t sample_cycles,
+                                              float ticks_per_output_rev,
+                                              float cm_per_tick)
+{
+    int32_t start_ticks = get_ticks();
+    uint32_t start_time = get_time_cycles();
+
+    while ((get_time_cycles() - start_time) < sample_cycles)
+    {
+    }
+
+    uint32_t end_time = get_time_cycles();
+    uint32_t delta_cycles = end_time - start_time;
+
+    uint32_t cycles_per_microsecond = cycles_per_us();
+    if (delta_cycles == 0 || cycles_per_microsecond == 0 ||
+        ticks_per_output_rev == 0.0f)
+    {
+        return {0.0f, 0.0f, 0.0f, 0.0f, 0};
+    }
+
+    int32_t end_ticks = get_ticks();
+    int32_t delta_ticks = end_ticks - start_ticks;
+
+    float delta_time_us = static_cast<float>(delta_cycles) /
+                          static_cast<float>(cycles_per_microsecond);
+
+    // Convert us to seconds for velocity
+    float delta_time_sec = delta_time_us / 1'000'000.0f;
+
+    // Calculate velocity and distance
+    float ticks_per_sec = static_cast<float>(delta_ticks) / delta_time_sec;
+
+    // RPM = (60 sec / rev) * (ticks / sec) / (ticks / rev)
+    // Expected: (60 / 1) * (ticks/sec) / 180 ticks/rev = ticks/sec * 0.3333 RPM per tick/sec = # RPM
+    // IF 6000 Ticks/sec => 6000 * 0.3333 = 2000 RPM, which is reasonable
+    float rpm = (60.0f / ticks_per_output_rev) * ticks_per_sec;
+
+    // Velocity in cm/s = (cm/tick) * (ticks/sec)
+    // Expected: 0.0244 cm/tick * ticks/sec = # velocity in cm/s
+    float velocity_cm_per_sec = cm_per_tick * ticks_per_sec;
+
+    // Distance in cm = (cm/tick) * (delta ticks)
+    // Expected: 0.0244 cm/tick * delta ticks = # distance in cm
+    float distance_cm = cm_per_tick * static_cast<float>(delta_ticks);
+
+    return {rpm, velocity_cm_per_sec, distance_cm, delta_time_sec, delta_ticks};
 }
 
 }  // namespace Stmf4
