@@ -69,7 +69,7 @@ Trapezoidal::VelocitySetpoint Trapezoidal::trapezoidal(
     setpoint.left = calc_setpoint(left_travel) * turnMul;
     setpoint.right = calc_setpoint(right_travel);
 
-    return setpoint; 
+    return setpoint;
 }
 
 }  // namespace MM

@@ -16,9 +16,6 @@ namespace MM
 namespace Sample
 {
 
-/**
-* @brief Struct to hold encoder timing information for sampling
-*/
 struct EncoderTiming
 {
     uint32_t sample_cycles;

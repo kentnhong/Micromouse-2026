@@ -8,18 +8,10 @@
 #pragma once
 
 #include <cstdint>
-#include "elapsed.h"
 #include "enc_math.h"
-#include "encoder.h"
 #include "pid_math.h"
 #include "trapezoidal.h"
 
-/**
-* @note No derivative filtering (can be sensitive to sensor noise).
-*       Output and integral terms are clamped.
-*       No anti-windup for output saturation.
-*       No advanced features like feedforward, adaptive gains, or state estimation.
-*/
 namespace MM
 {
 class PID
@@ -38,8 +30,8 @@ public:
 
     struct PIDConfig
     {
-        Val left;
-        Val right;
+        Gains left;
+        Gains right;
     };
 
     explicit PID(const PIDConfig& config);
@@ -112,7 +104,7 @@ private:
     // Separate PID loops for left and right wheels.
     struct Loop
     {
-        Val pid{};
+        Gains pid{};
         Context state;
     };
 

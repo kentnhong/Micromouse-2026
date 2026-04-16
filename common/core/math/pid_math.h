@@ -16,20 +16,9 @@ namespace MM
  * I - Integral term: based on accumulated error over time
  * D - Derivative term: based on rate of change of error
  */
-struct Val
+struct Gains
 {
     float kp, ki, kd;
-};
-
-/**
- * @brief Struct to hold the current error values for the PID controller
- * kp_err - current proportional error
- * ki_error - accumulated integral error
- * kd_error - current derivative error
-*/
-struct Error
-{
-    float kp_err, ki_error, kd_error;
 };
 
 }  // namespace MM
