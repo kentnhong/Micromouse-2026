@@ -1,4 +1,5 @@
 #include "trapezoidal.h"
+#include <cmath>
 
 namespace MM
 {
@@ -28,7 +29,7 @@ Trapezoidal::VelocitySetpoint Trapezoidal::trapezoidal(
     }
 
     // calculate setpoint based on current travel and target using a lambda for cleaner code
-    static inline auto calc_setpoint = [&](float travel) -> float
+    auto calc_setpoint = [&](float travel) -> float
     {
         float abs_travel = std::abs(travel);
         float velocity;
@@ -68,7 +69,7 @@ Trapezoidal::VelocitySetpoint Trapezoidal::trapezoidal(
     setpoint.left = calc_setpoint(left_travel) * turnMul;
     setpoint.right = calc_setpoint(right_travel);
 
-    return setpoint;
+    return setpoint; 
 }
 
 }  // namespace MM
