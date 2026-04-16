@@ -8,6 +8,7 @@
 /**
 * @note Generate dynamic speed setpoints based on progress.
 * While, PID follows those setpoints as closely as possible
+* It helps with smoothing the accel & decel phases.
 */
 
 #pragma once
@@ -17,13 +18,13 @@ namespace MM
 {
 class Trapezoidal
 {
+public:
     struct VelocitySetpoint
     {
         float left;
         float right;
     };
 
-public:
     /**
     * @brief Generates velocity setpoints for a trapezoidal velocity profile
     * @param target The target distance to travel (in mm)
