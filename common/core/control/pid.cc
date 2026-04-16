@@ -1,20 +1,21 @@
 #include "pid.h"
-#include <cmath>
 #include <numbers>
 
 namespace MM
 {
 
-static constexpr float kWheelDiameterCm = 2.79f;
-static constexpr float kGearRatio = 15.0f;
+static constexpr float kWheelDiameterM = 0.014f;  // 14mm diameter wheel
+static constexpr float kGearRatio = 15.25f;
 static constexpr float kTicksPerRev = 12.0f;
 
 static constexpr float kTicksPerOutputRev =
     kGearRatio * kTicksPerRev;  // 180 ticks/output rev
-static constexpr float kWheelCircumferenceCm =
-    kWheelDiameterCm * std::numbers::pi_v<float>;  // 8.765 cm/rev
-static constexpr float kCmPerTick =
-    kWheelCircumferenceCm / kTicksPerOutputRev;  // 0.0487 cm/tick
+static constexpr float kWheelCircumferenceM =
+    kWheelDiameterM *
+    std::numbers::pi_v<float>;  // 0.044 m or 4.4 cm circumference
+static constexpr float kMetersPerTick =
+    kWheelCircumferenceM /
+    kTicksPerOutputRev;  // 0.000244 m/tick or 0.0244 cm/tick
 
 PID::PID(const PIDConfig& config)
 {
@@ -27,10 +28,17 @@ PID::PID(const PIDConfig& config)
 bool PID::update(const EncoderInput& encoder, const Target& target,
                  float dt_sec, MotorOutput& output)
 {
+    if (dt_sec <= 0.0f)
+    {
+        output.left = 0.0f;
+        output.right = 0.0f;
+        return false;
+    }
+
     // Convert encoder ticks to velocity (m/s)
     float left_velocity = 0.0f;
     float right_velocity = 0.0f;
-    ticks_to_velocity(encoder, left_velocity, right_velocity);
+    ticks_to_velocity(encoder, dt_sec, left_velocity, right_velocity);
 
     // Per-wheel PID: calculate error for each wheel (no yaw)
     float left_error = target.left_speed - left_velocity;
@@ -44,13 +52,6 @@ bool PID::update(const EncoderInput& encoder, const Target& target,
 
     return true;
 }
-
-// float PID::limit_angle(float angle)
-// {
-//     while (angle > 180.0f) angle -= 360.0f;
-//     while (angle < -180.0f) angle += 360.0f;
-//     return angle;
-// }
 
 bool PID::reset()
 {
@@ -119,7 +120,7 @@ float PID::compute_pid(Loop& loop, float error, float dt_sec)
     // Save error for next derivative calculation
     loop.state.prev_error = error;
 
-    return P + I + D;
+    return limit_range(P + I + D, min_output, max_output);
 }
 
 /* Helper functions for limiting values */
@@ -152,26 +153,18 @@ uint8_t PID::clamp_duty_cycle(float duty_cycle)
     return static_cast<uint8_t>(duty_cycle);
 }
 
-bool PID::ticks_to_velocity(const EncoderInput& encoder, float& left_velocity,
-                            float& right_velocity)
+bool PID::ticks_to_velocity(const EncoderInput& encoder, float dt_sec,
+                            float& left_velocity, float& right_velocity)
 {
-    //TODO: Changing the finding the velocity method from the m-method to mt-method to reduce noise. 
-    //      This will require storing the previous tick counts as static variables.
-    
-    static int32_t prev_l_ticks = 0;
-    static int32_t prev_r_ticks = 0;
+    if (dt_sec <= 0.0f)
+    {
+        left_velocity = 0.0f;
+        right_velocity = 0.0f;
+        return false;
+    }
 
-    float dt_sec = Elapsed::get_dt_sec();
-
-    int32_t delta_left_ticks = encoder.left_ticks - prev_l_ticks;
-    int32_t delta_right_ticks = encoder.right_ticks - prev_r_ticks;
-
-    prev_l_ticks = encoder.left_ticks;
-    prev_r_ticks = encoder.right_ticks;
-
-    // Use new static constexpr values for conversion (cm/s)
-    left_velocity = (delta_left_ticks * kCmPerTick) / dt_sec;
-    right_velocity = (delta_right_ticks * kCmPerTick) / dt_sec;
+    left_velocity = (encoder.left_ticks * kMetersPerTick) / dt_sec;
+    right_velocity = (encoder.right_ticks * kMetersPerTick) / dt_sec;
 
     return true;
 }

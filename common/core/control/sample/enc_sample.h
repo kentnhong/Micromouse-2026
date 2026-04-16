@@ -1,0 +1,48 @@
+/**
+* @file enc_sample.h
+* @brief Encoder sampling utilities for PID controller
+* @author Bex Saw
+* @date 4/15/2026
+*/
+
+#pragma once
+
+#include <cstdint>
+#include "enc_math.h"
+#include "encoder.h"
+
+namespace MM
+{
+namespace Sample
+{
+
+/**
+* @brief Struct to hold encoder timing information for sampling
+*/
+struct EncoderTiming
+{
+    uint32_t sample_cycles;
+    float sample_time_sec;
+};
+
+/**
+* @brief Initializes the encoder timing based on the desired sample time in microseconds
+* @param timing_encoder The encoder used for timing
+* @param sample_time_us The desired sample time in microseconds
+* @return An EncoderTiming struct containing the calculated sample cycles and sample time in seconds
+*/
+EncoderTiming init_encoder_timing(Encoder& timing_encoder,
+                                  uint32_t sample_time_us);
+
+/**
+* @brief Samples the left and right encoders for a specified duration based on the provided timing
+* @param left_encoder The left encoder to sample
+* @param right_encoder The right encoder to sample
+* @param timing The EncoderTiming struct containing the sample duration information
+* @return An EncoderInput struct containing the number of ticks for both encoders during the sampling period
+*/
+MM::EncoderInput sample_encoders(Encoder& left_encoder, Encoder& right_encoder,
+                                 const EncoderTiming& timing);
+
+}  // namespace Sample
+}  // namespace MM

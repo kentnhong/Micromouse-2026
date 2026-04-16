@@ -3,6 +3,7 @@ add_library(pid STATIC
 )
 
 add_subdirectory(helpers)
+add_subdirectory(sample)
 
 target_include_directories(pid PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -11,6 +12,7 @@ target_include_directories(pid PUBLIC
     ${CMAKE_SOURCE_DIR}/common/drivers/time
     ${CMAKE_SOURCE_DIR}/common/drivers/bus
     ${CMAKE_SOURCE_DIR}/common/core/control/helpers
+    ${CMAKE_SOURCE_DIR}/common/core/control/sample
 )
 
-target_link_libraries(pid PUBLIC helpers)
+target_link_libraries(pid PUBLIC helpers sample)
