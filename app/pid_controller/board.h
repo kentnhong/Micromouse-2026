@@ -12,7 +12,6 @@
 
 #include "delay.h"
 #include "drv8231.h"
-#include "elapsed.h"
 #include "enc_sample.h"
 #include "encoder.h"
 #include "gpio.h"
