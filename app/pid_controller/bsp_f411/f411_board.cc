@@ -16,7 +16,7 @@ namespace MM
 static constexpr uint16_t CCR_100KHZ = 0x1F4;
 static constexpr uint16_t TRISE_100KHZ = 0x2B;
 
-constexpr Val kWheelPid{
+constexpr Gains kWheelPid{
     250.0f, 5.0f, 0.0f};  // Tuning params depends on what we feed into the PID
 
 constexpr float kTargetSpeedMps = 0.10f;  // 10 cm/s target speed for testing
