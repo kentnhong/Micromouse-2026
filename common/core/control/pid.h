@@ -10,12 +10,13 @@
 #include <cstdint>
 #include "elapsed.h"
 #include "enc_math.h"
+#include "encoder.h"
 #include "pid_math.h"
 #include "trapezoidal.h"
 
 /**
 * @note No derivative filtering (can be sensitive to sensor noise).
-*       No output clamping on the final motor command (only on integral).
+*       Output and integral terms are clamped.
 *       No anti-windup for output saturation.
 *       No advanced features like feedforward, adaptive gains, or state estimation.
 */
@@ -64,8 +65,8 @@ public:
      * @param left_velocity The resulting left wheel velocity in m/s (output parameter)
      * @param right_velocity The resulting right wheel velocity in m/s (output parameter)
      */
-    bool ticks_to_velocity(const EncoderInput& encoder, float& left_velocity,
-                           float& right_velocity);
+    bool ticks_to_velocity(const EncoderInput& encoder, float dt_sec,
+                           float& left_velocity, float& right_velocity);
 
     /**
      * @brief Set motor output clamp range
@@ -108,7 +109,7 @@ private:
         float prev_error = 0.0f;  // D: Previous error (Derivative term)
     };
 
-    // Separate PID loops for left, right wheels, and yaw
+    // Separate PID loops for left and right wheels.
     struct Loop
     {
         Val pid{};
@@ -121,8 +122,6 @@ private:
     // Range from -100 to 100 for motor power percentage
     static float limit_range(float value, float min_value, float max_value);
     static uint8_t clamp_duty_cycle(float duty_cycle);
-
-    // static float limit_angle(float angle);
 
     Loop left{};   // PID loop for left wheel
     Loop right{};  // PID loop for right wheel
