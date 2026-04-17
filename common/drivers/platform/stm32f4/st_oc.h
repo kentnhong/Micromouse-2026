@@ -26,9 +26,10 @@ public:
     /**
      * @brief Initialize Timer Peripheral for Output Compare mode
      * 
+     * @param init_timer_freq Desired timer freq on first boot
      * @return true init success, false otherwise
      */
-    bool init();
+    bool init(uint32_t init_timer_freq);
 
     /**
      * @brief Set the Timer Period
@@ -49,10 +50,10 @@ public:
     /**
      * @brief Set the Timer Frequency
      * 
-     * @param timer_freq The desired timer frequency
+     * @param timer_freq The desired new timer frequency
      * @return true Timer Frequency set successfully, false otherwise
      */
-    bool set_freq(uint32_t timer_freq);
+    bool set_freq(uint32_t new_timer_freq);
 
 private:
     uint32_t timer_freq;
