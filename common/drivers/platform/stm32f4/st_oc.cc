@@ -22,8 +22,10 @@ bool HwOc::init(uint32_t init_timer_freq)
     // Enable Auto-reload preload enable bit (ARPE) in TIMx_CR1 register
     // Do not set UIF flag for interrupt and DMA requests (enable URS in TIMx_CR1)
 
-    // Set current timer_freq
-    this->set_freq(init_timer_freq);
+    if (!this->set_freq(init_timer_freq))
+    {
+        return false;
+    }
 
     // Start counter (set CEN in TIMx_CR1)
     start_counter();
@@ -34,31 +36,51 @@ bool HwOc::init(uint32_t init_timer_freq)
 bool HwOc::set_freq(uint32_t new_timer_freq)
 {
     // Check if new_timer_freq is in valid range
-    if (new_timer_freq < 1 || new_timer_freq > kMaxPclkFreq)
+    if (new_timer_freq == 0 || new_timer_freq > pclk)
     {
         return false;
     }
 
-    // Disable counter
-    stop_counter();
+    const bool was_running = (base_addr->CR1 & TIM_CR1_CEN) != 0U;
+    if (was_running)
+    {
+        // Disable counter while changing the prescaler.
+        stop_counter();
+    }
 
-    // Disable update event so it doesn't conflict with auto reload val being written to shadow register (set UDIS in TIMx_CR1)
     // Set new timer freq in between here
     prescaler = pclk / new_timer_freq;
     if (prescaler > kMaxPrescaler)
     {
+        if (was_running)
+        {
+            start_counter();
+        }
         return false;
     }
     base_addr->PSC = static_cast<uint16_t>(prescaler - 1);
 
+    // Set the achievable counter clock after integer division.
+    timer_freq = pclk / prescaler;
+
+    if (was_running)
+    {
+        start_counter();
+    }
+
+    return true;
+}
+
+bool HwOc::set_period(std::chrono::microseconds period_us)
+{
+    // Disable update event so it doesn't conflict with auto reload val being written to shadow register (set UDIS in TIMx_CR1)
+    // Set period here
     // Remember to enable update event after setting frequency (clear UDIS)
+    return true;
+}
 
-    // Set current timer frequency
-    timer_freq = new_timer_freq;
-
-    // Enable timer counter
-    start_counter();
-
+bool HwOc::set_compare(std::chrono::microseconds compare_us)
+{
     return true;
 }
 
