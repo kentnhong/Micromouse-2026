@@ -8,10 +8,12 @@
 #include <chrono>
 #include <cstdint>
 #include "oc.h"
+#include "stm32f411xe.h"
 
 struct StOcParams
 {
-    uint32_t pclk;
+    TIM_TypeDef* base_addr;
+    uint32_t pclk;  // Max PCLK Frequency for APB1 is 50 MHz
 };
 
 namespace MM
@@ -32,7 +34,7 @@ public:
     bool init(uint32_t init_timer_freq);
 
     /**
-     * @brief Set the Timer Period
+     * @brief Set the Timer Period (Update_event = TIM_CLK/((PSC + 1)*(ARR + 1)*(RCR + 1)))
      * 
      * @param period_us The timer period in microseconds
      * @return true Timer Period set successfully, false otherwise
@@ -40,7 +42,7 @@ public:
     bool set_period(std::chrono::microseconds period_us);
 
     /**
-     * @brief Set the Timer Compare within the Timer Period
+     * @brief Set the Timer Compare within the Timer Period 
      * 
      * @param compare_us The timer compare in microseconds
      * @return true Timer Compare set successfully, false otherwise
@@ -56,10 +58,16 @@ public:
     bool set_freq(uint32_t new_timer_freq);
 
 private:
+    // Private Methods
+    void start_counter();
+    void stop_counter();
+
     uint32_t timer_freq;
     uint32_t pclk;
+    uint32_t prescaler;
     // If changing period in different time unit, have to change all period member variables to match
     std::chrono::microseconds period_us;
+    TIM_TypeDef* base_addr;
 };
 };  // namespace Stmf4
 };  // namespace MM
