@@ -28,26 +28,9 @@ public:
     /**
      * @brief Initialize Timer Peripheral for Output Compare mode
      * 
-     * @param init_timer_freq Desired timer freq on first boot
      * @return true init success, false otherwise
      */
-    bool init(uint32_t init_timer_freq);
-
-    /**
-     * @brief Set the Timer Period (Update_event = TIM_CLK/((PSC + 1)*(ARR + 1)*(RCR + 1)))
-     * 
-     * @param period_us The timer period in microseconds
-     * @return true Timer Period set successfully, false otherwise
-     */
-    bool set_period(std::chrono::microseconds period_us);
-
-    /**
-     * @brief Set the Timer Compare within the Timer Period 
-     * 
-     * @param compare_us The timer compare in microseconds
-     * @return true Timer Compare set successfully, false otherwise
-     */
-    bool set_compare(std::chrono::microseconds compare_us);
+    bool init();
 
     /**
      * @brief Set the Timer Frequency
@@ -59,15 +42,38 @@ public:
 
 private:
     // Private Methods
-    void start_counter();
+    // TODO: Make it so that start_counter and stop_counter arent exposed to public API in function implementation
+    // Integrate set_freq, set_period, and set_compare inside of init and make init a template?
+    bool start_counter();
     void stop_counter();
+
+    /**
+     * @brief Set the Timer Period
+     * 
+     * @param period_us The timer period in microseconds
+     * @return true Timer Period set successfully, false otherwise
+     */
+    bool set_period_us(std::chrono::microseconds period_us);
+
+    /**
+     * @brief Set the Timer Compare within the Timer Period 
+     * 
+     * @param compare_us The timer compare in microseconds
+     * @return true Timer Compare set successfully, false otherwise
+     */
+    bool set_compare_us(std::chrono::microseconds compare_us);
 
     uint32_t timer_freq;
     uint32_t pclk;
     uint32_t prescaler;
-    // If changing period in different time unit, have to change all period member variables to match
-    std::chrono::microseconds period_us;
+    uint32_t period_ticks;
+    uint32_t compare_ticks;
     TIM_TypeDef* base_addr;
+
+    // Flags for seeing if freq, period, and compare were set before first start_counter()
+    bool has_freq = false;
+    bool has_period = false;
+    bool has_compare = false;
 };
 };  // namespace Stmf4
 };  // namespace MM
