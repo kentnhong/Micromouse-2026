@@ -16,17 +16,6 @@ HwOc::HwOc(StOcParams params_)
 {
 }
 
-bool HwOc::init()
-{
-    // Select CK_INT as clock source (reset SMS in TIMx_SMCR)
-    // Enable Edge-aligned mode from clearing CMS in TIMx_CR1
-    // Set as upcounter by clearing DIR in TIMx_CR1
-    // Enable Auto-reload preload enable bit (ARPE) in TIMx_CR1 register
-    // Do not set UIF flag for interrupt and DMA requests (enable URS in TIMx_CR1)
-
-    return true;
-}
-
 bool HwOc::set_freq(uint32_t new_timer_freq)
 {
     // Check if new_timer_freq is in valid range
@@ -62,37 +51,36 @@ bool HwOc::set_freq(uint32_t new_timer_freq)
         start_counter();
     }
 
-    if (!has_freq)
-    {
-        has_freq = true;
-    }
-
     return true;
 }
 
 bool HwOc::set_period_us(std::chrono::microseconds period_us)
 {
-    // Check if period is in valid range (not exceeding minimum or maximum)
-    // Tmax_us = ((ARRmax + 1) / timer_freq) * 1e6
-    const uint64_t period_max_us_count =
-        ((static_cast<uint64_t>(kArrMax) + 1ULL) * kMicrosecondsConversion) /
-        timer_freq;
-    const auto period_max_us = std::chrono::microseconds{period_max_us_count};
+    if (timer_freq == 0 || period_us <= std::chrono::microseconds::zero())
+    {
+        return false;
+    }
 
-    if (period_us <= std::chrono::microseconds::zero() ||
-        period_us > period_max_us)
+    const uint64_t period_us_count = static_cast<uint64_t>(period_us.count());
+    const uint64_t ticks =
+        (static_cast<uint64_t>(timer_freq) * period_us_count) /
+        kMicrosecondsConversion;
+    if (ticks == 0 || ticks > (static_cast<uint64_t>(kArrMax) + 1ULL))
     {
         return false;
     }
 
     // Disable update event so it doesn't conflict with auto reload val being written to shadow register (set UDIS in TIMx_CR1)
-    // Set period here
-    // Remember to enable update event after setting frequency (clear UDIS)
+    base_addr->CR1 |= TIM_CR1_UDIS;
 
-    if (!has_period)
-    {
-        has_period = true;
-    }
+    // Set period here
+    uint32_t reload = static_cast<uint32_t>(ticks - 1ULL);
+    base_addr->ARR = static_cast<uint16_t>(reload);
+
+    // Remember to enable update event after setting frequency (clear UDIS)
+    base_addr->CR1 &= ~TIM_CR1_UDIS;
+
+    period_ticks = reload;
 
     return true;
 }
@@ -101,21 +89,12 @@ bool HwOc::set_compare_us(std::chrono::microseconds compare_us)
 {
     // Check if compare is in valid range (not exceeding minimum or maximum)
 
-    if (!has_compare)
-    {
-        has_compare = true;
-    }
     return true;
 }
 
-bool HwOc::start_counter()
+void HwOc::start_counter()
 {
-    if (has_freq && has_period && has_compare)
-    {
-        base_addr->CR1 |= TIM_CR1_CEN;
-        return true;
-    }
-    return false;
+    base_addr->CR1 |= TIM_CR1_CEN;
 }
 
 void HwOc::stop_counter()

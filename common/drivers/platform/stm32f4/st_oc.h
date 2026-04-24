@@ -30,7 +30,42 @@ public:
      * 
      * @return true init success, false otherwise
      */
-    bool init();
+    template <typename Rep, typename Period>
+    bool init(uint32_t init_timer_freq,
+              std::chrono::duration<Rep, Period> period,
+              std::chrono::duration<Rep, Period> compare)
+    {
+        // Select CK_INT as clock source (reset SMS in TIMx_SMCR)
+        base_addr->SMCR &= ~TIM_SMCR_SMS;
+
+        // Enable Edge-aligned mode from clearing CMS in TIMx_CR1
+        base_addr->CR1 &= ~TIM_CR1_CMS;
+
+        // Set as upcounter by clearing DIR in TIMx_CR1
+        base_addr->CR1 &= ~TIM_CR1_DIR;
+
+        // Enable Auto-reload preload enable bit (ARPE) in TIMx_CR1 register
+        base_addr->CR1 |= TIM_CR1_ARPE;
+
+        // Do not set UIF flag for interrupt and DMA requests (enable URS in TIMx_CR1)
+        base_addr->CR1 |= TIM_CR1_URS;
+
+        bool result = true;
+
+        result = result && set_freq(init_timer_freq);
+        result = result && set_period(period);
+        result = result && set_compare(compare);
+
+        // Check if frequency, period, and compare were set successfully before starting counter
+        if (!result)
+        {
+            return false;
+        }
+
+        start_counter();
+
+        return true;
+    }
 
     /**
      * @brief Set the Timer Frequency
@@ -42,9 +77,17 @@ public:
 
 private:
     // Private Methods
-    // TODO: Make it so that start_counter and stop_counter arent exposed to public API in function implementation
-    // Integrate set_freq, set_period, and set_compare inside of init and make init a template?
-    bool start_counter();
+
+    /**
+     * @brief Start timer counter
+     * 
+     */
+    void start_counter();
+
+    /**
+     * @brief Stop timer counter
+     * 
+     */
     void stop_counter();
 
     /**
@@ -69,11 +112,6 @@ private:
     uint32_t period_ticks;
     uint32_t compare_ticks;
     TIM_TypeDef* base_addr;
-
-    // Flags for seeing if freq, period, and compare were set before first start_counter()
-    bool has_freq = false;
-    bool has_period = false;
-    bool has_compare = false;
 };
 };  // namespace Stmf4
 };  // namespace MM
