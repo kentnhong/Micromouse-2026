@@ -8,6 +8,16 @@
 #include <chrono>
 #include <cstdint>
 
+enum class TimerChannel : uint8_t
+{
+    CHANNEL_1 = 0,
+    CHANNEL_2,
+    CHANNEL_3,
+    CHANNEL_4
+    // Add more if supported on other boards
+};
+
+
 namespace MM
 {
 class Oc
@@ -39,10 +49,11 @@ public:
      * @brief Set the Timer Compare within the Timer Period 
      * 
      * @param compare The timer compare in any unit of time
+     * @param channel The timer channel you wish to configure
      * @return true Timer Compare set successfully, false otherwise
      */
     template <typename Rep, typename Period>
-    bool set_compare(std::chrono::duration<Rep, Period> compare)
+    bool set_compare(std::chrono::duration<Rep, Period> compare, TimerChannel channel)
     {
         auto compare_us =
             std::chrono::duration_cast<std::chrono::microseconds>(compare);
@@ -57,6 +68,6 @@ public:
 
 private:
     virtual bool set_period_us(std::chrono::microseconds period) = 0;
-    virtual bool set_compare_us(std::chrono::microseconds compare) = 0;
+    virtual bool set_compare_us(std::chrono::microseconds compare, TimerChannel channel) = 0;
 };
 };  // namespace MM
