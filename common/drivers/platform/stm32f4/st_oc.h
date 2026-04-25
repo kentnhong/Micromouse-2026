@@ -47,6 +47,24 @@ public:
         // Enable Auto-reload preload enable bit (ARPE) in TIMx_CR1 register
         base_addr->CR1 |= TIM_CR1_ARPE;
 
+        // Configure Timer Channels as Output
+        base_addr->CCMR1 &= ~TIM_CCMR1_CC1S;
+        base_addr->CCMR1 &= ~TIM_CCMR1_CC2S;
+        base_addr->CCMR2 &= ~TIM_CCMR2_CC3S;
+        base_addr->CCMR2 &= ~TIM_CCMR2_CC4S;
+
+        // Output Compare preload disable for instant writes to CCRx
+        base_addr->CCMR1 &= ~TIM_CCMR1_OC1PE;
+        base_addr->CCMR1 &= ~TIM_CCMR1_OC2PE;
+        base_addr->CCMR2 &= ~TIM_CCMR2_OC3PE;
+        base_addr->CCMR2 &= ~TIM_CCMR2_OC4PE;
+
+        // Output Compare mode is Frozen - no signal output to channel pin on OC match (only sets flag CCxIF)
+        base_addr->CCMR1 &= ~TIM_CCMR1_OC1M;
+        base_addr->CCMR1 &= ~TIM_CCMR1_OC2M;
+        base_addr->CCMR2 &= ~TIM_CCMR2_OC3M;
+        base_addr->CCMR2 &= ~TIM_CCMR2_OC4M;
+
         // Do not set UIF flag for interrupt and DMA requests (enable URS in TIMx_CR1)
         base_addr->CR1 |= TIM_CR1_URS;
 
@@ -102,9 +120,11 @@ private:
      * @brief Set the Timer Compare within the Timer Period 
      * 
      * @param compare_us The timer compare in microseconds
+     * @param channel The timer channel you wish to configure
      * @return true Timer Compare set successfully, false otherwise
      */
-    bool set_compare_us(std::chrono::microseconds compare_us);
+    bool set_compare_us(std::chrono::microseconds compare_us,
+                        TimerChannel channel);
 
     uint32_t timer_freq;
     uint32_t pclk;

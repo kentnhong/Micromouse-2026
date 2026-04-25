@@ -85,9 +85,33 @@ bool HwOc::set_period_us(std::chrono::microseconds period_us)
     return true;
 }
 
-bool HwOc::set_compare_us(std::chrono::microseconds compare_us)
+bool HwOc::set_compare_us(std::chrono::microseconds compare_us, TimerChannel channel)
 {
     // Check if compare is in valid range (not exceeding minimum or maximum)
+    if (timer_freq == 0 || compare_us <= std::chrono::microseconds::zero())
+    {
+        return false;
+    }
+
+    // Convert chrono to unsigned int and convert to ticks
+    const uint64_t compare_us_count = static_cast<uint64_t>(compare_us.count());
+    const uint64_t ticks =
+        (static_cast<uint64_t>(timer_freq) * compare_us_count) /
+        kMicrosecondsConversion;
+    
+    // Check if compare ticks is within period tick range
+    if (ticks == 0 || ticks <= (period_ticks + 1ULL))
+    {
+        return false;
+    }
+
+    // Select the output compare mode: timing / active / inactive / toggle.
+    // In case of active, inactive and toggle modes, select the polarity by writing CCxP in CCER register.
+    // Disable the preload feature for CCx by writing OCxPE in CCMRx register.
+    base_addr->CCMR
+
+    // Enable the capture / compare output by writing CCxE in CCERx register.
+
 
     return true;
 }
