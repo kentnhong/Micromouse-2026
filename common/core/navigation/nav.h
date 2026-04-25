@@ -86,6 +86,7 @@ private:
 #pragma once 
 
 #include "imu_math.h"
+#include "bno055.h"
 
 /**
 * @note Use IMU yaw to decide when to start/stop a turn, 
@@ -97,6 +98,15 @@ namespace MM
 class Nav
 {
 public:
+
+    // Constructor
+    Nav();
+
+    // Having a function where it holds the statemachine for the navigation control
+
+    // Function that checking the imu data and decide when the start/stop a turn (FOR OVERHEADING)
+
+    ~Nav();
 
 private:
 
