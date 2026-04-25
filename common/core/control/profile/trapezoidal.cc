@@ -37,14 +37,18 @@ Trapezoidal::VelocitySetpoint Trapezoidal::trapezoidal(
         // If we've overshot the target, set velocity to minimum in the opposite direction
         if (abs_travel > abs_target + target_distance_threshold)
         {
+            complete = false;
             return -min_speed;
         }
 
         // If we're within the target threshold, stop
         if (abs_travel >= abs_target - target_distance_threshold)
         {
+            complete = true;
             return 0.0f;
         }
+
+        complete = false;
 
         // Acceleration phase
         if (abs_travel <= acceleration_dist)
