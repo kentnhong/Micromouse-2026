@@ -169,4 +169,12 @@ bool PID::ticks_to_velocity(const EncoderInput& encoder, float dt_sec,
     return true;
 }
 
+bool PID::set_target_speed(float left_speed, float right_speed, Target& target)
+{
+    target.left_speed = left_speed;
+    target.right_speed = right_speed;
+
+    return true;
+}
+
 }  // namespace MM
