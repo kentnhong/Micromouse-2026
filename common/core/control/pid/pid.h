@@ -28,6 +28,7 @@ public:
         float left, right;
     };
 
+    // Tune Values for PID controller (kp, ki, kd) for each wheel
     struct PIDConfig
     {
         Gains left;
@@ -66,6 +67,14 @@ public:
      * @param max_output The maximum output value (e.g., 100 for full forward)
      */
     bool set_output_limits(float min_output, float max_output);
+
+    /**
+    * @brief Set the target speed for the PID controller
+    * @param left_speed The target speed for the left wheel in m/s
+    * @param right_speed The target speed for the right wheel in m/s
+    * @param target The target values for the PID controller
+    */
+    bool set_target_speed(float left_speed, float right_speed, Target& target);
 
     /**
      * @brief Set integral clamp range
