@@ -7,4 +7,4 @@ target_include_directories(pid_bsp
     PRIVATE ${CMAKE_SOURCE_DIR}/common/core/control
 )
 
-target_link_libraries(pid_bsp PUBLIC driver core bno055 drv8231)
+target_link_libraries(pid_bsp PUBLIC driver core bno055 drv8231 control motion)
