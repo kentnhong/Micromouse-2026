@@ -19,6 +19,7 @@ namespace MM
 struct Board
 {
     Bno055& imu;
+    // TODO: IR sensors, motors, encoders, Gpio, etc.
 };
 
 bool bsp_init(void);
