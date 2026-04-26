@@ -6,32 +6,44 @@
 * @date 4/8/2026
 */
 
-#pragma once 
+#pragma once
 
+#include "bno055_imu.h"
 #include "imu_math.h"
-#include "bno055.h"
-
-/**
-* @note Use IMU yaw to decide when to start/stop a turn, 
-* or to correct the robot’s heading during straight runs
-*/
+// #include "floodfill.h"
+// #include "ir_interface.h"
 
 namespace MM
 {
-class Nav
+class Navigation
 {
+
+    enum class State : uint8_t
+    {
+        STRAIGHT = 0,
+        TURNING_LEFT,
+        TURNING_RIGHT,
+        STOPPED,
+        RESET
+    };
+
 public:
+    Navigation();
 
-    // Constructor
-    Nav();
+    /**
+    * @brief Update the navigation system with new IMU data
+    * @param imu The latest IMU data from the BNO055 sensor
+    */
+    void update(const Bno055Data& imu);
 
-    // Having a function where it holds the statemachine for the navigation control
+    /**
+    * @brief Check if a turn is needed based on IMU data
+    */
+    void check_turn();
 
-    // Function that checking the imu data and decide when the start/stop a turn (FOR OVERHEADING)
-
-    ~Nav();
+    ~Navigation();
 
 private:
-
+    State state;
 };
-}
+}  // namespace MM
