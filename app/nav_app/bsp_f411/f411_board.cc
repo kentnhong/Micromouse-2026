@@ -1,10 +1,10 @@
+#include <cstdint>
 #include "bno055_imu.h"
+#include "board.h"
+#include "nav.h"
 #include "st_gpio.h"
 #include "st_i2c.h"
 #include "st_sys_clk.h"
-#include "board.h"
-#include "nav.h"
-#include <cstdint>
 
 namespace MM
 {
@@ -22,4 +22,4 @@ Board& get_board()
     return board;
 }
 
-}
+}  // namespace MM
