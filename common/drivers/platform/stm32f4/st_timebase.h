@@ -7,10 +7,16 @@
 
 #include <chrono>
 #include <cstdint>
-#include "oc.h"
 #include "stm32f411xe.h"
+#include "timebase.h"
 
-struct StOcParams
+// TODO: Figure out how to enable timer interrupts and check anything else missing for timebase setup
+// TODO: Fix ADC class to not use External ADC triggers
+// TODO: Write IRSensor class w/ states, buffers, calculated ADC value, and objects (GPIO, ADC, DMA)
+// TODO: Write IRController class that sequences through 4 IR Sensors
+// TODO: Write TimerIRQHandler to do a IRController update which is wrapped on top of IRSensor update
+
+struct StTimebaseParams
 {
     TIM_TypeDef* base_addr;
     uint32_t pclk;  // Max PCLK Frequency for APB1 is 50 MHz
@@ -20,13 +26,13 @@ namespace MM
 {
 namespace Stmf4
 {
-class HwOc : public Oc
+class HwTimebase : public Timebase
 {
 public:
-    explicit HwOc(StOcParams params_);
+    explicit HwTimebase(StTimebaseParams params_);
 
     /**
-     * @brief Initialize Timer Peripheral for Output Compare mode
+     * @brief Initialize Timer Peripheral for Timebase mode
      * 
      * @return true init success, false otherwise
      */
@@ -47,24 +53,6 @@ public:
         // Enable Auto-reload preload enable bit (ARPE) in TIMx_CR1 register
         base_addr->CR1 |= TIM_CR1_ARPE;
 
-        // Configure Timer Channels as Output
-        base_addr->CCMR1 &= ~TIM_CCMR1_CC1S;
-        base_addr->CCMR1 &= ~TIM_CCMR1_CC2S;
-        base_addr->CCMR2 &= ~TIM_CCMR2_CC3S;
-        base_addr->CCMR2 &= ~TIM_CCMR2_CC4S;
-
-        // Output Compare preload disable for instant writes to CCRx
-        base_addr->CCMR1 &= ~TIM_CCMR1_OC1PE;
-        base_addr->CCMR1 &= ~TIM_CCMR1_OC2PE;
-        base_addr->CCMR2 &= ~TIM_CCMR2_OC3PE;
-        base_addr->CCMR2 &= ~TIM_CCMR2_OC4PE;
-
-        // Output Compare mode is Frozen - no signal output to channel pin on OC match (only sets flag CCxIF)
-        base_addr->CCMR1 &= ~TIM_CCMR1_OC1M;
-        base_addr->CCMR1 &= ~TIM_CCMR1_OC2M;
-        base_addr->CCMR2 &= ~TIM_CCMR2_OC3M;
-        base_addr->CCMR2 &= ~TIM_CCMR2_OC4M;
-
         // Do not set UIF flag for interrupt and DMA requests (enable URS in TIMx_CR1)
         base_addr->CR1 |= TIM_CR1_URS;
 
@@ -72,7 +60,6 @@ public:
 
         result = result && set_freq(init_timer_freq);
         result = result && set_period(period);
-        result = result && set_compare(compare);
 
         // Check if frequency, period, and compare were set successfully before starting counter
         if (!result)
@@ -115,16 +102,6 @@ private:
      * @return true Timer Period set successfully, false otherwise
      */
     bool set_period_us(std::chrono::microseconds period_us);
-
-    /**
-     * @brief Set the Timer Compare within the Timer Period 
-     * 
-     * @param compare_us The timer compare in microseconds
-     * @param channel The timer channel you wish to configure
-     * @return true Timer Compare set successfully, false otherwise
-     */
-    bool set_compare_us(std::chrono::microseconds compare_us,
-                        TimerChannel channel);
 
     uint32_t timer_freq;
     uint32_t pclk;

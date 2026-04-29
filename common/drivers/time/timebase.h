@@ -17,10 +17,9 @@ enum class TimerChannel : uint8_t
     // Add more if supported on other boards
 };
 
-
 namespace MM
 {
-class Oc
+class Timebase
 {
 public:
     /**
@@ -46,28 +45,14 @@ public:
     }
 
     /**
-     * @brief Set the Timer Compare within the Timer Period 
-     * 
-     * @param compare The timer compare in any unit of time
-     * @param channel The timer channel you wish to configure
-     * @return true Timer Compare set successfully, false otherwise
-     */
-    template <typename Rep, typename Period>
-    bool set_compare(std::chrono::duration<Rep, Period> compare, TimerChannel channel)
-    {
-        auto compare_us =
-            std::chrono::duration_cast<std::chrono::microseconds>(compare);
-        return set_compare_us(compare_us);
-    }
-
-    /**
      * @brief Delete driver object
      * 
      */
-    virtual ~Oc() = default;
+    virtual ~Timebase() = default;
 
 private:
     virtual bool set_period_us(std::chrono::microseconds period) = 0;
-    virtual bool set_compare_us(std::chrono::microseconds compare, TimerChannel channel) = 0;
+    virtual bool set_compare_us(std::chrono::microseconds compare,
+                                TimerChannel channel) = 0;
 };
 };  // namespace MM

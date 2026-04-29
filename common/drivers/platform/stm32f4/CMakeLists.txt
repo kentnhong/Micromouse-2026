@@ -12,7 +12,7 @@ add_library(hal STATIC
     st_dma.cc
     st_sys_clk.cc
     st_usart.cc
-    st_oc.cc
+    st_timebase.cc
 )
 
 target_include_directories(hal PUBLIC
