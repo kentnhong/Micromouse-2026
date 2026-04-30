@@ -46,6 +46,10 @@ bool board_init()
     result =
         result && Stmf4::timebase.init(hclk, kTimerFreq, kTimerPeriod, true);
 
+    // Enable TIM5 interrupt in NVIC
+    NVIC_EnableIRQ(TIM5_IRQn);
+    NVIC_SetPriority(TIM5_IRQn, 0);
+
     return result;
 }
 
@@ -56,6 +60,9 @@ Board& get_board()
 
 extern "C" void TIM5_IRQHandler()
 {
+    // Clear the update interrupt flag
+    TIM5->SR &= ~TIM_SR_UIF;
+
     bool result = Stmf4::gpio.toggle();
     set ^= result;
 }

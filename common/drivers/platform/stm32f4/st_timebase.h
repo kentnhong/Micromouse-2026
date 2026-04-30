@@ -63,7 +63,11 @@ public:
         bool result = true;
 
         result = result && set_freq(init_timer_freq, pclk);
-        result = result && set_period(period);
+
+        // Convert period to microseconds
+        auto period_us =
+            std::chrono::duration_cast<std::chrono::microseconds>(period);
+        result = result && set_period_us(period_us);
 
         // Check if frequency, period, and compare were set successfully before starting counter
         if (!result)
@@ -75,6 +79,9 @@ public:
         {
             base_addr->DIER |= TIM_DIER_UIE;
         }
+
+        // Generate a software update event to load shadow registers (ARR, PSC)
+        base_addr->EGR |= TIM_EGR_UG;
 
         return true;
     }
@@ -99,7 +106,6 @@ public:
      */
     void stop();
 
-private:
     /**
      * @brief Set the Timer Period
      * 
@@ -108,6 +114,7 @@ private:
      */
     bool set_period_us(std::chrono::microseconds period_us);
 
+private:
     uint32_t timer_freq;
     uint32_t prescaler;
     uint32_t period_ticks;

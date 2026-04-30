@@ -321,7 +321,7 @@
         "enable breakpoint",
         "monitor reset"
       ],
-      "showDevDebugOutput": true
+      "showDevDebugOutput": true,
     }
   ]
 }

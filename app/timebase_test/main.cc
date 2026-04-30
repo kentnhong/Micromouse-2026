@@ -3,6 +3,7 @@
  * @author Kent Hong
  * @brief Timebase driver test app
  */
+
 #include "board.h"
 
 using namespace MM;
