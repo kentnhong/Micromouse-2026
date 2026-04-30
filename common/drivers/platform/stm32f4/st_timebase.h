@@ -10,12 +10,6 @@
 #include "stm32f411xe.h"
 #include "timebase.h"
 
-// TODO: Figure out how to enable timer interrupts and check anything else missing for timebase setup
-// TODO: Fix ADC class to not use External ADC triggers
-// TODO: Write IRSensor class w/ states, buffers, calculated ADC value, and objects (GPIO, ADC, DMA)
-// TODO: Write IRController class that sequences through 4 IR Sensors
-// TODO: Write TimerIRQHandler to do a IRController update which is wrapped on top of IRSensor update
-
 struct StTimebaseParams
 {
     TIM_TypeDef* base_addr;
@@ -38,8 +32,7 @@ public:
      */
     template <typename Rep, typename Period>
     bool init(uint32_t init_timer_freq,
-              std::chrono::duration<Rep, Period> period,
-              std::chrono::duration<Rep, Period> compare)
+              std::chrono::duration<Rep, Period> period, bool uie_en)
     {
         // Select CK_INT as clock source (reset SMS in TIMx_SMCR)
         base_addr->SMCR &= ~TIM_SMCR_SMS;
@@ -53,7 +46,7 @@ public:
         // Enable Auto-reload preload enable bit (ARPE) in TIMx_CR1 register
         base_addr->CR1 |= TIM_CR1_ARPE;
 
-        // Do not set UIF flag for interrupt and DMA requests (enable URS in TIMx_CR1)
+        // Set URS in TIMx_CR1 to generate UEV only on counter overflow/underflow
         base_addr->CR1 |= TIM_CR1_URS;
 
         bool result = true;
@@ -67,7 +60,10 @@ public:
             return false;
         }
 
-        start_counter();
+        if (uie_en)
+        {
+            base_addr->DIER |= TIM_DIER_UIE;
+        }
 
         return true;
     }
@@ -79,9 +75,6 @@ public:
      * @return true Timer Frequency set successfully, false otherwise
      */
     bool set_freq(uint32_t new_timer_freq);
-
-private:
-    // Private Methods
 
     /**
      * @brief Start timer counter
@@ -95,6 +88,7 @@ private:
      */
     void stop_counter();
 
+private:
     /**
      * @brief Set the Timer Period
      * 

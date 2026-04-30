@@ -45,6 +45,18 @@ public:
     }
 
     /**
+     * @brief Start timer counter
+     * 
+     */
+    virtual void start_counter() = 0;
+
+    /**
+     * @brief Stop timer counter
+     * 
+     */
+    virtual void stop_counter() = 0;
+
+    /**
      * @brief Delete driver object
      * 
      */
@@ -52,7 +64,5 @@ public:
 
 private:
     virtual bool set_period_us(std::chrono::microseconds period) = 0;
-    virtual bool set_compare_us(std::chrono::microseconds compare,
-                                TimerChannel channel) = 0;
 };
 };  // namespace MM
