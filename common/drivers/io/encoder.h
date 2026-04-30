@@ -57,7 +57,7 @@ public:
     * @brief Measures encoder statistics over a specified sample time in cycles.
     * @param sample_cycles - The number of cycles to sample for.
     * @param ticks_per_output_rev - Encoder ticks per output shaft revolution.
-    * @param cm_per_tick - Linear wheel travel per encoder tick.
+    * @param cm_per_tick - Linear wheel travel per encoder tick.s
     * @return An EncoderStats struct containing the measured statistics.
     * @note This function blocks for the duration of the sample time while it collects data.
     */

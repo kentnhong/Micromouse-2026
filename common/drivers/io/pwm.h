@@ -20,7 +20,7 @@ public:
     */
     virtual bool set_duty_cycle(uint8_t duty_cycle) = 0;
 
-    ~Pwm() = default;
+    virtual ~Pwm() = default;
 };
 
 }  // namespace MM
