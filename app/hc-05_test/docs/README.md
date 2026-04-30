@@ -4,8 +4,8 @@ This document describes the setup and important considerations for interfacing w
 
 ## Hardware Setup
 - **USART2** is used for communication with the HC-05 module.
-- **TX Pin:** PA11 (USART2_TX)
-- **RX Pin:** PC7 (USART2_RX)
+- **TX Pin:** PA2 (USART2_TX)
+- **RX Pin:** PA3 (USART2_RX)
 - Ensure the HC-05 module is connected to these pins accordingly.
 - Module and MCU must share a common ground.
 
