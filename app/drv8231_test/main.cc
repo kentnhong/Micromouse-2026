@@ -18,12 +18,12 @@ int main(int argc, char* argv[])
     {
         // Test motor sequences (FORWARD -> REVERSE -> BRAKE -> COAST)
         hw.drv8231.set_direction(Drv8231::Direction::FORWARD);
-        hw.drv8231.set_speed(128);  // 50% speed
+        hw.drv8231.set_speed(50);  // 50% speed
 
         hw.drv8231.get_state();  // Should return 1 (FORWARD)
 
         hw.drv8231.set_direction(Drv8231::Direction::REVERSE);
-        hw.drv8231.set_speed(128);  // 50% speed
+        hw.drv8231.set_speed(50);  // 50% speed
 
         hw.drv8231.get_state();  // Should return 2 (REVERSE)
 

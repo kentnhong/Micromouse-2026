@@ -22,32 +22,24 @@
 namespace MM
 {
 
+/// NOTE: This is currently a setup for one motor and encoder.
+
 struct Board
 {
-    // Encoder
-    Encoder& left_encoder;
-    Encoder& right_encoder;
-
-    // PWM outputs for motor speed control
-    Pwm& left_speed_pwm;
-    Pwm& right_speed_pwm;
-
-    // Motor Driver control pins
-    Drv8231& left_motor;
-    Drv8231& right_motor;
+    // Peripherals
+    Encoder& encoder;
+    Pwm& speed_pwm;
+    Drv8231& motor;
 
     // GPIO pins for motor direction control
-    Gpio& left_in1;
-    Gpio& left_in2;
-    Gpio& right_in1;
-    Gpio& right_in2;
+    Gpio& in1;
+    Gpio& in2;
 
-    // GPIO pins for encoder channels
-    Gpio& left_encoder_ch1;
-    Gpio& left_encoder_ch2;
-    Gpio& right_encoder_ch1;
-    Gpio& right_encoder_ch2;
+    // Encoder channel GPIO pins A/B for inputs
+    Gpio& encoder_ch1;
+    Gpio& encoder_ch2;
 
+    // Need to feed this into the control loop for timing the encoder sampling
     uint32_t encoder_sample_us;
 };
 
@@ -55,6 +47,6 @@ bool bsp_init(void);
 Board& get_board(void);
 
 /* PID */
-std::tuple<PID&, PID::MotorOutput&, PID::Target&> get_pid_bundle();
+std::tuple<PID&, float&> get_pid_bundle();
 
 }  // namespace MM

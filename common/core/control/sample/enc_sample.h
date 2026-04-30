@@ -32,13 +32,21 @@ EncoderTiming init_encoder_timing(Encoder& timing_encoder,
                                   uint32_t sample_time_us);
 
 /**
-* @brief Samples the left and right encoders for a specified duration based on the provided timing
-* @param left_encoder The left encoder to sample
-* @param right_encoder The right encoder to sample
+* @brief Samples a single encoder for a specified duration based on the provided timing
+* @param encoder The encoder to sample
+* @param timing The EncoderTiming struct containing the sample duration information
+* @return The number of ticks during the sampling period
+*/
+int32_t sample_encoder(Encoder& encoder, const EncoderTiming& timing);
+
+/**
+* @brief Samples two encoders for a specified duration based on the provided timing
+* @param phase_a Phase A encoder to sample
+* @param phase_b Phase B encoder to sample
 * @param timing The EncoderTiming struct containing the sample duration information
 * @return An EncoderInput struct containing the number of ticks for both encoders during the sampling period
 */
-MM::EncoderInput sample_encoders(Encoder& left_encoder, Encoder& right_encoder,
+MM::EncoderInput sample_encoders(Encoder& phase_a, Encoder& phase_b,
                                  const EncoderTiming& timing);
 
 }  // namespace Sample
