@@ -1,7 +1,6 @@
 #include <ctime>
 #include <tuple>
 #include "../board.h"
-#include "bno055_imu.h"
 #include "drv8231.h"
 #include "pid.h"
 #include "st_encoder.h"
@@ -13,128 +12,90 @@
 namespace MM
 {
 
-static constexpr uint16_t CCR_100KHZ = 0x1F4;
-static constexpr uint16_t TRISE_100KHZ = 0x2B;
+constexpr Gains kVelocityPid{0.002f, 0.0f, 0.0f};
+constexpr float kTargetTicksPerSec = 400.0f;
 
-constexpr Gains kWheelPid{
-    250.0f, 5.0f, 0.0f};  // Tuning params depends on what we feed into the PID
-
-constexpr float kTargetSpeedMps = 0.10f;  // 10 cm/s target speed for testing
-static constexpr uint32_t kEncoderSampleUs =
-    100'000;  // 100ms sample time for encoder readings
-
-/* PWM */
+/// NOTE: 1KHZ sampling frequency for encoder to match the PID loop freq
+static constexpr uint32_t kEncoderSample = 1'000;
 
 Stmf4::StGpioSettings speed_pwm_output_settings{
     Stmf4::GpioMode::AF, Stmf4::GpioOtype::PUSH_PULL, Stmf4::GpioOspeed::LOW,
     Stmf4::GpioPupd::NO_PULL, 2};  // AF2 for TIM3 on PB4
 
-const Stmf4::StGpioParams left_speed_pwm_output_params{
-    4, GPIOB, speed_pwm_output_settings};  // PB4 (TIM3_CH1)
-const Stmf4::StGpioParams right_speed_pwm_output_params{
-    5, GPIOB, speed_pwm_output_settings};  // PB5 (TIM3_CH2)
-
-Stmf4::StPwmSettings pwm_settings{Stmf4::PwmMode::EDGE_ALIGNED,
-                                  Stmf4::PwmOutputMode::PWM_MODE_1,
-                                  Stmf4::PwmDir::UPCOUNTING};
-
-const Stmf4::StPwmParams left_speed_pwm_params{TIM3, Stmf4::PwmChannel::CH1,
-                                               pwm_settings, 16000000};
-const Stmf4::StPwmParams right_speed_pwm_params{TIM3, Stmf4::PwmChannel::CH2,
-                                                pwm_settings, 16000000};
-
-Stmf4::StGpioSettings motor_input_settings{
+Stmf4::StGpioSettings motor_output_settings{
     Stmf4::GpioMode::GPOUT, Stmf4::GpioOtype::PUSH_PULL,
     Stmf4::GpioOspeed::HIGH, Stmf4::GpioPupd::NO_PULL, 0};
-
-const Stmf4::StGpioParams left_in1_params{4, GPIOA,
-                                          motor_input_settings};  // PA4
-const Stmf4::StGpioParams left_in2_params{5, GPIOA,
-                                          motor_input_settings};  // PA5
-const Stmf4::StGpioParams right_in1_params{0, GPIOB,
-                                           motor_input_settings};  // PB0
-const Stmf4::StGpioParams right_in2_params{1, GPIOB,
-                                           motor_input_settings};  // PB1
-
-/* Encoder */
 
 Stmf4::StGpioSettings enc_input_settings{
     Stmf4::GpioMode::AF, Stmf4::GpioOtype::PUSH_PULL, Stmf4::GpioOspeed::LOW,
     Stmf4::GpioPupd::PULL_UP, 1};
 
-const Stmf4::StGpioParams left_enc_input_params_1{
-    0, GPIOA, enc_input_settings};  // PA0 (TIM2_CH1)
-const Stmf4::StGpioParams left_enc_input_params_2{
-    1, GPIOA, enc_input_settings};  // PA1 (TIM2_CH2)
+Stmf4::StPwmSettings pwm_settings{Stmf4::PwmMode::EDGE_ALIGNED,
+                                  Stmf4::PwmOutputMode::PWM_MODE_1,
+                                  Stmf4::PwmDir::UPCOUNTING};
 
-Stmf4::StGpioSettings right_enc_input_settings{
-    Stmf4::GpioMode::AF, Stmf4::GpioOtype::PUSH_PULL, Stmf4::GpioOspeed::LOW,
-    Stmf4::GpioPupd::PULL_UP, 2};
-
-const Stmf4::StGpioParams right_enc_input_params_1{
-    6, GPIOB, right_enc_input_settings};  // PB6 (TIM4_CH1)
-const Stmf4::StGpioParams right_enc_input_params_2{
-    7, GPIOB, right_enc_input_settings};  // PB7 (TIM4_CH2)
-
-// Configuration in Encoder
 Stmf4::StEncoderSettings encoder_settings{
     Stmf4::EncMode::MODE_3, Stmf4::EncChannel::BOTH,
     Stmf4::EncInputPolarity::RISING, Stmf4::EncSlaveMode::DISABLED};
 
-const Stmf4::StEncoderParams left_encoder_params{TIM2, encoder_settings};
-const Stmf4::StEncoderParams right_encoder_params{TIM4, encoder_settings};
+///NOTE: Gpio Specifics
 
-/* Clock */
+// Encoder input pins
+const Stmf4::StGpioParams enc_input_params_1{
+    0, GPIOA, enc_input_settings};  // PA0 (TIM2_CH1)
+const Stmf4::StGpioParams enc_input_params_2{
+    1, GPIOA, enc_input_settings};  // PA1 (TIM2_CH2)
+
+// Motor control pins
+const Stmf4::StGpioParams in1_params{
+    4, GPIOA, motor_output_settings};  // PA4 for Motor IN1
+const Stmf4::StGpioParams in2_params{
+    5, GPIOA, motor_output_settings};  // PA5 for Motor IN2
+
+// PWM output pin
+const Stmf4::StGpioParams speed_pwm_output_params{
+    4, GPIOB, speed_pwm_output_settings};  // PB4 (TIM3_CH1)
+const Stmf4::StEncoderParams encoder_params{
+    TIM2, encoder_settings};  // Using TIM2 in encoder mode
+
+const Stmf4::StPwmParams speed_pwm_params{
+    TIM3, Stmf4::PwmChannel::CH1, pwm_settings, 1000};  // 1KHz PWM frequency
 
 Stmf4::HwClk clock(Stmf4::Configuration::HSI_16MHZ);
+Stmf4::HwGpio in1(in1_params);
+Stmf4::HwGpio in2(in2_params);
+Stmf4::HwGpio speed_pwm_output(speed_pwm_output_params);
+Stmf4::HwPwm speed_pwm(speed_pwm_params);
+Stmf4::HwEncoder encoder(encoder_params);
+Stmf4::HwGpio encoder_ch1(enc_input_params_1);
+Stmf4::HwGpio encoder_ch2(enc_input_params_2);
+Drv8231 motor(in1, in2, speed_pwm);
 
-Stmf4::HwGpio left_in1(left_in1_params);
-Stmf4::HwGpio left_in2(left_in2_params);
-Stmf4::HwGpio right_in1(right_in1_params);
-Stmf4::HwGpio right_in2(right_in2_params);
-
-Stmf4::HwGpio left_speed_pwm_output(left_speed_pwm_output_params);
-Stmf4::HwGpio right_speed_pwm_output(right_speed_pwm_output_params);
-Stmf4::HwPwm left_speed_pwm(left_speed_pwm_params);
-Stmf4::HwPwm right_speed_pwm(right_speed_pwm_params);
-
-Stmf4::HwEncoder left_encoder(left_encoder_params);
-Stmf4::HwEncoder right_encoder(right_encoder_params);
-
-Stmf4::HwGpio left_encoder_ch1(left_enc_input_params_1);
-Stmf4::HwGpio left_encoder_ch2(left_enc_input_params_2);
-Stmf4::HwGpio right_encoder_ch1(right_enc_input_params_1);
-Stmf4::HwGpio right_encoder_ch2(right_enc_input_params_2);
-
-Drv8231 left_motor(left_in1, left_in2, left_speed_pwm);
-Drv8231 right_motor(right_in1, right_in2, right_speed_pwm);
-
-Board board{.left_encoder = left_encoder,
-            .right_encoder = right_encoder,
-            .left_speed_pwm = left_speed_pwm,
-            .right_speed_pwm = right_speed_pwm,
-            .left_motor = left_motor,
-            .right_motor = right_motor,
-            .left_in1 = left_in1,
-            .left_in2 = left_in2,
-            .right_in1 = right_in1,
-            .right_in2 = right_in2,
-            .left_encoder_ch1 = left_encoder_ch1,
-            .left_encoder_ch2 = left_encoder_ch2,
-            .right_encoder_ch1 = right_encoder_ch1,
-            .right_encoder_ch2 = right_encoder_ch2,
-            .encoder_sample_us = kEncoderSampleUs};
+Board board{.encoder = encoder,
+            .speed_pwm = speed_pwm,
+            .motor = motor,
+            .in1 = in1,
+            .in2 = in2,
+            .encoder_ch1 = encoder_ch1,
+            .encoder_ch2 = encoder_ch2,
+            .encoder_sample_us = kEncoderSample};
+/*************************************
+* @brief All of the pins out
+*        - PA0: Encoder CH1 (TIM2_CH1)
+*        - PA1: Encoder CH2 (TIM2_CH2)
+*        - PA4: Motor IN1 Encoder
+*        - PA5: Motor IN2 Encoder
+*        - PB4: Motor PWM (TIM3_CH1)
+* @note 1. PWM frequency is set to 1KHz to match the control loop frequency and encoder sampling rate.
+*       2. Using TIM2 in encoder mode to read the quadrature encoder signals for simplicity and hardware efficiency.
+*/
 
 /* PID */
 
-static PID::PIDConfig config{
-    .left = kWheelPid,
-    .right = kWheelPid,
-};
-
+static PID::PIDConfig config{.gains = kVelocityPid};
 static PID pid(config);
-static PID::MotorOutput output{};
-static PID::Target target{kTargetSpeedMps, kTargetSpeedMps};
+
+static float target_ticks_per_sec = kTargetTicksPerSec;
 
 bool bsp_init()
 {
@@ -146,24 +107,22 @@ bool bsp_init()
     clock.init();
 
     // Initialize GPIOs
-    left_in1.init();
-    left_in2.init();
-    right_in1.init();
-    right_in2.init();
-    left_speed_pwm_output.init();
-    right_speed_pwm_output.init();
-    left_encoder_ch1.init();
-    left_encoder_ch2.init();
-    right_encoder_ch1.init();
-    right_encoder_ch2.init();
+    in1.init();
+    in2.init();
 
-    // Initialize peripherals
-    left_speed_pwm.init();
-    right_speed_pwm.init();
-    left_encoder.init();
-    right_encoder.init();
-    left_motor.init();
-    right_motor.init();
+    // Initialize PWM output pin
+    speed_pwm_output.init();
+
+    // Initialize Motor Driver
+    encoder_ch1.init();
+    encoder_ch2.init();
+
+    // Initialize PWM
+    speed_pwm.init();
+
+    // Initialize Encoder
+    encoder.init();
+    motor.init();
 
     return true;
 }
@@ -176,8 +135,8 @@ Board& get_board()
 /* Accessors for PID */
 
 // PID-related objects
-std::tuple<PID&, PID::MotorOutput&, PID::Target&> get_pid_bundle()
+std::tuple<PID&, float&> get_pid_bundle()
 {
-    return std::tie(pid, output, target);
+    return std::tie(pid, target_ticks_per_sec);
 }
 }  // namespace MM
