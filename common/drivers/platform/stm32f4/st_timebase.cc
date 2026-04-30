@@ -11,12 +11,11 @@ namespace MM
 {
 namespace Stmf4
 {
-HwTimebase::HwTimebase(StTimebaseParams params_)
-    : pclk{params_.pclk}, base_addr{params_.base_addr}
+HwTimebase::HwTimebase(StTimebaseParams params_) : base_addr{params_.base_addr}
 {
 }
 
-bool HwTimebase::set_freq(uint32_t new_timer_freq)
+bool HwTimebase::set_freq(uint32_t new_timer_freq, uint32_t pclk)
 {
     // Check if new_timer_freq is in valid range
     if (new_timer_freq == 0 || new_timer_freq > pclk)
@@ -28,7 +27,7 @@ bool HwTimebase::set_freq(uint32_t new_timer_freq)
     if (was_running)
     {
         // Disable counter while changing the prescaler.
-        stop_counter();
+        stop();
     }
 
     // Set new timer freq in between here
@@ -37,7 +36,7 @@ bool HwTimebase::set_freq(uint32_t new_timer_freq)
     {
         if (was_running)
         {
-            start_counter();
+            start();
         }
         return false;
     }
@@ -48,7 +47,7 @@ bool HwTimebase::set_freq(uint32_t new_timer_freq)
 
     if (was_running)
     {
-        start_counter();
+        start();
     }
 
     return true;
@@ -85,12 +84,12 @@ bool HwTimebase::set_period_us(std::chrono::microseconds period_us)
     return true;
 }
 
-void HwTimebase::start_counter()
+void HwTimebase::start()
 {
     base_addr->CR1 |= TIM_CR1_CEN;
 }
 
-void HwTimebase::stop_counter()
+void HwTimebase::stop()
 {
     base_addr->CR1 &= ~TIM_CR1_CEN;
 }

@@ -10,10 +10,12 @@
 #include "stm32f411xe.h"
 #include "timebase.h"
 
+#define PCLK_MAX 50000000u
+
 struct StTimebaseParams
 {
     TIM_TypeDef* base_addr;
-    uint32_t pclk;  // Max PCLK Frequency for APB1 is 50 MHz
+    // Can add more params later
 };
 
 namespace MM
@@ -28,12 +30,21 @@ public:
     /**
      * @brief Initialize Timer Peripheral for Timebase mode
      * 
+     * @param init_timer_freq The timer frequency you want to set on init.
+     * @param period The timer period you want to set on init.
+     * @param uie_en True for Update Event (Overflow/Underflow) Interrupt Enable, false for Update Event interrupt disable. Default argument is interrupt disabled.
      * @return true init success, false otherwise
      */
     template <typename Rep, typename Period>
-    bool init(uint32_t init_timer_freq,
-              std::chrono::duration<Rep, Period> period, bool uie_en)
+    bool init(uint32_t pclk, uint32_t init_timer_freq,
+              std::chrono::duration<Rep, Period> period, bool uie_en = false)
     {
+        // Max PCLK Frequency for APB1 is 50 MHz
+        if (pclk > PCLK_MAX)
+        {
+            return false;
+        }
+
         // Select CK_INT as clock source (reset SMS in TIMx_SMCR)
         base_addr->SMCR &= ~TIM_SMCR_SMS;
 
@@ -51,7 +62,7 @@ public:
 
         bool result = true;
 
-        result = result && set_freq(init_timer_freq);
+        result = result && set_freq(init_timer_freq, pclk);
         result = result && set_period(period);
 
         // Check if frequency, period, and compare were set successfully before starting counter
@@ -71,22 +82,22 @@ public:
     /**
      * @brief Set the Timer Frequency
      * 
-     * @param timer_freq The desired new timer frequency
+     * @param new_timer_freq The desired new timer frequency
      * @return true Timer Frequency set successfully, false otherwise
      */
-    bool set_freq(uint32_t new_timer_freq);
+    bool set_freq(uint32_t new_timer_freq, uint32_t pclk);
 
     /**
      * @brief Start timer counter
      * 
      */
-    void start_counter();
+    void start();
 
     /**
      * @brief Stop timer counter
      * 
      */
-    void stop_counter();
+    void stop();
 
 private:
     /**
@@ -98,7 +109,6 @@ private:
     bool set_period_us(std::chrono::microseconds period_us);
 
     uint32_t timer_freq;
-    uint32_t pclk;
     uint32_t prescaler;
     uint32_t period_ticks;
     uint32_t compare_ticks;

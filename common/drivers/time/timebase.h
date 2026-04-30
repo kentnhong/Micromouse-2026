@@ -28,7 +28,7 @@ public:
      * @param timer_freq The desired new timer frequency
      * @return true Timer Frequency set successfully, false otherwise
      */
-    virtual bool set_freq(uint32_t new_timer_freq) = 0;
+    virtual bool set_freq(uint32_t new_timer_freq, uint32_t pclk) = 0;
 
     /**
      * @brief Set the Timer Period
@@ -48,13 +48,13 @@ public:
      * @brief Start timer counter
      * 
      */
-    virtual void start_counter() = 0;
+    virtual void start() = 0;
 
     /**
      * @brief Stop timer counter
      * 
      */
-    virtual void stop_counter() = 0;
+    virtual void stop() = 0;
 
     /**
      * @brief Delete driver object
