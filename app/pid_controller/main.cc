@@ -11,9 +11,24 @@
 #include "enc_sample.h"
 #include "motion.h"
 #include "pid.h"
-// #include "trapezoidal.h"
+
+/// NOTE: Currently running at 1KHz, which is the max sampling rate of the encoders.
+/// PWM at 1KHZ as well to match the control loop frequency.
 
 using namespace MM;
+
+static void update_motor_drive(PID& pid, Encoder& encoder, Drv8231& motor,
+                               float target_ticks_per_sec,
+                               const Sample::EncoderTiming& encoder_timing)
+{
+    float drive = 0.0f;
+    const int32_t sample_ticks =
+        Sample::sample_encoder(encoder, encoder_timing);
+
+    pid.update_ticks(sample_ticks, target_ticks_per_sec,
+                     encoder_timing.sample_time_sec, drive);
+    motor.set_drive(drive);
+}
 
 int main(int argc, char* argv[])
 {
@@ -21,40 +36,25 @@ int main(int argc, char* argv[])
     Board& hw = get_board();
     Motion motion(hw);
 
-    auto [pid, output, target] = get_pid_bundle();
+    auto [pid, target_ticks_per_sec] = get_pid_bundle();
 
-    /// Trapezoidal profile;
+    // Change here for different target encoder velocities.
+    target_ticks_per_sec =
+        400.0f;  // 400 ticks/s is approximately 1 m/s for our encoders
 
-    uint8_t left_pwm = 0;
-    uint8_t right_pwm = 0;
-
-    // Change here for diff target speeds velocity
-    // Testing range from 0.05, 0.1, 0.2, 0.5, 1.0 m/s
-    target.left_speed = 0.5;   // m/s
-    target.right_speed = 0.5;  // m/s
-
-    hw.left_encoder.reset_ticks();
-    hw.right_encoder.reset_ticks();
+    hw.encoder.reset_ticks();
 
     const Sample::EncoderTiming encoder_timing =
-        Sample::init_encoder_timing(hw.left_encoder, hw.encoder_sample_us);
+        Sample::init_encoder_timing(hw.encoder, hw.encoder_sample_us);
 
     while (1)
     {
-        /// TEST SEQUENCE: 1. Sample encoders
-        ///                2. Update PID with exact dummy target speeds and the measured encoder speeds
-        ///                3. Convert PID output to PWM duty cycle and set motor speeds
+        /// TEST SEQUENCE: 1. Sample encoder
+        ///                2. Update generic PID with ticks/s target
+        ///                3. Apply signed normalized motor drive (-1 to 1)
 
-        EncoderInput sample_encoder = Sample::sample_encoders(
-            hw.left_encoder, hw.right_encoder, encoder_timing);
-
-        float dt_sec = encoder_timing.sample_time_sec;
-        pid.update(sample_encoder, target, dt_sec, output);
-
-        pid.output_to_pwm_duty_cycle(output, left_pwm, right_pwm);
-
-        hw.left_motor.set_speed(left_pwm);
-        hw.right_motor.set_speed(right_pwm);
+        update_motor_drive(pid, hw.encoder, hw.motor, target_ticks_per_sec,
+                           encoder_timing);
     }
 
     return 0;

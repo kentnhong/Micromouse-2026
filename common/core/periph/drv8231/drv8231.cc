@@ -1,9 +1,16 @@
 
 #include "drv8231.h"
+#include <algorithm>
 #include <cstdint>
 
 namespace MM
 {
+
+static inline float clamp_drive(float drive)
+{
+    return std::clamp(drive, -1.0f, 1.0f);
+}
+
 Drv8231::Drv8231(Gpio& in1, Gpio& in2, Pwm& pwm)
     : in1_pin(in1), in2_pin(in2), pwm(pwm)
 {
@@ -11,7 +18,6 @@ Drv8231::Drv8231(Gpio& in1, Gpio& in2, Pwm& pwm)
 
 bool Drv8231::init()
 {
-    // Set initial state to COAST
     set_direction(Direction::COAST);
     set_speed(0);
 
@@ -44,7 +50,30 @@ void Drv8231::set_direction(Direction dir)
 
 void Drv8231::set_speed(uint8_t speed)
 {
+    speed = std::clamp<uint8_t>(speed, 0, 100);
     pwm.set_duty_cycle(speed);
+}
+
+void Drv8231::set_drive(float drive)
+{
+    const float clamped_drive = clamp_drive(drive);
+
+    if (clamped_drive > 0.0f)
+    {
+        set_direction(Direction::FORWARD);
+        set_speed(static_cast<uint8_t>((clamped_drive * 100.0f) + 0.5f));
+        return;
+    }
+
+    if (clamped_drive < 0.0f)
+    {
+        set_direction(Direction::REVERSE);
+        set_speed(static_cast<uint8_t>((-clamped_drive * 100.0f) + 0.5f));
+        return;
+    }
+
+    set_direction(Direction::COAST);
+    set_speed(0);
 }
 
 int Drv8231::get_state() const

@@ -1,7 +1,6 @@
 #include "motion.h"
 
 static constexpr float kTargetDistanceMm = 180.0f;
-static constexpr float kMmPerMeter = 1000.0f;
 static constexpr float kWheelDiameterMm = 14.0f;
 static constexpr float kGearRatio = 15.25f;
 static constexpr float kTicksPerMotorRev = 12.0f;
@@ -16,30 +15,29 @@ Motion::Motion(Board& hw)
     : hw(hw), pid(PID::PIDConfig{}), profile(), total_encoder{}
 {
     // Direction setup
-    hw.left_motor.set_direction(Drv8231::Direction::FORWARD);
-    hw.right_motor.set_direction(Drv8231::Direction::FORWARD);
+    hw.motor.set_direction(Drv8231::Direction::FORWARD);
 }
 
 bool Motion::update()
 {
-    PID::Target target{};
+    float target_ticks_per_sec = 0.0f;
 
     // Get the encoder timing configuration based on the desired sample time
     const Sample::EncoderTiming encoder_timing =
-        Sample::init_encoder_timing(hw.left_encoder, hw.encoder_sample_us);
+        Sample::init_encoder_timing(hw.encoder, hw.encoder_sample_us);
 
-    EncoderInput sample_encoder = Sample::sample_encoders(
-        hw.left_encoder, hw.right_encoder, encoder_timing);
+    const int32_t sample_ticks =
+        Sample::sample_encoder(hw.encoder, encoder_timing);
 
-    total_encoder.left_ticks += sample_encoder.left_ticks;
-    total_encoder.right_ticks += sample_encoder.right_ticks;
+    total_encoder.left_ticks += sample_ticks;
+    total_encoder.right_ticks += sample_ticks;
 
     const Trapezoidal::VelocitySetpoint setpoint = profile.trapezoidal(
         kTargetDistanceMm, total_encoder, kTicksToMm, kStraight);
 
-    // Convert the velocity setpoints from mm/s to m/s for the PID controller
-    pid.set_target_speed(setpoint.left / kMmPerMeter,
-                         setpoint.right / kMmPerMeter, target);
+    // Convert the velocity setpoint from mm/s to ticks/s for the generic PID.
+    pid.set_target_ticks_per_sec(setpoint.left / kTicksToMm,
+                                 target_ticks_per_sec);
 
     return profile.is_complete();
 }

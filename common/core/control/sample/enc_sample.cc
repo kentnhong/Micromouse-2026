@@ -16,20 +16,37 @@ Sample::EncoderTiming Sample::init_encoder_timing(Encoder& timing_encoder,
             .sample_time_sec = static_cast<float>(sample_time_us) / kUsToSec};
 }
 
-MM::EncoderInput Sample::sample_encoders(Encoder& left_encoder,
-                                         Encoder& right_encoder,
-                                         const EncoderTiming& timing)
+int32_t Sample::sample_encoder(Encoder& encoder, const EncoderTiming& timing)
 {
-    const uint32_t start_time = left_encoder.get_time_cycles();
-    while ((left_encoder.get_time_cycles() - start_time) < timing.sample_cycles)
+    const uint32_t start_time = encoder.get_time_cycles();
+    while ((encoder.get_time_cycles() - start_time) < timing.sample_cycles)
     {
     }
 
-    EncoderInput encoder{.left_ticks = left_encoder.get_ticks(),
-                         .right_ticks = right_encoder.get_ticks()};
+    const int32_t ticks = encoder.get_ticks();
+    encoder.reset_ticks();
 
-    left_encoder.reset_ticks();
-    right_encoder.reset_ticks();
+    return ticks;
+}
+
+MM::EncoderInput Sample::sample_encoders(Encoder& phase_a, Encoder& phase_b,
+                                         const EncoderTiming& timing)
+{
+    const uint32_t start_time = phase_a.get_time_cycles();
+
+    while ((phase_a.get_time_cycles() - start_time) < timing.sample_cycles)
+    {
+    }
+
+    while ((phase_b.get_time_cycles() - start_time) < timing.sample_cycles)
+    {
+    }
+
+    EncoderInput encoder{.left_ticks = phase_a.get_ticks(),
+                         .right_ticks = phase_b.get_ticks()};
+
+    phase_a.reset_ticks();
+    phase_b.reset_ticks();
 
     return encoder;
 }

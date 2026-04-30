@@ -45,9 +45,15 @@ public:
 
     /**
      * @brief Set the motor speed (PWM duty cycle)
-     * @param speed Speed of motor rotation (0-255)
+     * @param speed Speed of motor rotation as a duty cycle (0-100)
      */
     void set_speed(uint8_t speed);
+
+    /**
+     * @brief Set signed normalized motor drive.
+     * @param drive Motor command from -1.0 (reverse) to 1.0 (forward)
+     */
+    void set_drive(float drive);
 
     int get_state() const;
 
