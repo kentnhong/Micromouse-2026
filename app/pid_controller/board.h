@@ -16,7 +16,6 @@
 #include "encoder.h"
 #include "gpio.h"
 #include "i2c.h"
-#include "pid.h"
 #include "pwm.h"
 
 namespace MM
@@ -45,8 +44,5 @@ struct Board
 
 bool bsp_init(void);
 Board& get_board(void);
-
-/* PID */
-std::tuple<PID&, float&> get_pid_bundle();
 
 }  // namespace MM
