@@ -8,4 +8,5 @@ target_include_directories(pid PUBLIC
     ${CMAKE_SOURCE_DIR}/common/drivers/bus
     ${CMAKE_SOURCE_DIR}/common/core/control/profile
     ${CMAKE_SOURCE_DIR}/common/core/control/sample
+    ${CMAKE_SOURCE_DIR}/common/core/periph/
 )

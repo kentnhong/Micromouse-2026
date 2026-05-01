@@ -8,6 +8,7 @@
 #pragma once
 
 #include <cstdint>
+#include "drv8231.h"
 #include "pid_math.h"
 
 namespace MM
@@ -16,31 +17,19 @@ class PID
 {
 public:
     /**
-    * @brief PID controller configuration parameters
-    * @param gains PID gains (Kp, Ki, Kd)
-    * @param min_output Minimum output value for the controller (e.g., -1.0 for motor drive)
-    * @param max_output Maximum output value for the controller (e.g., 1.0 for motor drive)
-    * @param integral_limit Maximum absolute value for the integral term to prevent windup
+    * @brief PID controller wrapping an individual motor
     */
-    struct PIDConfig
-    {
-        Gains gains;
-        float min_output{-1.0f};
-        float max_output{1.0f};
-        float integral_limit{1000.0f};
-    };
-
-    explicit PID(const PIDConfig& config);
+    PID(Drv8231& motor, const Gains& gains);
 
     /**
-    * @brief Update the PID from a measured velocity in encoder ticks per second.
-    * @param measured_ticks_per_sec Current measured velocity in ticks/s.
-    * @param target_ticks_per_sec Target velocity in ticks/s.
+    * @brief Update the PID from an encoder tick measurement
+    * @param desired_speed_ticks Desired velocity in ticks/s.
+    * @param polarity Direction of the motor command (FORWARD or REVERSE)
+    * @param measured_ticks Measured delta ticks over the sampling period.
     * @param dt_sec Time step for the update in seconds.
-    * @param output Normalized motor command in the configured output range.
     */
-    bool update(float measured_ticks_per_sec, float target_ticks_per_sec,
-                float dt_sec, float& output);
+    bool update(float desired_speed_ticks, Drv8231::Direction polarity,
+                int32_t measured_ticks, float dt_sec);
 
     /**
     * @brief Update the PID from encoder ticks measured over the sample period.
@@ -93,6 +82,7 @@ private:
     float compute_pid(float error, float dt_sec);
     static float limit_range(float value, float min_value, float max_value);
 
+    Drv8231& motor;
     Gains gains{};
     Context state{};
     float min_output{-1.0f};
