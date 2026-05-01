@@ -5,32 +5,45 @@
 namespace MM
 {
 
-PID::PID(const PIDConfig& config)
-    : gains(config.gains),
-      min_output(config.min_output),
-      max_output(config.max_output),
-      integral_limit(config.integral_limit)
+PID::PID(Drv8231& motor, const Gains& gains)
+    : motor(motor),
+      gains(gains),
+      min_output(-1.0f),
+      max_output(1.0f),
+      integral_limit(1000.0f)
 {
 }
 
-bool PID::update(float measured_ticks_per_sec, float target_ticks_per_sec,
-                 float dt_sec, float& output)
+bool PID::update(float desired_speed_ticks, Drv8231::Direction polarity,
+                 int32_t measured_ticks, float dt_sec)
 {
-    if (dt_sec <= 0.0f)
+    // 1. Calculate controller output based on difference
+    float error = desired_speed_ticks - (measured_ticks / dt_sec);
+    float output = compute_pid(error, dt_sec);
+
+    // 2. Sum the signals and constrain proportional result
+    float final_drive = limit_range(output, min_output, max_output);
+
+    // 3. Map [-1.0, 1.0] float to Polarity + 0-100% Duty Cycle
+    Drv8231::Direction dir = polarity;
+
+    if (final_drive < 0.0f)
     {
-        output = 0.0f;
-        return false;
+        // Reverse whatever the desired polarity was
+        dir = (polarity == Drv8231::Direction::FORWARD)
+                  ? Drv8231::Direction::REVERSE
+                  : Drv8231::Direction::FORWARD;
     }
 
-    // Error for velocity PID is in ticks/s, and output is normalized motor drive (-1 to 1)
-    const float error = target_ticks_per_sec - measured_ticks_per_sec;
+    // Map magnitude to 0-100 duty cycle
+    uint8_t duty_cycle = static_cast<uint8_t>(std::abs(final_drive) * 100.0f);
 
-    // Output example: -1 to 1 for motor drive
-    output = compute_pid(error, dt_sec);
+    // 4. Send to motor driver directly
+    motor.set_direction(dir);
+    motor.set_speed(duty_cycle);
 
     return true;
 }
-
 bool PID::update_ticks(int32_t measured_ticks, float target_ticks_per_sec,
                        float dt_sec, float& output)
 {
