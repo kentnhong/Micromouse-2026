@@ -32,16 +32,6 @@ public:
                 int32_t measured_ticks, float dt_sec);
 
     /**
-    * @brief Update the PID from encoder ticks measured over the sample period.
-    * @param measured_ticks Encoder delta ticks for this control period.
-    * @param target_ticks_per_sec Target velocity in ticks/s.
-    * @param dt_sec Time step for the update in seconds.
-    * @param output Normalized motor command in the configured output range.
-    */
-    bool update_ticks(int32_t measured_ticks, float target_ticks_per_sec,
-                      float dt_sec, float& output);
-
-    /**
     * @brief Reset the PID controller state.
     */
     bool reset();
