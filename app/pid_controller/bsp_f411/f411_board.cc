@@ -55,7 +55,8 @@ Stmf4::StEncoderSettings encoder_settings{
     Stmf4::EncMode::MODE_3, Stmf4::EncChannel::BOTH,
     Stmf4::EncInputPolarity::RISING, Stmf4::EncSlaveMode::DISABLED};
 
-///GPIO: PA0 = Encoder CH1 (TIM2_CH1), PA1 = Encoder CH2 (TIM2_CH2), PA4 = Motor IN1, PA5 = Motor IN2, PB4 = Motor PWM (TIM3_CH1)
+///GPIO: PA0 = Encoder CH1 (TIM2_CH1), PA1 = Encoder CH2 (TIM2_CH2)
+//       PA4 = Motor IN1, PA5 = Motor IN2, PB4 = Motor PWM (TIM3_CH1)
 
 // Encoder input pins
 const Stmf4::StGpioParams enc_input_params_1{0, GPIOA,
@@ -96,7 +97,7 @@ volatile float g_target_ticks_per_sec{
 volatile Drv8231::Direction g_target_polarity = Drv8231::Direction::FORWARD;
 
 Board board{.encoder = encoder,
-            .pwm = pwm,
+            .speed = pwm,
             .motor = motor,
             .in1 = in1,
             .in2 = in2,
@@ -150,6 +151,7 @@ Board& get_board()
     return board;
 }
 
+// TIM4 Needed for the 1KHz control loop to sample the encoder and update the PID output
 extern "C" void TIM4_IRQHandler(void)
 {
     // 1. Clear the update interrupt flag (assuming TIM4)
@@ -162,8 +164,8 @@ extern "C" void TIM4_IRQHandler(void)
         MM::Board& hw = MM::get_board();
 
         // 3. Encoder sample
-        const MM::Sample::EncoderTiming encoder_timing = {
-            0.000001f};  // 1us sample time
+        const MM::Sample::EncoderTiming encoder_timing =
+            MM::Sample::init_encoder_timing(hw.encoder, hw.encoder_sample_us);
         int32_t sample_ticks =
             MM::Sample::sample_encoder(hw.encoder, encoder_timing);
 
