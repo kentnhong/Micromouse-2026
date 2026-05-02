@@ -17,6 +17,10 @@ enable_testing()
 
 include(cmake/build-util.cmake)
 
+if("${TARGET_DEVICE}" STREQUAL "NATIVE")
+    add_subdirectory(external/googletest)
+endif()
+
 if(MCU_NAME MATCHES "^(STM32).*")
     message("Found STM32 Device!")
     add_compile_definitions(

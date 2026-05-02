@@ -28,3 +28,7 @@ if (TARGET pid_bsp)
 	target_preprocess_for(${TARGET_DEVICE} ${EXECUTABLE} ${LINKER_SCRIPT} ${LDF} ${PREPROCESS_DEFS})
 
 endif()
+
+if("${TARGET_DEVICE}" STREQUAL "NATIVE")
+    add_subdirectory(test)
+endif()
