@@ -15,7 +15,9 @@
             "inherits": "build",
             "binaryDir": "${sourceDir}/build/native",
             "cacheVariables": {
-                "TARGET_DEVICE": "NATIVE"
+                "TARGET_DEVICE": "NATIVE",
+                "CMAKE_C_COMPILER": "C:/msys64/mingw64/bin/gcc.exe",
+                "CMAKE_CXX_COMPILER": "C:/msys64/mingw64/bin/g++.exe"
             }
         },
         {
