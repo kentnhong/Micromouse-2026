@@ -11,6 +11,9 @@
 * It helps with smoothing the accel & decel phases.
 */
 
+/// NOTE: IGNORE THIS FOR NOW THIS HAS TO BE CHANGE RELATIVE TO ticks/second rightnow I have in RPM format
+///       This makes the profile invalid but I will change it later once PID is working with ticks/s
+
 #pragma once
 #include "enc_math.h"
 

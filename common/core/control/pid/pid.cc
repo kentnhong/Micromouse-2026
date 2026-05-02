@@ -39,25 +39,9 @@ bool PID::update(float desired_speed_ticks, Drv8231::Direction polarity,
     uint8_t duty_cycle = static_cast<uint8_t>(std::abs(final_drive) * 100.0f);
 
     // 4. Send to motor driver directly
-    motor.set_direction(dir);
-    motor.set_speed(duty_cycle);
+    motor.drive(dir, duty_cycle);
 
     return true;
-}
-bool PID::update_ticks(int32_t measured_ticks, float target_ticks_per_sec,
-                       float dt_sec, float& output)
-{
-    float measured_ticks_per_sec = 0.0f;
-
-    // If ticks_to_ticks_per_second fails it feed back 0
-    if (!ticks_to_ticks_per_second(measured_ticks, dt_sec,
-                                   measured_ticks_per_sec))
-    {
-        output = 0.0f;
-        return false;
-    }
-
-    return update(measured_ticks_per_sec, target_ticks_per_sec, dt_sec, output);
 }
 
 bool PID::reset()

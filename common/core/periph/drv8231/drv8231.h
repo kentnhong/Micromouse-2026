@@ -30,23 +30,18 @@ public:
 
     /**
      * @brief Constructor for DRV8231 motor driver
-     * @param config Reference to configuration struct
-     * @param pwm Reference to PWM driver object for speed control
+     * @param in1 GPIO pin for direction 1
+     * @param in2 GPIO pin for direction 2
+     * @param speed PWM driver object for speed control
      */
-    explicit Drv8231(const Config& config);
-    // TODO: Verify if the constructor should output the PWM object
+    Drv8231(Gpio& in1, Gpio& in2, Pwm& speed);
 
     /**
-     * @brief Set the motor direction (COAST, FORWARD, REVERSE, BRAKE)
+     * @brief Drive the motor with a specific direction and duty cycle
      * @param dir Direction of motor rotation
+     * @param duty_cycle Motor speed as a percentage (0-100)
      */
-    void set_direction(Direction dir);
-
-    /**
-     * @brief Set the motor speed (PWM duty cycle)
-     * @param speed Motor speed as a percentage (0-100)
-     */
-    void set_speed(uint8_t speed);
+    void drive(Direction dir, uint8_t duty_cycle);
 
     /**
      * @brief Get the current motor state
@@ -57,14 +52,10 @@ public:
     bool init();
 
 private:
-    struct Config
-    {
-        Gpio& in1_pin;
-        Gpio& in2_pin;
-        Pwm& speed_pwm;
-    };
-
     int state;
+    Gpio& in1;
+    Gpio& in2;
+    Pwm& speed;
 };
 
 }  // namespace MM

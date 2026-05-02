@@ -9,14 +9,9 @@
 #include "enc_sample.h"
 #include "pid.h"
 #include "pid_controller/board.h"
-#include "trapezoidal.h"
 
 namespace MM
 {
-/**
-     * @brief Constructor for the Motion class
-     * @param hw Reference to the hardware interface
-     */
 class Motion
 {
 public:
@@ -35,7 +30,5 @@ public:
 private:
     Board& hw;
     PID pid;
-    Trapezoidal profile;
-    EncoderInput total_encoder;
 };
 }  // namespace MM
