@@ -54,5 +54,22 @@
             }
         }
         
+    ],
+    "testPresets": [
+        {
+            "name": "native",
+            "configurePreset": "native",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "native-verbose",
+            "configurePreset": "native",
+            "output": {
+                "outputOnFailure": true,
+                "verbosity": "verbose"
+            }
+        }
     ]
 }
