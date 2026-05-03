@@ -16,8 +16,6 @@
 
 using namespace MM;
 
-volatile bool g_control_tick = false;
-
 /// NOTE: sample_encoder waits 1000 us -> PID runs about 1 kHz
 ///       with TIM4 generating an interrupt every 1000 us to set the control tick flag.
 
@@ -26,7 +24,8 @@ int main(int argc, char* argv[])
     bsp_init();
     Board& hw = get_board();
 
-    constexpr Gains kVelocityGains{0.1f, 0.0f, 0.0f};
+    // CHANGE_VALUE
+    constexpr Gains kVelocityGains{0.001f, 0.0f, 0.0f};
     Motion motion(hw, kVelocityGains);
 
     hw.encoder.reset_ticks();
@@ -42,8 +41,13 @@ int main(int argc, char* argv[])
     *       final_drive = -0.40 -> direction reverse, duty_cycle = 40
     */
 
-    uint32_t last_ms = Utils::get_ms_ticks();
-    uint32_t count = 0;
+    /// NOTE: When debugging look at:
+    ///         desired_speed_ticks
+    ///         measured_ticks
+    ///         dt_sec
+    ///         error
+    ///         final_drive
+    ///         duty_cycle
 
     while (1)
     {
