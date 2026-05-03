@@ -19,7 +19,7 @@ public:
         * @brief Constructor for the Motion class
         * @param hw Reference to the hardware interface
         */
-    Motion(Board& hw);
+    Motion(Board& hw, const Gains& gains);
 
     /**
         * @brief Updates the motion controler, should be called in a loop

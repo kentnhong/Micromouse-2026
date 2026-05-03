@@ -10,7 +10,7 @@ static constexpr float kPidTargetSpeedMmPerSec = 100.0f;
 
 namespace MM
 {
-Motion::Motion(Board& hw) : hw(hw), pid(hw.motor, Gains{0.0f, 0.0f, 0.0f})
+Motion::Motion(Board& hw, const Gains& gains) : hw(hw), pid(hw.motor, gains)
 {
     hw.motor.drive(Drv8231::Direction::FORWARD, 0);
 }

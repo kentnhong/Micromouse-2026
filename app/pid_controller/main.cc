@@ -10,18 +10,24 @@
 #include "board.h"
 #include "enc_sample.h"
 #include "motion.h"
-#include "pid.h"
 
 /// NOTE: Currently running at 1KHz, which is the max sampling rate of the encoders.
 /// PWM at 1KHZ as well to match the control loop frequency.
 
 using namespace MM;
 
+volatile bool g_control_tick = false;
+
+/// NOTE: sample_encoder waits 1000 us -> PID runs about 1 kHz
+///       with TIM4 generating an interrupt every 1000 us to set the control tick flag.
+
 int main(int argc, char* argv[])
 {
     bsp_init();
     Board& hw = get_board();
-    Motion motion(hw);
+
+    constexpr Gains kVelocityGains{0.1f, 0.0f, 0.0f};
+    Motion motion(hw, kVelocityGains);
 
     hw.encoder.reset_ticks();
 
@@ -36,9 +42,11 @@ int main(int argc, char* argv[])
     *       final_drive = -0.40 -> direction reverse, duty_cycle = 40
     */
 
+    uint32_t last_ms = Utils::get_ms_ticks();
+    uint32_t count = 0;
+
     while (1)
     {
-
         motion.update();
     }
 

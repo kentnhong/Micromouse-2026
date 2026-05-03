@@ -17,6 +17,19 @@ PID::PID(Drv8231& motor, const Gains& gains)
 bool PID::update(float desired_speed_ticks, Drv8231::Direction polarity,
                  int32_t measured_ticks, float dt_sec)
 {
+    if (dt_sec <= 0.0f)
+    {
+        motor.drive(Drv8231::Direction::COAST, 0);
+        return false;
+    }
+
+    if (polarity != Drv8231::Direction::FORWARD &&
+        polarity != Drv8231::Direction::REVERSE)
+    {
+        motor.drive(Drv8231::Direction::COAST, 0);
+        return false;
+    }
+
     // 1. Calculate controller output based on difference
     float error = desired_speed_ticks - (measured_ticks / dt_sec);
     float output = compute_pid(error, dt_sec);
@@ -26,6 +39,12 @@ bool PID::update(float desired_speed_ticks, Drv8231::Direction polarity,
 
     // 3. Map [-1.0, 1.0] float to Polarity + 0-100% Duty Cycle
     Drv8231::Direction dir = polarity;
+
+    if (final_drive == 0.0f)
+    {
+        motor.drive(Drv8231::Direction::COAST, 0);
+        return true;
+    }
 
     if (final_drive < 0.0f)
     {
@@ -37,6 +56,11 @@ bool PID::update(float desired_speed_ticks, Drv8231::Direction polarity,
 
     // Map magnitude to 0-100 duty cycle
     uint8_t duty_cycle = static_cast<uint8_t>(std::abs(final_drive) * 100.0f);
+    if (duty_cycle == 0)
+    {
+        motor.drive(Drv8231::Direction::COAST, 0);
+        return true;
+    }
 
     // 4. Send to motor driver directly
     motor.drive(dir, duty_cycle);

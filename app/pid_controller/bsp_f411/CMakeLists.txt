@@ -5,6 +5,7 @@ target_include_directories(pid_bsp
     PRIVATE ${CMAKE_SOURCE_DIR}/common/drivers/platform/bno055
     PRIVATE ${CMAKE_SOURCE_DIR}/common/core/periph/drv8231
     PRIVATE ${CMAKE_SOURCE_DIR}/common/core/control
+    PRIVATE ${CMAKE_SOURCE_DIR}/common/core/control/sample
 )
 
-target_link_libraries(pid_bsp PUBLIC driver core bno055 drv8231 control motion)
+target_link_libraries(pid_bsp PUBLIC driver core bno055 drv8231 sample)
