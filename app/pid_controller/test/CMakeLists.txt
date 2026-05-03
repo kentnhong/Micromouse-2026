@@ -7,6 +7,7 @@ if("${TARGET_DEVICE}" STREQUAL "NATIVE")
         PRIVATE
             GTest::gtest_main
             pid
+            sample
             drv8231
     )
 

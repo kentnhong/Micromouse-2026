@@ -23,6 +23,7 @@ if (TARGET pid_bsp)
 
 	target_link_libraries_for(${TARGET_DEVICE} ${EXECUTABLE} PRIVATE
 		pid_bsp
+		motion
 	)
 
 	target_preprocess_for(${TARGET_DEVICE} ${EXECUTABLE} ${LINKER_SCRIPT} ${LDF} ${PREPROCESS_DEFS})

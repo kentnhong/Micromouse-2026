@@ -2,34 +2,14 @@
 #include <tuple>
 #include "../board.h"
 #include "drv8231.h"
-#include "pid.h"
 #include "st_encoder.h"
 #include "st_gpio.h"
 #include "st_i2c.h"
 #include "st_pwm.h"
 #include "st_sys_clk.h"
 
-static inline void setup_TIM4()
-{
-
-    // Assuming 16MHz clock (adjust Prescaler / Auto-Reload Register for your clock tree)
-    TIM4->PSC = 16 - 1;          // Clock to 1 MHz
-    TIM4->ARR = 1000 - 1;        // 1 MHz / 1000 = 1 kHz interrupt
-    TIM4->DIER |= TIM_DIER_UIE;  // Enable Update Interrupt
-    TIM4->CR1 |= TIM_CR1_CEN;    // Start the timer
-
-    // Enable in NVIC
-
-    // Set priority based on needs
-    NVIC_SetPriority(TIM4_IRQn, 0);
-
-    // Enable the interrupt in NVIC
-    NVIC_EnableIRQ(TIM4_IRQn);
-}
 namespace MM
 {
-
-constexpr Gains kVelocityPid{0.0f, 0.0f, 0.0f};
 
 /// NOTE: 1KHZ sampling frequency for encoder to match the PID loop freq
 static constexpr uint32_t kEncoderSample = 1'000;
@@ -89,13 +69,6 @@ Stmf4::HwGpio encoder_ch2(enc_input_params_2);
 
 Drv8231 motor(in1, in2, pwm);
 
-/// PID: Create your PID instance directly wrapping the motor
-PID cfg(motor, kVelocityPid);
-
-volatile float g_target_ticks_per_sec{
-    400.0f};  // Example target velocity in ticks/s
-volatile Drv8231::Direction g_target_polarity = Drv8231::Direction::FORWARD;
-
 Board board{.encoder = encoder,
             .speed = pwm,
             .motor = motor,
@@ -117,10 +90,9 @@ Board board{.encoder = encoder,
 */
 bool bsp_init()
 {
-    // Enable GPIOA, GPIOB, TIM2, TIM3, TIM4, and I2C1 clocks
+    // Enable GPIOA, GPIOB, TIM2, and TIM3 clocks
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN;
-    RCC->APB1ENR |=
-        RCC_APB1ENR_TIM2EN | RCC_APB1ENR_TIM3EN | RCC_APB1ENR_TIM4EN;
+    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN | RCC_APB1ENR_TIM3EN;
 
     clock.init();
 
@@ -136,9 +108,6 @@ bool bsp_init()
     // Initialize PWM
     pwm.init();
 
-    // Setup TIM4 for 1 kHz interrupts to sample the encoder and run the PID loop
-    setup_TIM4();
-
     // Initialize Encoder
     encoder.init();
     motor.init();
@@ -151,28 +120,17 @@ Board& get_board()
     return board;
 }
 
-// TIM4 Needed for the 1KHz control loop to sample the encoder and update the PID output
+// Timer interrupt handler for control loop tick
+// Making sure that the control loop runs at 1KHz
+// to match the Encoder, PWM, and PID update frequencies.
+volatile bool g_control_tick = false;
+
 extern "C" void TIM4_IRQHandler(void)
 {
-    // 1. Clear the update interrupt flag (assuming TIM4)
     if (TIM4->SR & TIM_SR_UIF)
     {
-        // Clear the interrupt flag
         TIM4->SR &= ~TIM_SR_UIF;
-
-        // Get hardware bundles
-        MM::Board& hw = MM::get_board();
-
-        // 3. Encoder sample
-        const MM::Sample::EncoderTiming encoder_timing =
-            MM::Sample::init_encoder_timing(hw.encoder, hw.encoder_sample_us);
-        int32_t sample_ticks =
-            MM::Sample::sample_encoder(hw.encoder, encoder_timing);
-
-        // 4. PID Update & Dispatch
-        // update(float desired_speed_ticks, Drv8231::Direction polarity, int32_t measured_ticks, float dt_sec)
-        cfg.update(g_target_ticks_per_sec, g_target_polarity, sample_ticks,
-                   0.001f);
+        g_control_tick = true;
     }
 }
 
