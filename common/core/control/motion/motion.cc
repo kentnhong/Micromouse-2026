@@ -25,8 +25,9 @@ Motion::Motion(Board& hw, const Gains& gains) : hw(hw), pid(hw.motor, gains)
 
 bool Motion::update()
 {
+    // CHANGE_VALUE
     float target_ticks_per_sec = 0.0f;
-
+    
     const Sample::EncoderTiming encoder_timing =
         Sample::init_encoder_timing(hw.encoder, hw.encoder_sample_us);
 
@@ -35,9 +36,16 @@ bool Motion::update()
 
     pid.set_target_ticks_per_sec(kPidTargetSpeedMmPerSec / kMmPerTick,
                                  target_ticks_per_sec);
-
-    return pid.update(target_ticks_per_sec, Drv8231::Direction::FORWARD,
-                      sample_ticks, encoder_timing.sample_time_sec);
+                                 
+    // PID inputs:
+    // - target_ticks_per_sec: desired motor speed in ticks/s
+    // - FORWARD: commanded motor polarity
+    // - sample_ticks: encoder ticks measured during this sample window
+    // - sample_time_sec: dt for converting sample_ticks to measured ticks/s
+    return pid.update(target_ticks_per_sec, 
+                      Drv8231::Direction::FORWARD,
+                      sample_ticks, 
+                      encoder_timing.sample_time_sec);
 }
 
 }  // namespace MM
