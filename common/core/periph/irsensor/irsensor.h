@@ -9,7 +9,7 @@
 #include <array>
 #include <cstdint>
 #include "adc.h"
-//#include "dma.h"
+#include "dma.h"
 #include "delay.h"
 #include "gpio.h"
 
@@ -31,7 +31,7 @@ enum class IrStates : uint8_t
 struct IrParams
 {
     Adc& adc;
-    //Dma& dma;
+    Dma& dma;
     Gpio& emitter;
 };
 
@@ -82,7 +82,7 @@ private:
     void calculate();
 
     Adc& adc;
-    //Dma& dma;
+    Dma& dma;
     Gpio& emitter;
     IrStates current_state;
     std::array<uint16_t, 2> ambient;  // ADC samples with ambient light
