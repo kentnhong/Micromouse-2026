@@ -10,19 +10,9 @@ IrSensor::IrSensor(IrParams params_)
 bool IrSensor::init()
 {
     current_state = IrStates::SAMPLE_OFF_1;
-
-    for (auto& val : ambient)
-    {
-        val = 0;
-    }
-
-    for (auto& val : combined)
-    {
-        val = 0;
-    }
-
+    ambient.fill(0);
+    combined.fill(0);
     ir_val = 0;
-
     return emitter.set(0);
 }
 
