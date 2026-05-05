@@ -9,7 +9,8 @@
 #include <array>
 #include <cstdint>
 #include "adc.h"
-#include "dma.h"
+//#include "dma.h"
+#include "delay.h"
 #include "gpio.h"
 
 namespace MM
@@ -24,13 +25,13 @@ enum class IrStates : uint8_t
     SAMPLE_ON_1,
     SAMPLE_ON_2,
     EMITTER_OFF,
-    SETTLE_2
+    CALCULATE  // Settle period and calculation
 };
 
 struct IrParams
 {
     Adc& adc;
-    Dma& dma;
+    //Dma& dma;
     Gpio& emitter;
 };
 
@@ -45,11 +46,25 @@ public:
     explicit IrSensor(IrParams params_);
 
     /**
+     * @brief IR Sensor initialization
+     * 
+     * @return true initialization success, false otherwise
+     */
+    bool init();
+
+    /**
      * @brief Execute current IR Sensor state and move to next state
      * 
      * @return true State executed and incremented successfully, false otherwise.
      */
     bool update();
+
+    /**
+     * @brief Retrieves current true IR reading
+     * 
+     * @return uint16_t The current true IR reading as an ADC 12-bit value
+     */
+    uint16_t get_ir_val() const;
 
     /**
      * @brief Default destructor
@@ -64,15 +79,17 @@ private:
      * 
      * @return true ADC value calculated successfully, false otherwise
      */
-    bool calculate();
+    void calculate();
 
-    IrStates current_state = IrStates::SAMPLE_OFF_1;
     Adc& adc;
-    Dma& dma;
+    //Dma& dma;
     Gpio& emitter;
+    IrStates current_state;
     std::array<uint16_t, 2> ambient;  // ADC samples with ambient light
     std::array<uint16_t, 2>
-        combined;           // ADC sample with ambient light + true IR
-    uint16_t adc_true = 0;  // Final calculated ADC value with just true IR
+        combined;         // ADC sample with ambient light + true IR
+    uint16_t ir_val = 0;  // Final calculated ADC value with just true IR
 };
 };  // namespace MM
+
+//yo mama so fat that she obsesed with da meat (shawty in love with the meatn)
