@@ -30,37 +30,45 @@ bool IrSensor::update()
 {
     bool result = true;
 
-    // TODO: Complete this
     switch (current_state)
     {
         case IrStates::SAMPLE_OFF_1:
-            dma.arm_p2m(reinterpret_cast<uintptr_t>(&ambient), 2);
-            adc.convert(true, 1);
-            current_state = IrStates::SAMPLE_OFF_2;
+            if (dma.complete())
+            {
+                result =
+                    result &&
+                    dma.arm_p2m(reinterpret_cast<uintptr_t>(ambient.data()), 2);
+                result = result && adc.convert(true, 1);
+                current_state = IrStates::SAMPLE_OFF_2;
+            }
             break;
         case IrStates::SAMPLE_OFF_2:
-            adc.convert(true, 1);
+            result = result && adc.convert(true, 1);
             current_state = IrStates::EMITTER_ON;
             break;
         case IrStates::EMITTER_ON:
-            emitter.set(1);
-            current_state = IrStates::SETTLE_1;
+            result = result && emitter.set(1);
+            current_state = IrStates::SETTLE;
             break;
-        case IrStates::SETTLE_1:
-            Utils::DelayUs(10);  // TODO: Change this value later
+        case IrStates::SETTLE:
             current_state = IrStates::SAMPLE_ON_1;
             break;
         case IrStates::SAMPLE_ON_1:
-            dma.arm_p2m(reinterpret_cast<uintptr_t>(&combined), 2);
-            adc.convert(true, 1);
-            current_state = IrStates::SAMPLE_ON_2;
+            if (dma.complete())
+            {
+                result = result &&
+                         dma.arm_p2m(
+                             reinterpret_cast<uintptr_t>(combined.data()), 2);
+                result = result && adc.convert(true, 1);
+                current_state = IrStates::SAMPLE_ON_2;
+            }
             break;
         case IrStates::SAMPLE_ON_2:
-            adc.convert(true, 1);
+            result = result && adc.convert(true, 1);
             current_state = IrStates::EMITTER_OFF;
             break;
         case IrStates::EMITTER_OFF:
-            emitter.set(0);
+            result = result && emitter.set(0);
             current_state = IrStates::CALCULATE;
             break;
         case IrStates::CALCULATE:
@@ -90,7 +98,7 @@ void IrSensor::calculate()
     uint16_t avg_combined = (combined[0] + combined[1]) / 2u;
 
     // Get rid of ambient values from the combined readings to get true IR readings
-    ir_val = avg_combined - avg_ambient;
+    ir_val = (avg_combined > avg_ambient) ? (avg_combined - avg_ambient) : 0;
 
     return;
 }

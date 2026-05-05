@@ -9,8 +9,8 @@
 #include <array>
 #include <cstdint>
 #include "adc.h"
-#include "dma.h"
 #include "delay.h"
+#include "dma.h"
 #include "gpio.h"
 
 namespace MM
@@ -21,7 +21,7 @@ enum class IrStates : uint8_t
     SAMPLE_OFF_1 = 0,
     SAMPLE_OFF_2,
     EMITTER_ON,
-    SETTLE_1,
+    SETTLE,
     SAMPLE_ON_1,
     SAMPLE_ON_2,
     EMITTER_OFF,

@@ -280,9 +280,11 @@ bool HwDma::start()
     return true;
 }
 
-// TODO: Verify logic tomorrow
 bool HwDma::complete()
 {
+    // Not busy: if READY, safe to re-arm (handles first-run case)
+    if (state == DmaState::READY)
+        return true;
     if (state != DmaState::BUSY)
         return false;
 
@@ -310,9 +312,8 @@ bool HwDma::complete()
 
     if (tcif_set || (stream_disabled && ndtr_done))
     {
-        if (!clear_flags())
-            return false;
-
+        (void)
+            clear_flags();  // clear before exposing READY to ISR to avoid race
         state = DmaState::READY;
         return true;
     }
