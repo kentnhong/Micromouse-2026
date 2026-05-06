@@ -50,7 +50,7 @@ bool HwSpi::read(std::span<uint8_t> rx_data)
         int timeout = 1000;
         while (!(instance->SR & SPI_SR_TXE) && --timeout > 0)
         {
-            MM::Utils::DelayUs(1);
+            MM::Utils::delay_us(1);
         }
         if (timeout == 0)
             return false;
@@ -60,7 +60,7 @@ bool HwSpi::read(std::span<uint8_t> rx_data)
         timeout = 1000;
         while (!(instance->SR & SPI_SR_RXNE) && --timeout > 0)
         {
-            MM::Utils::DelayUs(1);
+            MM::Utils::delay_us(1);
         }
         if (timeout == 0)
             return false;
@@ -98,7 +98,7 @@ bool HwSpi::write(std::span<uint8_t> tx_data)
         int timeout = 1000;
         while (!(instance->SR & SPI_SR_TXE) && --timeout > 0)
         {
-            MM::Utils::DelayUs(1);
+            MM::Utils::delay_us(1);
         }
         if (timeout == 0)
             return false;
@@ -108,7 +108,7 @@ bool HwSpi::write(std::span<uint8_t> tx_data)
         timeout = 1000;
         while (!(instance->SR & SPI_SR_RXNE) && --timeout > 0)
         {
-            MM::Utils::DelayUs(1);
+            MM::Utils::delay_us(1);
         }
         if (timeout == 0)
             return false;
@@ -156,7 +156,7 @@ bool HwSpi::seq_transfer(std::span<uint8_t> tx_data, std::span<uint8_t> rx_data)
         int timeout = 1000;
         while (!(instance->SR & SPI_SR_TXE) && --timeout > 0)
         {
-            MM::Utils::DelayUs(1);
+            MM::Utils::delay_us(1);
         }
         if (timeout == 0)
             return false;
@@ -166,7 +166,7 @@ bool HwSpi::seq_transfer(std::span<uint8_t> tx_data, std::span<uint8_t> rx_data)
         timeout = 1000;
         while (!(instance->SR & SPI_SR_RXNE) && --timeout > 0)
         {
-            MM::Utils::DelayUs(1);
+            MM::Utils::delay_us(1);
         }
         if (timeout == 0)
             return false;
@@ -183,7 +183,7 @@ bool HwSpi::seq_transfer(std::span<uint8_t> tx_data, std::span<uint8_t> rx_data)
         int timeout = 1000;
         while (!(instance->SR & SPI_SR_TXE) && --timeout > 0)
         {
-            MM::Utils::DelayUs(1);
+            MM::Utils::delay_us(1);
         }
         if (timeout == 0)
             return false;
@@ -193,7 +193,7 @@ bool HwSpi::seq_transfer(std::span<uint8_t> tx_data, std::span<uint8_t> rx_data)
         timeout = 1000;
         while (!(instance->SR & SPI_SR_RXNE) && --timeout > 0)
         {
-            MM::Utils::DelayUs(1);
+            MM::Utils::delay_us(1);
         }
         if (timeout == 0)
             return false;

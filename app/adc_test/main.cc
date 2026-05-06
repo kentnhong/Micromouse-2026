@@ -90,6 +90,6 @@ int main(int argc, char* argv[])
         // result &= board.usart.send(avg_sample_txt);
         // result &= board.usart.send(adc_avg);
 
-        MM::Utils::DelayMs(50);
+        MM::Utils::delay_ms(50);
     }
 }

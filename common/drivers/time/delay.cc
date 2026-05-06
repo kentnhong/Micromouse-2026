@@ -36,7 +36,7 @@ bool bind_timebase(const Timebase& timebase)
     return true;
 }
 
-bool DelayMs(uint32_t ms)
+bool delay_ms(uint32_t ms)
 {
     if (g_tb == nullptr)
     {
@@ -56,7 +56,7 @@ bool DelayMs(uint32_t ms)
     return true;
 }
 
-bool DelayUs(uint32_t us)
+bool delay_us(uint32_t us)
 {
     if (g_tb == nullptr)
     {

@@ -56,7 +56,7 @@ bool HwI2c::mem_read(uint8_t* data, size_t len, const uint8_t reg_addr,
     {
         // Try to recover bus
         _base_addr->CR1 |= I2C_CR1_STOP;
-        MM::Utils::DelayUs(10);
+        MM::Utils::delay_us(10);
         if (_base_addr->SR2 & I2C_SR2_BUSY)
             return false;
     }
@@ -195,7 +195,7 @@ bool HwI2c::mem_write(const uint8_t* data, size_t len, const uint8_t reg_addr,
     {
         // Try to recover bus
         _base_addr->CR1 |= I2C_CR1_STOP;
-        MM::Utils::DelayUs(10);
+        MM::Utils::delay_us(10);
         if (_base_addr->SR2 & I2C_SR2_BUSY)
             return false;
     }
@@ -257,7 +257,7 @@ bool HwI2c::write(const uint8_t* data, size_t len, uint8_t dev_addr)
     {
         // Try to recover bus
         _base_addr->CR1 |= I2C_CR1_STOP;
-        MM::Utils::DelayUs(10);
+        MM::Utils::delay_us(10);
         if (_base_addr->SR2 & I2C_SR2_BUSY)
             return false;
     }
@@ -310,7 +310,7 @@ bool HwI2c::read(uint8_t* data, size_t len, uint8_t dev_addr)
     {
         // Try to recover bus
         _base_addr->CR1 |= I2C_CR1_STOP;
-        MM::Utils::DelayUs(10);
+        MM::Utils::delay_us(10);
         if (_base_addr->SR2 & I2C_SR2_BUSY)
             return false;
     }

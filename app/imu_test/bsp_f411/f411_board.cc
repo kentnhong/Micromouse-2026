@@ -50,9 +50,9 @@ bool bsp_init()
 
     // BNO055 reset sequence
     rst.set(0);  // Hold BNO055 in reset
-    MM::Utils::DelayMs(10);
-    rst.set(1);               // Release reset
-    MM::Utils::DelayMs(650);  // Wait for BNO055 to boot
+    MM::Utils::delay_ms(10);
+    rst.set(1);                // Release reset
+    MM::Utils::delay_ms(650);  // Wait for BNO055 to boot
 
     imu.init();
     uint8_t chip_id = 0;

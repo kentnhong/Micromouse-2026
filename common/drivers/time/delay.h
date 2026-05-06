@@ -10,7 +10,7 @@ namespace MM::Utils
     * @param ms The number of milliseconds to delay.
     * @return true Delay success, false Timebase wasn't binded correctly
     */
-bool DelayMs(uint32_t ms);
+bool delay_ms(uint32_t ms);
 
 /**
     * @brief Delays execution for a specified number of microseconds.
@@ -18,7 +18,7 @@ bool DelayMs(uint32_t ms);
     * @param us The number of microseconds to delay.
     * @return true Delay success, false Timebase wasn't binded correctly
     */
-bool DelayUs(uint32_t us);
+bool delay_us(uint32_t us);
 
 /**
  * @brief Bind a timebase object to delay functions
