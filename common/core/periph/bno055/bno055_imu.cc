@@ -22,7 +22,7 @@ bool Bno055::set_mode(Mode mode)
     bool ok = i2c_.mem_write(&buf, 1, REG_OPR_MODE, address_);
     // Per BNO055 datasheet, a delay is required after changing OPR_MODE
     // to allow the sensor to switch modes and stabilize.
-    MM::Utils::DelayMs(30);
+    MM::Utils::delay_ms(30);
     return ok;
 }
 
@@ -33,13 +33,13 @@ bool Bno055::set_mode(Mode mode)
 void Bno055::init()
 {
     // Per BNO055 datasheet, allow time for device startup after power-on reset.
-    MM::Utils::DelayMs(650);
+    MM::Utils::delay_ms(650);
 
     uint8_t id = 0;
     i2c_.mem_read(&id, 1, 0x00, address_);  // CHIP_ID = 0x00
     for (int i = 0; i < 5 && id != 0xA0; i++)
     {
-        MM::Utils::DelayMs(10);
+        MM::Utils::delay_ms(10);
         i2c_.mem_read(&id, 1, 0x00, address_);
     }
     if (id != 0xA0)
@@ -47,7 +47,7 @@ void Bno055::init()
 
     set_mode(Bno055::CONFIG);
     // Per BNO055 datasheet, delay after switching to CONFIG mode.
-    MM::Utils::DelayMs(25);
+    MM::Utils::delay_ms(25);
 
     uint8_t pwr_mode = 0x00;
     i2c_.mem_write(&pwr_mode, 1, 0x3E, address_);  // PWR_MODE = 0x3E
@@ -56,7 +56,7 @@ void Bno055::init()
 
     set_mode(Bno055::IMU);
     // Per BNO055 datasheet, delay after switching to IMU mode.
-    MM::Utils::DelayMs(20);
+    MM::Utils::delay_ms(20);
 }
 
 /**
@@ -68,13 +68,13 @@ void Bno055::deinit()
     // Put device into deep suspend to save power
     set_mode(Bno055::CONFIG);
     // Per BNO055 datasheet, delay after switching to CONFIG mode.
-    MM::Utils::DelayMs(10);
+    MM::Utils::delay_ms(10);
     static constexpr uint8_t PWR_MODE_SUSPEND = 0x02;
     static constexpr uint8_t PWR_MODE_REG = 0x3E;
     uint8_t pwr_mode = PWR_MODE_SUSPEND;
     i2c_.mem_write(&pwr_mode, 1, PWR_MODE_REG, address_);
     // Per BNO055 datasheet, delay after entering suspend mode.
-    MM::Utils::DelayMs(25);
+    MM::Utils::delay_ms(25);
 }
 
 static inline int16_t combine(uint8_t lsb, uint8_t msb)
@@ -153,17 +153,17 @@ bool Bno055::run_post(uint8_t& status)
 {
     set_mode(Bno055::CONFIG);
     // Per BNO055 datasheet, delay after switching to CONFIG mode.
-    MM::Utils::DelayMs(25);
+    MM::Utils::delay_ms(25);
     uint8_t sys_trigger = 0x80;
     static constexpr uint8_t SYS_TRIGGER_REG = 0x3F;  // SYS_TRIGGER register
     i2c_.mem_write(&sys_trigger, 1, SYS_TRIGGER_REG, address_);
     // Per BNO055 datasheet, delay for self-test completion.
-    MM::Utils::DelayMs(650);
+    MM::Utils::delay_ms(650);
     static constexpr uint8_t ST_RESULT_REG = 0x36;  // ST_RESULT register
     bool ok = i2c_.mem_read(&status, 1, ST_RESULT_REG, address_);
     set_mode(Bno055::IMU);
     // Per BNO055 datasheet, delay after switching to IMU mode.
-    MM::Utils::DelayMs(20);
+    MM::Utils::delay_ms(20);
     return ok;
 }
 
@@ -171,17 +171,17 @@ bool Bno055::run_bist(uint8_t& status)
 {
     set_mode(Bno055::CONFIG);
     // Per BNO055 datasheet, delay after switching to CONFIG mode.
-    MM::Utils::DelayMs(25);
+    MM::Utils::delay_ms(25);
     uint8_t sys_trigger = 0x01;
     static constexpr uint8_t SYS_TRIGGER_REG = 0x3F;  // SYS_TRIGGER register
     i2c_.mem_write(&sys_trigger, 1, SYS_TRIGGER_REG, address_);
     // Per BNO055 datasheet, delay for BIST completion.
-    MM::Utils::DelayMs(650);
+    MM::Utils::delay_ms(650);
     static constexpr uint8_t ST_RESULT_REG = 0x36;  // ST_RESULT register
     bool ok = i2c_.mem_read(&status, 1, ST_RESULT_REG, address_);
     set_mode(Bno055::IMU);
     // Per BNO055 datasheet, delay after switching to IMU mode.
-    MM::Utils::DelayMs(20);
+    MM::Utils::delay_ms(20);
     return ok;
 }
 

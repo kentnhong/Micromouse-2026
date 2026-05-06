@@ -1,7 +1,7 @@
 /**
  * @file oc.h
  * @author Kent Hong
- * @brief Timer Output Compare Interface
+ * @brief Timebase Interface
  */
 #pragma once
 
@@ -55,6 +55,28 @@ public:
      * 
      */
     virtual void stop() = 0;
+
+    /**
+     * @brief Get the current timer count value
+     * 
+     * @return uint32_t The current timer counter value
+     */
+    virtual uint32_t get_count() const = 0;
+
+    /**
+     * @brief Get the timer frequency
+     * 
+     * @return uint32_t Timer frequency
+     */
+    virtual uint32_t get_freq() const = 0;
+
+    /**
+     * @brief Get the maximum possible counter value
+     * @note Used to differentiate between a 16-bit and 32-bit timer
+     * 
+     * @return uint32_t The maximum count
+     */
+    virtual uint32_t get_max_count() const = 0;
 
     /**
      * @brief Delete driver object

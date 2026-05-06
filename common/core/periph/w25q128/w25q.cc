@@ -102,7 +102,7 @@ bool W25q::status_reg_write(StatusWrite status_reg_num, uint8_t mask,
         return false;
 
     // Add delay of tw
-    Utils::DelayUs(1);
+    Utils::delay_us(1);
 
     // Check busy bit
     while (this->busy_check())
@@ -217,7 +217,7 @@ bool W25q::reset()
         return false;
 
     // Add 30 microsecond delay using timer
-    Utils::DelayUs(30);
+    Utils::delay_us(30);
 
     // Check if WEL bit was cleared after reset
     std::array<uint8_t, 1> status_reg_val;
@@ -460,7 +460,7 @@ bool W25q::chip_erase()
     }
 
     // Wait delay of tCE
-    Utils::DelayMs(150);
+    Utils::delay_ms(150);
 
     // Wait for Chip Erase to complete before ending
     while (this->busy_check())
