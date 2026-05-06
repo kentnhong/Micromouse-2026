@@ -6,8 +6,14 @@
 
 namespace MM::Utils
 {
+namespace
+{
+const MM::Timebase* g_tb = nullptr;
+static constexpr uint32_t kDelayFreq{1'000'000};
+static constexpr uint32_t kMsMax{4'294'967};
+}  // namespace
 
-uint32_t g_ms_ticks = 0;
+volatile uint32_t g_ms_ticks = 0;
 
 // SysTick_Handler is defined in st_sys_clk.cc
 // Provide a way for it to increment g_ms_ticks
@@ -16,34 +22,55 @@ extern "C" void IncDelayTicks(void)
     g_ms_ticks = g_ms_ticks + 1;
 }
 
-void DelayMs(uint32_t ms)
+bool bind_timebase(const Timebase& timebase)
 {
-#ifdef STM32F4xx
-    // Embedded target: busy-wait loop
-    for (uint32_t i = 0; i < ms * 4000; i++)
+    if (timebase.get_max_count() != UINT32_MAX)
     {
-        __NOP();
+        return false;
     }
-#else
-    (void)ms;
-#endif
+    if (timebase.get_freq() != kDelayFreq)
+    {
+        return false;
+    }
+    g_tb = &timebase;
+    return true;
 }
 
-void DelayUs(uint32_t us)
+bool DelayMs(uint32_t ms)
 {
-#ifdef STM32F4xx
-    for (uint32_t i = 0; i < us * 4; i++)
+    if (g_tb == nullptr)
     {
-        __NOP();
+        return false;
     }
-#else
-    (void)us;
-#endif
+    if (ms > kMsMax)
+    {
+        return false;
+    }
+
+    // Convert ms to us
+    uint32_t us = ms * 1000u;
+
+    uint32_t start = g_tb->get_count();
+    while ((g_tb->get_count() - start) < us);
+
+    return true;
+}
+
+bool DelayUs(uint32_t us)
+{
+    if (g_tb == nullptr)
+    {
+        return false;
+    }
+
+    uint32_t start = g_tb->get_count();
+    while ((g_tb->get_count() - start) < us);
+
+    return true;
 }
 
 uint32_t get_ms_ticks()
 {
-
     return g_ms_ticks;
 }
 

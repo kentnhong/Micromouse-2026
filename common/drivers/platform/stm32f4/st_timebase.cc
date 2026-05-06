@@ -2,9 +2,9 @@
 
 namespace
 {
-constexpr uint32_t kMaxPclkFreq{50000000};
 constexpr uint32_t kMaxPrescaler{65536};
-constexpr uint32_t kArrMax{65535};
+constexpr uint32_t kArrMax16{65535};
+constexpr uint32_t kArrMax32{4294967295};
 constexpr uint32_t kMicrosecondsConversion{1000000};
 };  // namespace
 namespace MM
@@ -64,9 +64,19 @@ bool HwTimebase::set_period_us(std::chrono::microseconds period_us)
     const uint64_t ticks =
         (static_cast<uint64_t>(timer_freq) * period_us_count) /
         kMicrosecondsConversion;
-    if (ticks == 0 || ticks > (static_cast<uint64_t>(kArrMax) + 1ULL))
+    if (base_addr == TIM1 || base_addr == TIM3 || base_addr == TIM4)
     {
-        return false;
+        if (ticks == 0 || ticks > (static_cast<uint64_t>(kArrMax16) + 1ULL))
+        {
+            return false;
+        }
+    }
+    else if (base_addr == TIM2 || base_addr == TIM5)
+    {
+        if (ticks == 0 || ticks > (static_cast<uint64_t>(kArrMax32) + 1ULL))
+        {
+            return false;
+        }
     }
 
     // Disable update event so it doesn't conflict with auto reload val being written to shadow register (set UDIS in TIMx_CR1)
@@ -74,7 +84,14 @@ bool HwTimebase::set_period_us(std::chrono::microseconds period_us)
 
     // Set period here
     uint32_t reload = static_cast<uint32_t>(ticks - 1ULL);
-    base_addr->ARR = static_cast<uint16_t>(reload);
+    if (base_addr == TIM1 || base_addr == TIM3 || base_addr == TIM4)
+    {
+        base_addr->ARR = static_cast<uint16_t>(reload);
+    }
+    else if (base_addr == TIM2 || base_addr == TIM5)
+    {
+        base_addr->ARR = reload;
+    }
 
     // Remember to enable update event after setting frequency (clear UDIS)
     base_addr->CR1 &= ~TIM_CR1_UDIS;
@@ -92,6 +109,30 @@ void HwTimebase::start()
 void HwTimebase::stop()
 {
     base_addr->CR1 &= ~TIM_CR1_CEN;
+}
+
+uint32_t HwTimebase::get_count() const
+{
+    return base_addr->CNT;
+}
+
+uint32_t HwTimebase::get_freq() const
+{
+    return timer_freq;
+}
+
+uint32_t HwTimebase::get_max_count() const
+{
+    if (base_addr == TIM1 || base_addr == TIM3 || base_addr == TIM4)
+    {
+        return UINT16_MAX;
+    }
+    else if (base_addr == TIM2 || base_addr == TIM5)
+    {
+        return UINT32_MAX;
+    }
+
+    return 0;
 }
 
 };  // namespace Stmf4

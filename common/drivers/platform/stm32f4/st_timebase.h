@@ -1,7 +1,7 @@
 /**
  * @file st_oc.h
  * @author Kent Hong
- * @brief Timer Output Compare Driver for STM32F4
+ * @brief Timebase Driver for the STM32F411 for Timers 1, 2, 3, 4, and 5
  */
 #pragma once
 
@@ -10,7 +10,7 @@
 #include "stm32f411xe.h"
 #include "timebase.h"
 
-#define PCLK_MAX 50000000u
+constexpr uint32_t PCLK_MAX{50'000'000u};
 
 struct StTimebaseParams
 {
@@ -39,10 +39,22 @@ public:
     bool init(uint32_t pclk, uint32_t init_timer_freq,
               std::chrono::duration<Rep, Period> period, bool uie_en = false)
     {
+        // Check if timer base address is valid
+        if (!(base_addr == TIM1 || base_addr == TIM2 || base_addr == TIM3 ||
+              base_addr == TIM4 || base_addr == TIM5))
+        {
+            return false;
+        }
+
         // Max PCLK Frequency for APB1 is 50 MHz
         if (pclk > PCLK_MAX)
         {
             return false;
+        }
+
+        if (base_addr == TIM1)
+        {
+            base_addr->RCR = 0;
         }
 
         // Select CK_INT as clock source (reset SMS in TIMx_SMCR)
@@ -92,19 +104,7 @@ public:
      * @param new_timer_freq The desired new timer frequency
      * @return true Timer Frequency set successfully, false otherwise
      */
-    bool set_freq(uint32_t new_timer_freq, uint32_t pclk);
-
-    /**
-     * @brief Start timer counter
-     * 
-     */
-    void start();
-
-    /**
-     * @brief Stop timer counter
-     * 
-     */
-    void stop();
+    bool set_freq(uint32_t new_timer_freq, uint32_t pclk) override;
 
     /**
      * @brief Set the Timer Period
@@ -112,13 +112,46 @@ public:
      * @param period_us The timer period in microseconds
      * @return true Timer Period set successfully, false otherwise
      */
-    bool set_period_us(std::chrono::microseconds period_us);
+    bool set_period_us(std::chrono::microseconds period_us) override;
+
+    /**
+     * @brief Start timer counter
+     * 
+     */
+    void start() override;
+
+    /**
+     * @brief Stop timer counter
+     * 
+     */
+    void stop() override;
+
+    /**
+     * @brief Get the current timer count value
+     * 
+     * @return uint32_t The current timer counter value
+     */
+    uint32_t get_count() const override;
+
+    /**
+     * @brief Get the timer frequency
+     * 
+     * @return uint32_t Timer frequency
+     */
+    uint32_t get_freq() const override;
+
+    /**
+     * @brief Get the maximum possible counter value
+     * @note Used to differentiate between a 16-bit and 32-bit timer
+     * 
+     * @return uint32_t The maximum count
+     */
+    uint32_t get_max_count() const override;
 
 private:
     uint32_t timer_freq;
     uint32_t prescaler;
     uint32_t period_ticks;
-    uint32_t compare_ticks;
     TIM_TypeDef* base_addr;
 };
 };  // namespace Stmf4
