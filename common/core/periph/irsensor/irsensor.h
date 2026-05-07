@@ -24,7 +24,7 @@ enum class IrStates : uint8_t
     SAMPLE_ON_1,
     SAMPLE_ON_2,
     EMITTER_OFF,
-    CALCULATE  // Settle period and calculation
+    CALCULATE,  // Settle period and calculation
 };
 
 struct IrParams
@@ -66,6 +66,20 @@ public:
     uint16_t get_ir_val() const;
 
     /**
+     * @brief Get the current state of the IR Sensor
+     * 
+     * @return IrStates The IR Sensor's current state
+     */
+    IrStates get_state() const;
+
+    /**
+     * @brief Checks if CALCULATE state has finished
+     * 
+     * @return true IR Sensor has went through all states, false otherwise
+     */
+    bool is_done() const;
+
+    /**
      * @brief Default destructor
      * 
      */
@@ -88,6 +102,7 @@ private:
     std::array<uint16_t, 2>
         combined;         // ADC sample with ambient light + true IR
     uint16_t ir_val = 0;  // Final calculated ADC value with just true IR
+    bool done;
 };
 };  // namespace MM
 

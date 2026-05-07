@@ -6,15 +6,26 @@
 #pragma once
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include "irsensor.h"
 
 namespace MM
 {
 
+// Struct for storing IR Sensor values
+struct IrValues
+{
+    uint16_t left = 0;
+    uint16_t front_left = 0;
+    uint16_t front_right = 0;
+    uint16_t right = 0;
+};
+
 struct IrControllerParams
 {
-    std::array<IrSensor*, 4> ir_sequence;
+    std::array<IrSensor, 4>& ir_sequence;
+    IrValues& ir_vals;
 };
 
 class IrController
@@ -35,6 +46,13 @@ public:
     bool update();
 
     /**
+     * @brief Get a struct of the current ir sensor vals for one sequence
+     * 
+     * @return IrValues& 
+     */
+    IrValues& get_ir_vals() const;
+
+    /**
      * @brief IR Controller Destructor
      * 
      */
@@ -42,6 +60,7 @@ public:
 
 private:
     // Store reference to 4 IR Sensors
-    std::array<IrSensor*, 4> ir_sequence;
+    std::array<IrSensor, 4>& ir_sequence;
+    IrValues& ir_vals;
 };
 }  // namespace MM

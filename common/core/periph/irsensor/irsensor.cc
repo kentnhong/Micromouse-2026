@@ -23,6 +23,7 @@ bool IrSensor::update()
     switch (current_state)
     {
         case IrStates::SAMPLE_OFF_1:
+            done = false;
             if (dma.complete())
             {
                 result =
@@ -64,6 +65,7 @@ bool IrSensor::update()
         case IrStates::CALCULATE:
             calculate();
             current_state = IrStates::SAMPLE_OFF_1;
+            done = true;
             break;
         default:
             // Turn off IR Emitter and reset state
@@ -77,6 +79,16 @@ bool IrSensor::update()
 uint16_t IrSensor::get_ir_val() const
 {
     return ir_val;
+}
+
+IrStates IrSensor::get_state() const
+{
+    return current_state;
+}
+
+bool IrSensor::is_done() const
+{
+    return done;
 }
 
 void IrSensor::calculate()
