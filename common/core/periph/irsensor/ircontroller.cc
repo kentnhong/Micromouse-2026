@@ -7,7 +7,8 @@ IrController::IrController(IrControllerParams& params_)
 {
 }
 
-bool IrController::update()
+// TODO: REDO this whole logic, we want to implement states for IR Controller too so that update gets called every 100us in the ISR
+bool IrController::update(IrSensor& ir)
 {
     bool result = true;
 
@@ -41,6 +42,11 @@ bool IrController::update()
                 ir_vals.right = 0;
         }
     }
+    return true;
+}
+
+bool IrController::sequence()
+{
     return true;
 }
 

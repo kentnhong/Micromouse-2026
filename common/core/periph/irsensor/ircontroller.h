@@ -13,6 +13,13 @@
 namespace MM
 {
 
+enum class IrControllerStates : uint8_t
+{
+    LEFT = 0,
+    FRONT_LEFT,
+    FRONT_RIGHT,
+    RIGHT
+};
 // Struct for storing IR Sensor values
 struct IrValues
 {
@@ -43,7 +50,14 @@ public:
      * 
      * @return true update success, false otherwise
      */
-    bool update();
+    bool update(IrSensor& ir);
+
+    /**
+     * @brief Iterates through all IR sensors to retrieve IR values for each sensor
+     * 
+     * @return true succressfully iterated through all ir sensors, false otherwise
+     */
+    bool sequence();
 
     /**
      * @brief Get a struct of the current ir sensor vals for one sequence
@@ -61,6 +75,10 @@ public:
 private:
     // Store reference to 4 IR Sensors
     std::array<IrSensor, 4>& ir_sequence;
+
+    // Store ir vals for all 4 sensors
     IrValues& ir_vals;
+
+    IrControllerStates current_state;
 };
 }  // namespace MM
