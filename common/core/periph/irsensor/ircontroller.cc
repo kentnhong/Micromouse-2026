@@ -7,52 +7,76 @@ IrController::IrController(IrControllerParams& params_)
 {
 }
 
-// TODO: REDO this whole logic, we want to implement states for IR Controller too so that update gets called every 100us in the ISR
-bool IrController::update(IrSensor& ir)
+bool IrController::update()
 {
-    bool result = true;
-
-    // For loop through all IR Sensors
-    for (size_t i = 0; i < ir_sequence.size(); i++)
+    if (sequence_done)
     {
-        while (ir_sequence[i].is_done() != true)
-        {
-            result = result && ir_sequence[i].update();
-        }
-
-        // TODO: Maybe implement this in a way where its reusable logic for values larger than 3
-        switch (i)
-        {
-            case 0:
-                ir_vals.left = ir_sequence[i].get_ir_val();
-                break;
-            case 1:
-                ir_vals.front_left = ir_sequence[i].get_ir_val();
-                break;
-            case 2:
-                ir_vals.front_right = ir_sequence[i].get_ir_val();
-                break;
-            case 3:
-                ir_vals.right = ir_sequence[i].get_ir_val();
-                break;
-            default:
-                ir_vals.left = 0;
-                ir_vals.front_left = 0;
-                ir_vals.front_right = 0;
-                ir_vals.right = 0;
-        }
+        // Hold until consumer acknowledges completion via is_sequence_done().
+        return true;
     }
-    return true;
+
+    bool result = true;
+    switch (current_state)
+    {
+        case IrControllerStates::LEFT:
+            result = result && ir_sequence[0].update();
+            if (ir_sequence[0].is_done())
+            {
+                ir_vals.left = ir_sequence[0].get_ir_val();
+                current_state = IrControllerStates::FRONT_LEFT;
+                result = result && ir_sequence[0].reset();
+            }
+            break;
+        case IrControllerStates::FRONT_LEFT:
+            result = result && ir_sequence[1].update();
+            if (ir_sequence[1].is_done())
+            {
+                ir_vals.front_left = ir_sequence[1].get_ir_val();
+                current_state = IrControllerStates::FRONT_RIGHT;
+                result = result && ir_sequence[1].reset();
+            }
+            break;
+        case IrControllerStates::FRONT_RIGHT:
+            result = result && ir_sequence[2].update();
+            if (ir_sequence[2].is_done())
+            {
+                ir_vals.front_right = ir_sequence[2].get_ir_val();
+                current_state = IrControllerStates::RIGHT;
+                result = result && ir_sequence[2].reset();
+            }
+            break;
+        case IrControllerStates::RIGHT:
+            result = result && ir_sequence[3].update();
+            if (ir_sequence[3].is_done())
+            {
+                ir_vals.right = ir_sequence[3].get_ir_val();
+                result = result && ir_sequence[3].reset();
+                current_state = IrControllerStates::LEFT;
+                sequence_done = true;
+            }
+            break;
+    }
+    return result;
 }
 
-bool IrController::sequence()
-{
-    return true;
-}
-
-IrValues& IrController::get_ir_vals() const
+IrValues& IrController::get_ir_vals()
 {
     return ir_vals;
+}
+
+const IrValues& IrController::get_ir_vals() const
+{
+    return ir_vals;
+}
+
+bool IrController::is_sequence_done()
+{
+    if (!sequence_done)
+    {
+        return false;
+    }
+    sequence_done = false;
+    return true;
 }
 
 }  // namespace MM

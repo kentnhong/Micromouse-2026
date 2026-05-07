@@ -14,4 +14,11 @@ namespace Stmf4
 // Hardware specific periph object creation
 }
 // Non-hardware specific object creation and initialization
+extern "C" void TIM1_IRQHandler()
+{
+    // Clear the update interrupt flag
+    TIM1->SR &= ~TIM_SR_UIF;
+
+    // IrController update goes here
+}
 }  // namespace MM

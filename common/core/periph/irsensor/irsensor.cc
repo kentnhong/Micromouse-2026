@@ -7,13 +7,13 @@ IrSensor::IrSensor(IrParams params_)
 {
 }
 
-bool IrSensor::init()
+bool IrSensor::reset()
 {
+    bool result = true;
+    result = result && emitter.set(false);
     current_state = IrStates::SAMPLE_OFF_1;
-    ambient.fill(0);
-    combined.fill(0);
-    ir_val = 0;
-    return emitter.set(0);
+    done = false;
+    return result;
 }
 
 bool IrSensor::update()
@@ -23,7 +23,6 @@ bool IrSensor::update()
     switch (current_state)
     {
         case IrStates::SAMPLE_OFF_1:
-            done = false;
             if (dma.complete())
             {
                 result =
@@ -64,13 +63,11 @@ bool IrSensor::update()
             break;
         case IrStates::CALCULATE:
             calculate();
-            current_state = IrStates::SAMPLE_OFF_1;
             done = true;
             break;
         default:
             // Turn off IR Emitter and reset state
-            result = result && emitter.set(false);
-            current_state = IrStates::SAMPLE_OFF_1;
+            result = result && reset();
     }
 
     return result;

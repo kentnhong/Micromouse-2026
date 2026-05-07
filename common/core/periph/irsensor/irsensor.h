@@ -45,11 +45,11 @@ public:
     explicit IrSensor(IrParams params_);
 
     /**
-     * @brief IR Sensor initialization
+     * @brief Reset the IR Sensor to start its state sequence from the beginning
      * 
-     * @return true initialization success, false otherwise
+     * @return true reset success, false otherwise
      */
-    bool init();
+    bool reset();
 
     /**
      * @brief Execute current IR Sensor state and move to next state
@@ -97,12 +97,12 @@ private:
     Adc& adc;
     Dma& dma;
     Gpio& emitter;
-    IrStates current_state;
-    std::array<uint16_t, 2> ambient;  // ADC samples with ambient light
+    IrStates current_state = IrStates::SAMPLE_OFF_1;
+    std::array<uint16_t, 2> ambient{};  // ADC samples with ambient light
     std::array<uint16_t, 2>
-        combined;         // ADC sample with ambient light + true IR
+        combined{};       // ADC sample with ambient light + true IR
     uint16_t ir_val = 0;  // Final calculated ADC value with just true IR
-    bool done;
+    bool done = false;
 };
 };  // namespace MM
 

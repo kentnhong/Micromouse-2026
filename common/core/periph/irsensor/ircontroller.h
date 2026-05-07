@@ -6,7 +6,6 @@
 #pragma once
 
 #include <array>
-#include <cstddef>
 #include <cstdint>
 #include "irsensor.h"
 
@@ -50,21 +49,22 @@ public:
      * 
      * @return true update success, false otherwise
      */
-    bool update(IrSensor& ir);
-
-    /**
-     * @brief Iterates through all IR sensors to retrieve IR values for each sensor
-     * 
-     * @return true succressfully iterated through all ir sensors, false otherwise
-     */
-    bool sequence();
+    bool update();
 
     /**
      * @brief Get a struct of the current ir sensor vals for one sequence
      * 
      * @return IrValues& 
      */
-    IrValues& get_ir_vals() const;
+    IrValues& get_ir_vals();
+    const IrValues& get_ir_vals() const;
+
+    /**
+     * @brief Checks if IR Sensor Sequence is finished (went through all 4 sensors)
+     * 
+     * @return true sequence finished, false otherwise
+     */
+    bool is_sequence_done();
 
     /**
      * @brief IR Controller Destructor
@@ -73,12 +73,9 @@ public:
     ~IrController() = default;
 
 private:
-    // Store reference to 4 IR Sensors
-    std::array<IrSensor, 4>& ir_sequence;
-
-    // Store ir vals for all 4 sensors
-    IrValues& ir_vals;
-
-    IrControllerStates current_state;
+    std::array<IrSensor, 4>& ir_sequence;  // Store reference to 4 IR Sensors
+    IrValues& ir_vals;                     // Store ir vals for all 4 sensors
+    IrControllerStates current_state = IrControllerStates::LEFT;
+    bool sequence_done = false;
 };
 }  // namespace MM
