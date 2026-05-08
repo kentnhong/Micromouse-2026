@@ -1,95 +1,189 @@
 #include "floodfill.h"
+#include <algorithm>
+#include <iterator>
+#include <queue>
 
 namespace MM
 {
 
-void Floodfill::update()
+Floodfill::Floodfill()
 {
-    // Update logic for the floodfill sequence
-
-    // Initialize the walls of the maze
     Floodfill::init_wall();
-
-    /// TODO: Implement the floodfill algorithm to update the distance values of the maze squares
 }
 
-/// *************************************************************************///
+void Floodfill::update()
+{
+    switch (mode)
+    {
+        case Mode::SEARCH:
+            update_search();
+            break;
+        case Mode::ZOOMING:
+            update_zooming();
+            break;
+    }
+}
 
-Floodfill::Direction Floodfill::mark_wall(std::queue<Position> pos, int a,
+void Floodfill::set_mode(Mode next_mode)
+{
+    mode = next_mode;
+}
+
+void Floodfill::set_sensor_data(bool front_wall, bool right_wall,
+                                bool left_wall)
+{
+    sensor_front_wall = front_wall;
+    sensor_right_wall = right_wall;
+    sensor_left_wall = left_wall;
+}
+
+char Floodfill::get_next_move()
+{
+    constexpr int kDirectionCount{4};
+    constexpr int dx[kDirectionCount]{0, 1, 0, -1};
+    constexpr int dy[kDirectionCount]{1, 0, -1, 0};
+
+    Position current{current_x, current_y};
+
+    int best_dir{dir};
+    unsigned char best_distance{255};
+
+    // Explore each of the four possible directions to find the best move based on the distance values in the maze
+    for (int next_dir{0}; next_dir < kDirectionCount; ++next_dir)
+    {
+        // Check if there is a wall in the current direction from the current position
+        const auto direction{static_cast<Direction>(next_dir)};
+
+        // If there is a known wall in this direction, skip it
+        if (known_wall(current, direction))
+        {
+            continue;
+        }
+
+        // Calculate the coordinates of the neighboring cell in the current direction
+        const int next_x{current.x + dx[next_dir]};
+        const int next_y{current.y + dy[next_dir]};
+
+        // Check if the neighboring cell is within the bounds of the maze
+        if (next_x < 0 || next_x >= MAZE_SIZE || next_y < 0 ||
+            next_y >= MAZE_SIZE)
+        {
+            continue;
+        }
+
+        // Update the best direction if the neighboring cell has a smaller distance value than the current best distance
+        if (maze[next_x][next_y] < best_distance)
+        {
+            best_distance = maze[next_x][next_y];
+            best_dir = next_dir;
+        }
+    }
+
+    // Calculate the relative turn needed to face the best direction and return the corresponding move
+    const int turn{(best_dir - dir + kDirectionCount) % kDirectionCount};
+
+    // Update the current direction to the best direction
+    dir = best_dir;
+
+    // Track the path for readings the next move
+    track_path();
+
+    // Return the move corresponding to the relative turn
+    if (turn == 0)
+    {
+        return 'F';
+    }
+    if (turn == 1)
+    {
+        return 'R';
+    }
+    if (turn == 2)
+    {
+        return 'U';
+    }
+    return 'L';
+}
+
+void Floodfill::update_search()
+{
+    Position current{current_x, current_y};
+    mark_wall(current, relative_direction(0), sensor_front_wall);
+    mark_wall(current, relative_direction(1), sensor_right_wall);
+    mark_wall(current, relative_direction(3), sensor_left_wall);
+    flood();
+}
+
+void Floodfill::update_zooming()
+{
+    // TODO : Implement the logic to update the floodfill algorithm in ZOOMING mode
+    flood();
+}
+
+Floodfill::Direction Floodfill::relative_direction(int relative_turn) const
+{
+    return static_cast<Direction>((dir + relative_turn) % 4);
+}
+
+/// @private functions
+
+Floodfill::Direction Floodfill::mark_wall(Position cell, Direction dir,
                                           bool has_wall)
 {
     /// NOTE: has_wall indicates whether there is a wall in the direction 'a' from the current position
     ///       If has_wall is true, we mark the wall in the walls array. If has_wall is false, we do not mark it,
     ///       indicating that there is no wall in that direction.
 
-    // Based on the direction 'a' mark the wall
-    switch (static_cast<Direction>(a))
+    if (has_wall)
     {
-        case Direction::NORTH:
-            // Handle NORTH direction
-            if (has_wall)
-            {
-                // Mark the wall in the NORTH direction
-                walls[pos.front().x][pos.front().y] |= (1 << 0);
-            }
-            break;
-        case Direction::EAST:
-            // Handle EAST direction
-            if (has_wall)
-            {
-                // Mark the wall in the EAST direction
-                walls[pos.back().x][pos.back().y] |= (1 << 1);
-            }
-            break;
-        case Direction::SOUTH:
-            // Handle SOUTH direction
-            if (has_wall)
-            {
-                // Mark the wall in the SOUTH direction
-                walls[pos.front().x][pos.front().y] |= (1 << 2);
-            }
-            break;
-        case Direction::WEST:
-            // Handle WEST direction
-            if (has_wall)
-            {
-                // Mark the wall in the WEST direction
-                walls[pos.front().x][pos.front().y] |= (1 << 3);
-            }
-            break;
+        walls[cell.x][cell.y] |= (1 << static_cast<int>(dir));
     }
-    return Direction::NORTH;  // Default case
-}
 
-bool Floodfill::known_wall(std::queue<Position> path, int a)
-{
-    // Check the bit at position 'a' in the walls array for cell (x,y)
-    return (walls[path.front().x][path.front().y] & (1 << a)) != 0;
+    if (!has_wall)
+    {
+        return dir;
+    }
+
+    constexpr int kDirectionCount{4};
+    constexpr int dx[kDirectionCount]{0, 1, 0, -1};
+    constexpr int dy[kDirectionCount]{1, 0, -1, 0};
+
+    const int wall_dir{static_cast<int>(dir)};
+    const int neighbor_x{cell.x + dx[wall_dir]};
+    const int neighbor_y{cell.y + dy[wall_dir]};
+
+    if (neighbor_x >= 0 && neighbor_x < MAZE_SIZE && neighbor_y >= 0 &&
+        neighbor_y < MAZE_SIZE)
+    {
+        const int opposite_dir{(wall_dir + 2) % kDirectionCount};
+        walls[neighbor_x][neighbor_y] |= (1 << opposite_dir);
+    }
+
+    return dir;
 }
 
 bool Floodfill::track_path()
 {
-    // (xuperX, xuperY) represents the current position of the mouse in the maze
+    // (current_x, current_y) represents the current position of the mouse in the maze
     // 0 = NORTH, 1 = EAST, 2 = SOUTH, 3 = WEST
 
     // Logic to track the path from start to goal
     if (dir == 0)
     {
-        xuperY++;  // Y because we are moving NORTH
+        current_y++;  // Y because we are moving NORTH
     }
     else if (dir == 1)
     {
-        xuperX++;  // X because we are moving EAST
+        current_x++;  // X because we are moving EAST
     }
     else if (dir == 2)
     {
-        xuperY--;  // Y because we are moving SOUTH
+        current_y--;  // Y because we are moving SOUTH
     }
     else if (dir == 3)
     {
-        xuperX--;  // X because we are moving WEST
+        current_x--;  // X because we are moving WEST
     }
-    else if (xuperX == 7 && xuperY == 7)
+    else if (current_x == 7 && current_y == 7)
     {
         return true;  // Goal reached
     }
@@ -99,55 +193,84 @@ bool Floodfill::track_path()
 
 bool Floodfill::flood()
 {
-    /// NOTE: At the diagram level it will look like this:
-    ///      1. Start at the initial position (0,0) and enqueue it
-    ///      2. While the queue is not empty:
-    ///         a. Dequeue the front position from the queue
-    ///         b. For each of the four directions (NORTH, EAST, SOUTH, WEST):
-    ///            i. Check if there is a known wall in that direction using known_wall function
-    ///            ii. If there is no wall, enqueue the adjacent position in that direction
-    ///      3. Repeat until the queue is empty or the goal is reached
+    constexpr unsigned char kUnknownDistance{255};
+    constexpr int kDirectionCount{
+        4};  // Number of possible directions (NORTH, EAST, SOUTH, WEST)
+    const int dx[kDirectionCount]{0, 1, 0,
+                                  -1};  // Change in x for each direction
+    const int dy[kDirectionCount]{1, 0, -1,
+                                  0};  // Change in y for each direction
 
-    pos.push({xuperX, xuperY});
+    // Initialize the maze distances to UNKNOWN_DISTANCE
+    std::fill_n(&maze[0][0], MAZE_SIZE * MAZE_SIZE, kUnknownDistance);
 
-    while (!pos.empty())
+    // Initialize the queue for the floodfill algorithm
+    std::queue<Position> q;
+
+    // Define the goal positions (center of the maze)
+    constexpr Position goals[4]{{7, 7}, {7, 8}, {8, 7}, {8, 8}};
+
+    // Set the distance of the goal positions to 0 and enqueue them
+    for (const auto& goal : goals)
     {
-        // Get the current position from the queue
-        Position current = pos.front();
+        // Set the distance of the goal position to 0
+        maze[goal.x][goal.y] = 0;
+        // Enqueue the goal position
+        q.push(goal);
+    }
 
-        // Remove the current position from the queue
-        pos.pop();
+    // Perform the floodfill algorithm using a breadth-first search approach
+    while (!q.empty())
+    {
+        // Dequeue the current position
+        const Position current = q.front();
+        q.pop();
 
-        // Check all four directions from the current position
-        if (known_wall(pos, static_cast<int>(Direction::NORTH)))
+        // Calculate the distance for the neighboring cells
+        const unsigned char next_distance{
+            static_cast<unsigned char>(maze[current.x][current.y] + 1)};
+
+        // Explore each of the four possible directions
+        for (int dir{0}; dir < kDirectionCount; ++dir)
         {
-            // If there is no wall to the NORTH, enqueue the position to the NORTH
-            pos.push({current.x, current.y + 1});
-        }
-        if (known_wall(pos, static_cast<int>(Direction::EAST)))
-        {
-            // If there is no wall to the EAST, enqueue the position to the EAST
-            pos.push({current.x + 1, current.y});
-        }
-        if (known_wall(pos, static_cast<int>(Direction::SOUTH)))
-        {
-            // If there is no wall to the SOUTH, enqueue the position to the SOUTH
-            pos.push({current.x, current.y - 1});
-        }
-        if (known_wall(pos, static_cast<int>(Direction::WEST)))
-        {
-            // If there is no wall to the WEST, enqueue the position to the WEST
-            pos.push({current.x - 1, current.y});
+            // Check if there is a wall in the current direction from the current position
+            if (known_wall(current, static_cast<Direction>(dir)))
+            {
+                continue;
+            }
+
+            // Calculate the coordinates of the neighboring cell in current direction
+            const int next_x{current.x + dx[dir]};
+            const int next_y{current.y + dy[dir]};
+
+            // Check if the neighboring cell is within the bounds of the maze and has
+            // not been visited (distance is kUnknownDistance)
+
+            if (next_x < 0 || next_x >= MAZE_SIZE || next_y < 0 ||
+                next_y >= MAZE_SIZE || maze[next_x][next_y] != kUnknownDistance)
+            {
+                continue;
+            }
+
+            // Update the distance for the neighboring cell and enqueue it
+            maze[next_x][next_y] = next_distance;
+            q.push({next_x, next_y});
         }
     }
+
     return true;
 }
 
-bool Floodfill::check_wall()
+bool Floodfill::check_wall(Position cell, Direction dir)
 {
-    // TODO: Implement a logic where it's of the data from the sensors to check if the maze has been fully explored.
-    //       Fetch directly from navigation system
-    return true;
+    // Does this cell have a wall in this direction?
+    return (walls[cell.x][cell.y] & (1 << static_cast<int>(dir))) != 0;
+}
+
+bool Floodfill::known_wall(Position cell, Direction dir)
+{
+    // Check if there is a wall in the direction 'a' from the current position
+    return (walls[cell.x][cell.y] & (1 << static_cast<int>(dir))) != 0;
 }
 
 bool Floodfill::init_wall()

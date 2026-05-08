@@ -7,29 +7,65 @@
 
 #pragma once
 #include <algorithm>
-#include <array>
 #include <cstdint>
-#include <cstdio>
-#include <cstdlib>
-#include <iterator>
-#include <queue>
 
-/**
-* @note INPUT TO THE ALGORITHM - navigation data from the mouse's sensors indicating the presence of walls in the four cardinal directions 
-        (NORTH, EAST, SOUTH, WEST) at each position in the maze.
-* @note OUTPUT OF THE ALGORITHM - a path from the start position to the goal position, 
-*       which can be used by the mouse to navigate through the maze.
-*/
+// TODO: Rightnow we rely on the fake sensor data being set in the main loop of the simulator,
+// but eventually we will need to replace this with real sensor data coming in from the mouse
 
 namespace MM
 {
 class Floodfill
 {
 public:
+    enum class Mode
+    {
+        SEARCH,
+        ZOOMING
+    };
+
+    Floodfill();
+
     /**
     * @brief Floodfill algorithm to update the distance values of the maze squares
     */
     void update();
+
+    /**
+    * @brief Sets the mode of the floodfill algorithm
+    * @param next_mode The mode to set (SEARCH or ZOOMING)
+    */
+    void set_mode(Mode next_mode);
+
+    /**
+    * @brief Get the current mode and state of the floodfill algorithm
+    * @return The current mode of the algorithm
+    */
+    Mode get_mode() const
+    {
+        return mode;
+    }
+
+    /**
+    * @brief Set the sensor data for the current position of the mouse in the maze
+    * @param front_wall, right_wall, left_wall detecting true or false 
+    */
+    void set_sensor_data(bool front_wall, bool right_wall, bool left_wall);
+
+    /**
+    * @brief Get the next move for the mouse based on the current state of the floodfill algorithm
+    * @return A character representing the next move 
+    * ('F' for forward, 'R' for turn right, 'L' for turn left, 'U' for U-turn)
+    */
+    char get_next_move();
+
+    /**
+    * @brief Get the calculated distance value for a specific cell
+    * @return The distance to the goal
+    */
+    unsigned char get_distance(int x, int y) const
+    {
+        return maze[x][y];
+    }
 
 private:
     /**
@@ -54,18 +90,21 @@ private:
     };
 
     /**
-    * @brief Marks a wall in the maze
-    * @param a Direction of the wall
-    * @param has_wall Boolean indicating if a wall exists
+    * @brief Marks a wall in the maze based on the sensor data
+    * @param cell The current position of the mouse in the maze
+    * @param dir The direction in which to mark the wall
+    * @param has_wall Boolean indicating whether there is a wall in that direction
+    * @return The direction in which the wall was marked
     */
-    Direction mark_wall(std::queue<Position> pos, int a, bool has_wall);
+    Direction mark_wall(Position cell, Direction dir, bool has_wall);
 
     /**
     * @brief Checks if a wall is known at a specific position and direction
-    * @param a Direction to check
+    * @param cell The position to check
+    * @param dir The direction to check
     * @return Boolean indicating if a wall is known
     */
-    bool known_wall(std::queue<Position> path, int a);
+    bool known_wall(Position cell, Direction dir);
 
     /**
     * @brief Tracks the path from the start to the goal
@@ -80,10 +119,12 @@ private:
     bool flood();
 
     /**
-    * @brief Checks if the maze has been fully explored
-    * @return Boolean indicating if the maze is fully explored
+    * @brief Checks if a wall exists at a specific position and direction
+    * @param cell The position to check
+    * @param dir The direction to check
+    * @return Boolean indicating if a wall exists
     */
-    bool check_wall();
+    bool check_wall(Position cell, Direction dir);
 
     /**
     * @brief Initializes the wall information for the maze
@@ -91,33 +132,37 @@ private:
     */
     bool init_wall();
 
-    /// *********************************************************** ///
+    /**
+    * @brief Updates the search mode of the algorithm
+    */
+    void update_search();
 
-    // Queue for floodfill algorithm
-    std::queue<Position> pos;
+    /**
+    * @brief Updates the zooming mode of the algorithm
+    */
+    void update_zooming();
 
-    // Deque for path tracking
-    std::queue<Position> path;
+    /**
+    * @brief Converts a relative turn to an absolute direction based on the current direction
+    * @param relative_turn The relative turn (0 for forward, 1 for right, 2 for backward, 3 for left)
+    * @return The absolute direction corresponding to the relative turn
+    */
+    Direction relative_direction(int relative_turn) const;
 
-    /// SIZE: 16x16 maze
     static constexpr int MAZE_SIZE = 16;
-
-    int dir{0};
-    int turn{0};
-    int target{0};
-    int num{14};
-    int min{0};
-    int max{0};
-    int count{0};
-    std::array<int, 4> distance;
-
     unsigned char maze[MAZE_SIZE][MAZE_SIZE];
-    unsigned char check[MAZE_SIZE][MAZE_SIZE];
     char walls[MAZE_SIZE][MAZE_SIZE];
 
-    // position of the mouse in the maze using in track_path();
-    // where xuperX is the x-coordinate and xuperY is the y-coordinate
-    int xuperX{0};
-    int xuperY{0};
+    int dir{0};
+    Mode mode{Mode::SEARCH};
+    int current_x{0};
+    int current_y{0};
+
+    // TODO: Will need to replace this when we have real sensor data coming in from the mouse
+    // Which is the IR sensor data indicating the presence of walls in the four cardinal directions
+    bool sensor_front_wall{false};
+    bool sensor_right_wall{false};
+    bool sensor_left_wall{false};
 };
+
 }  // namespace MM
