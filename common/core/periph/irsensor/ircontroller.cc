@@ -19,38 +19,38 @@ bool IrController::update()
     switch (current_state)
     {
         case IrControllerStates::LEFT:
-            result = result && ir_sequence[0].update();
-            if (ir_sequence[0].is_done())
+            result = result && ir_sequence[0]->update();
+            if (ir_sequence[0]->is_done())
             {
-                ir_vals.left = ir_sequence[0].get_ir_val();
+                ir_vals.left = ir_sequence[0]->get_ir_val();
                 current_state = IrControllerStates::FRONT_LEFT;
-                result = result && ir_sequence[0].reset();
+                result = result && ir_sequence[0]->reset();
             }
             break;
         case IrControllerStates::FRONT_LEFT:
-            result = result && ir_sequence[1].update();
-            if (ir_sequence[1].is_done())
+            result = result && ir_sequence[1]->update();
+            if (ir_sequence[1]->is_done())
             {
-                ir_vals.front_left = ir_sequence[1].get_ir_val();
+                ir_vals.front_left = ir_sequence[1]->get_ir_val();
                 current_state = IrControllerStates::FRONT_RIGHT;
-                result = result && ir_sequence[1].reset();
+                result = result && ir_sequence[1]->reset();
             }
             break;
         case IrControllerStates::FRONT_RIGHT:
-            result = result && ir_sequence[2].update();
-            if (ir_sequence[2].is_done())
+            result = result && ir_sequence[2]->update();
+            if (ir_sequence[2]->is_done())
             {
-                ir_vals.front_right = ir_sequence[2].get_ir_val();
+                ir_vals.front_right = ir_sequence[2]->get_ir_val();
                 current_state = IrControllerStates::RIGHT;
-                result = result && ir_sequence[2].reset();
+                result = result && ir_sequence[2]->reset();
             }
             break;
         case IrControllerStates::RIGHT:
-            result = result && ir_sequence[3].update();
-            if (ir_sequence[3].is_done())
+            result = result && ir_sequence[3]->update();
+            if (ir_sequence[3]->is_done())
             {
-                ir_vals.right = ir_sequence[3].get_ir_val();
-                result = result && ir_sequence[3].reset();
+                ir_vals.right = ir_sequence[3]->get_ir_val();
+                result = result && ir_sequence[3]->reset();
                 current_state = IrControllerStates::LEFT;
                 sequence_done = true;
             }
