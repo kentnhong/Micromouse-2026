@@ -5,39 +5,30 @@
 * @version 0.1
 */
 
-/**
-* @note Generate dynamic speed setpoints based on progress.
-* While, PID follows those setpoints as closely as possible
-* It helps with smoothing the accel & decel phases.
-*/
-
-/// NOTE: IGNORE THIS FOR NOW THIS HAS TO BE CHANGE RELATIVE TO ticks/second rightnow I have in RPM format
-///       This makes the profile invalid but I will change it later once PID is working with ticks/s
-
 #pragma once
+#include <cmath>
 #include "enc_math.h"
 
+/**
+* @note This profile taking in the ticks/s and then outputting the desired ticks/s for the left and right motors.
+*       The trapezoidal profile will have a max speed, min speed, and acceleration/deceleration rate that can be tuned.
+*/
 namespace MM
 {
 class Trapezoidal
 {
 public:
-    struct VelocitySetpoint
+    /**
+    * @brief Struct to hold the desired velocity setpoint for the left and right motors.
+    */
+    struct EncoderInput
     {
-        float left;
-        float right;
+        int32_t left = 0;
+        int32_t right = 0;
     };
 
-    /**
-    * @brief Generates velocity setpoints for a trapezoidal velocity profile
-    * @param target The target distance to travel (in mm)
-    * @param encoder The current encoder readings for both wheels
-    * @param ticks_to_mm Conversion factor from encoder ticks to millimeters
-    * @param turn Whether the robot is turning (1 for turn, 0 for straight)
-    * @return A boolean indicating whether the target distance has been reached within a threshold
-    */
-    VelocitySetpoint trapezoidal(float target, const EncoderInput& encoder,
-                                 float ticks_to_mm, uint8_t turn);
+    // TODO: Need to change params this based on the ticks/s and max speed and min for the decel/accel
+    bool trapezoidal(const EncoderInput& input, float dt_sec);
 
     bool is_complete() const
     {
@@ -45,12 +36,10 @@ public:
     }
 
 private:
-    float max_speed{100.0f};                // [mm/s]
-    float min_speed{20.0f};                 // [mm/s]
-    float acceleration_distance{100.0f};    // [mm]
-    float target_distance_threshold{1.0f};  // [mm]
-    bool complete{false};
+    // ticks/s for left and right motors
+    float max_speed{};
+    float min_speed{0};
 
-    // Need to change all of this later based on testing and tuning
+    bool complete{false};
 };
 }  // namespace MM
