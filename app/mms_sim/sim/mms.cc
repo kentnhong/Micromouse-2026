@@ -70,8 +70,8 @@ void Simulation::turnLeft()
 
 void Simulation::turnAround()
 {
-    sim.turnRight();
-    sim.turnRight();
+    turnRight();
+    turnRight();
 }
 
 }  // namespace MM
