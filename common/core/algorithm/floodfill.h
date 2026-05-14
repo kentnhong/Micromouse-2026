@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <cstdint>
 
-// TODO: Rightnow we rely on the fake sensor data being set in the main loop of the simulator,
+// TODO: Right now we rely on the fake sensor data being set in the main loop of the simulator,
 // but eventually we will need to replace this with real sensor data coming in from the mouse
 
 namespace MM
@@ -158,8 +158,7 @@ private:
     int current_x{0};
     int current_y{0};
 
-    // TODO: Will need to replace this when we have real sensor data coming in from the mouse
-    // Which is the IR sensor data indicating the presence of walls in the four cardinal directions
+    // TODO: IR interface will make decision for this variables to be T/F
     bool sensor_front_wall{false};
     bool sensor_right_wall{false};
     bool sensor_left_wall{false};

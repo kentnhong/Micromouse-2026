@@ -1,22 +1,29 @@
 #include "mms.h"
 #include <iostream>
 
-void logMsg(const std::string& text)
+namespace MM
+{
+
+Simulation::Simulation()
+{
+}
+
+void Simulation::logMsg(const std::string& text)
 {
     std::cerr << text << std::endl;
 }
 
-void setText(int x, int y, const std::string& text)
+void Simulation::setText(int x, int y, const std::string& text)
 {
     std::cout << "setText " << x << " " << y << " " << text << std::endl;
 }
 
-void setColor(int x, int y, char color)
+void Simulation::setColor(int x, int y, char color)
 {
     std::cout << "setColor " << x << " " << y << " " << color << std::endl;
 }
 
-bool wallFront()
+bool Simulation::wallFront()
 {
     std::cout << "wallFront" << std::endl;
     std::string response;
@@ -24,7 +31,7 @@ bool wallFront()
     return response == "true";
 }
 
-bool wallRight()
+bool Simulation::wallRight()
 {
     std::cout << "wallRight" << std::endl;
     std::string response;
@@ -32,7 +39,7 @@ bool wallRight()
     return response == "true";
 }
 
-bool wallLeft()
+bool Simulation::wallLeft()
 {
     std::cout << "wallLeft" << std::endl;
     std::string response;
@@ -40,29 +47,31 @@ bool wallLeft()
     return response == "true";
 }
 
-void moveForward()
+void Simulation::moveForward()
 {
     std::cout << "moveForward" << std::endl;
     std::string response;
     std::cin >> response;
 }
 
-void turnRight()
+void Simulation::turnRight()
 {
     std::cout << "turnRight" << std::endl;
     std::string response;
     std::cin >> response;
 }
 
-void turnLeft()
+void Simulation::turnLeft()
 {
     std::cout << "turnLeft" << std::endl;
     std::string response;
     std::cin >> response;
 }
 
-void turnAround()
+void Simulation::turnAround()
 {
-    turnRight();
-    turnRight();
+    sim.turnRight();
+    sim.turnRight();
 }
+
+}  // namespace MM

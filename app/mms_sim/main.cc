@@ -4,16 +4,17 @@
 using namespace MM;
 int main()
 {
-    logMsg("Running Floodfill in MMS Simulator...");
+    Simulation sim;
+    sim.logMsg("Running Floodfill in MMS Simulator...");
 
     MM::Floodfill mouseAlgo;
 
     while (1)
     {
         // 1. Read sensors from the MMS Simulator
-        bool f_wall = wallFront();
-        bool r_wall = wallRight();
-        bool l_wall = wallLeft();
+        bool f_wall = sim.wallFront();
+        bool r_wall = sim.wallRight();
+        bool l_wall = sim.wallLeft();
 
         // 2. Pass reality to your algorithm
         mouseAlgo.set_sensor_data(f_wall, r_wall, l_wall);
@@ -28,12 +29,12 @@ int main()
             {
                 unsigned char dist = mouseAlgo.get_distance(x, y);
                 // Print the distance text on the cell
-                setText(x, y, std::to_string(dist));
+                sim.setText(x, y, std::to_string(dist));
 
                 // Color the center goal green
                 if ((x == 7 || x == 8) && (y == 7 || y == 8))
                 {
-                    setColor(x, y, 'G');
+                    sim.setColor(x, y, 'G');
                 }
             }
         }
@@ -42,27 +43,27 @@ int main()
         char move = mouseAlgo.get_next_move();
 
         std::string moveStr(1, move);
-        logMsg("Algorithm chose to move: " + moveStr);
+        sim.logMsg("Algorithm chose to move: " + moveStr);
 
         // 5. Execute the move mechanically in the simulator
         if (move == 'F')
         {
-            moveForward();
+            sim.moveForward();
         }
         else if (move == 'R')
         {
-            turnRight();
-            moveForward();
+            sim.turnRight();
+            sim.moveForward();
         }
         else if (move == 'L')
         {
-            turnLeft();
-            moveForward();
+            sim.turnLeft();
+            sim.moveForward();
         }
         else if (move == 'U')
         {
-            turnAround();
-            moveForward();
+            sim.turnAround();
+            sim.moveForward();
         }
     }
 

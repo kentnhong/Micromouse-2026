@@ -24,19 +24,6 @@ void Floodfill::update()
     }
 }
 
-void Floodfill::set_mode(Mode next_mode)
-{
-    mode = next_mode;
-}
-
-void Floodfill::set_sensor_data(bool front_wall, bool right_wall,
-                                bool left_wall)
-{
-    sensor_front_wall = front_wall;
-    sensor_right_wall = right_wall;
-    sensor_left_wall = left_wall;
-}
-
 char Floodfill::get_next_move()
 {
     constexpr int kDirectionCount{4};
@@ -299,6 +286,19 @@ bool Floodfill::init_wall()
     }
 
     return true;
+}
+
+void Floodfill::set_mode(Mode next_mode)
+{
+    mode = next_mode;
+}
+
+void Floodfill::set_sensor_data(bool front_wall, bool right_wall,
+                                bool left_wall)
+{
+    sensor_front_wall = front_wall;
+    sensor_right_wall = right_wall;
+    sensor_left_wall = left_wall;
 }
 
 }  // namespace MM
