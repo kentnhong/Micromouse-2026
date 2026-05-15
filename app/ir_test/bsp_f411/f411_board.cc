@@ -7,6 +7,16 @@
 #include "st_sys_clk.h"
 #include "st_timebase.h"
 #include "st_usart.h"
+#include "stm32f411xe.h"
+
+// ADC IRQ will set this to true if there is overrun, then we can just handle it with board_recover()
+volatile bool g_adc_ovr = false;
+
+namespace
+{
+static constexpr uint32_t kTimerFreq{1'000'000};
+static constexpr std::chrono::microseconds kTimerPeriod{100};
+};  // namespace
 
 namespace MM
 {
@@ -83,6 +93,7 @@ StTimebaseParams timebase_params{TIM1};
 HwTimebase timebase{timebase_params};
 
 /* Sysclk Initialization */
+// TODO: Change to HSE 24MHz (need sysclk hotfix)
 HwClk clk{Configuration::HSI_16MHZ};
 
 /* USART Initialization */
@@ -102,7 +113,62 @@ Board board{.ir_controller = MM::Stmf4::ircontroller,
 
 bool board_init()
 {
-    // TODO: Finish board init, also implement ADC overrun and TIM1_IRQHandler
+    bool result = true;
+
+    // Init SYSCLK/HCLK and configure prescalers for APB1 and APB2
+    result = result && Stmf4::clk.init();
+    uint32_t hclk = Stmf4::clk.get_freq();
+
+    // Init Periph Clks
+    RCC->AHB1ENR |= (RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN |
+                     RCC_AHB1ENR_GPIOCEN | RCC_AHB1ENR_DMA2EN);
+    RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
+    RCC->APB2ENR |= (RCC_APB2ENR_ADC1EN | RCC_APB2ENR_TIM1EN);
+
+    // Init Periphs
+    result = result && Stmf4::led1.init();
+    result = result && Stmf4::led2.init();
+    result = result && Stmf4::led3.init();
+    result = result && Stmf4::led4.init();
+
+    result = result && Stmf4::pt1.init();
+    result = result && Stmf4::pt2.init();
+    result = result && Stmf4::pt3.init();
+    result = result && Stmf4::pt4.init();
+
+    result = result && Stmf4::dma.init();
+    result = result && Stmf4::adc.init();
+    result = result && Stmf4::usart.init();
+    result =
+        result && Stmf4::timebase.init(hclk, kTimerFreq, kTimerPeriod, true);
+
+    // Enable TIM1 interrupt in NVIC
+    NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
+    NVIC_SetPriority(TIM1_UP_TIM10_IRQn, 0);
+
+    // Enable USART2 interrupt in NVIC
+    NVIC_EnableIRQ(USART2_IRQn);
+    NVIC_SetPriority(USART2_IRQn, 1);
+
+    return result;
+}
+
+bool board_recover()
+{
+    // TODO: Finish board_recover()
+    // Could use atomic instead of disabling interrupts
+    __disable_irq();
+    g_adc_ovr = false;
+    /*
+     * stop timer-triggered conversions
+     * stop or disable the ADC/DMA path
+     * clear the ADC overrun flag
+     * reset your IR sequencing state
+     * reset or re-arm DMA
+     * turn all LEDs off
+     * restart from sensor 0 / ambient sample 1
+     */
+    __enable_irq();
     return true;
 }
 
@@ -127,6 +193,7 @@ extern "C" void USART2_IRQHandler(void)
 
 extern "C" void TIM1_IRQHandler()
 {
+    // TODO: Finish this
     // Clear the update interrupt flag
     TIM1->SR &= ~TIM_SR_UIF;
 
