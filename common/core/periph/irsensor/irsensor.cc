@@ -65,9 +65,6 @@ bool IrSensor::update()
             calculate();
             done = true;
             break;
-        default:
-            // Turn off IR Emitter and reset state
-            result = result && reset();
     }
 
     return result;

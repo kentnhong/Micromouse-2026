@@ -59,9 +59,29 @@ bool IrController::update()
     return result;
 }
 
-IrValues& IrController::get_ir_vals()
+bool IrController::reset()
 {
-    return ir_vals;
+    bool result = true;
+
+    // Clear IR Values
+    ir_vals.left = 0;
+    ir_vals.front_left = 0;
+    ir_vals.front_right = 0;
+    ir_vals.right = 0;
+
+    // Reset state for all IR sensors
+    result = result && ir_sequence[0]->reset();
+    result = result && ir_sequence[1]->reset();
+    result = result && ir_sequence[2]->reset();
+    result = result && ir_sequence[3]->reset();
+
+    // Reset current IR state
+    current_state = IrControllerStates::LEFT;
+
+    // Reset done flag
+    sequence_done = false;
+
+    return result;
 }
 
 const IrValues& IrController::get_ir_vals() const

@@ -52,11 +52,17 @@ public:
     bool update();
 
     /**
+     * @brief Reset the IR Controller Sequence to handle corrupted or missing data
+     * 
+     * @return true IR Controller reset success, false otherwise
+     */
+    bool reset();
+
+    /**
      * @brief Get a struct of the current ir sensor vals for one sequence
      * 
      * @return IrValues& 
      */
-    IrValues& get_ir_vals();
     const IrValues& get_ir_vals() const;
 
     /**

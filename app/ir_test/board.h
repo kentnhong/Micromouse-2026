@@ -5,11 +5,7 @@
  */
 
 #pragma once
-#include "adc.h"
-#include "dma.h"
-#include "gpio.h"
 #include "ircontroller.h"
-#include "irsensor.h"
 #include "timebase.h"
 #include "usart.h"
 

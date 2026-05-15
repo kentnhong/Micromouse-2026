@@ -1,13 +1,10 @@
 #include "../board.h"
-#include "ircontroller.h"
-#include "irsensor.h"
 #include "st_adc.h"
 #include "st_dma.h"
 #include "st_gpio.h"
 #include "st_sys_clk.h"
 #include "st_timebase.h"
 #include "st_usart.h"
-#include "stm32f411xe.h"
 
 // ADC IRQ will set this to true if there is overrun, then we can just handle it with board_recover()
 volatile bool g_adc_ovr = false;
@@ -106,7 +103,7 @@ StUsart usart{usart_params};
 
 namespace MM
 {
-// Non-hardware specific object creation and initialization
+/* Non-hardware specific object creation and initialization */
 Board board{.ir_controller = MM::Stmf4::ircontroller,
             .timebase = MM::Stmf4::timebase,
             .usart = MM::Stmf4::usart};
@@ -115,33 +112,40 @@ bool board_init()
 {
     bool result = true;
 
-    // Init SYSCLK/HCLK and configure prescalers for APB1 and APB2
+    /* Init SYSCLK/HCLK and configure prescalers for APB1 and APB2 */
     result = result && Stmf4::clk.init();
     uint32_t hclk = Stmf4::clk.get_freq();
 
-    // Init Periph Clks
+    /* Init Periph Clks */
+    // Enable GPIO Bus Clocks
     RCC->AHB1ENR |= (RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN |
                      RCC_AHB1ENR_GPIOCEN | RCC_AHB1ENR_DMA2EN);
+    // Enable USART2 Bus Clock
     RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
+    // Enable ADC1 and TIM1 Bus Clock
     RCC->APB2ENR |= (RCC_APB2ENR_ADC1EN | RCC_APB2ENR_TIM1EN);
 
-    // Init Periphs
+    /* Init Periphs */
+    // IR Emitter Inits
     result = result && Stmf4::led1.init();
     result = result && Stmf4::led2.init();
     result = result && Stmf4::led3.init();
     result = result && Stmf4::led4.init();
 
+    // Phototransistor Inits
     result = result && Stmf4::pt1.init();
     result = result && Stmf4::pt2.init();
     result = result && Stmf4::pt3.init();
     result = result && Stmf4::pt4.init();
 
+    // DMA, ADC, USART, and Timebase Inits
     result = result && Stmf4::dma.init();
     result = result && Stmf4::adc.init();
     result = result && Stmf4::usart.init();
     result =
         result && Stmf4::timebase.init(hclk, kTimerFreq, kTimerPeriod, true);
 
+    /* Interrupt Enables */
     // Enable TIM1 interrupt in NVIC
     NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
     NVIC_SetPriority(TIM1_UP_TIM10_IRQn, 0);
@@ -197,6 +201,7 @@ extern "C" void TIM1_IRQHandler()
     // Clear the update interrupt flag
     TIM1->SR &= ~TIM_SR_UIF;
 
-    // IrController update goes here
+    // IrController update state
+    Stmf4::ircontroller.update();
 }
 }  // namespace MM
