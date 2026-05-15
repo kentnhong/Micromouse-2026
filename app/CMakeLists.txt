@@ -10,8 +10,5 @@ add_subdirectory(drv8231_test)
 add_subdirectory(adc_test)
 add_subdirectory(hc-05_test)
 add_subdirectory(timebase_test)
-<<<<<<< HEAD
 add_subdirectory(ir_test)
-=======
 add_subdirectory(pid_controller)
->>>>>>> bed1a45 (init commits + pid structure/functions + cleanups)
