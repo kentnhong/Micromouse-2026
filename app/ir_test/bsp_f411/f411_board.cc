@@ -62,7 +62,7 @@ std::array<AdcChCycles, 4> adc_ch_cycles{ch9_cycles, ch8_cycles, ch11_cycles,
 StAdcSettings adc_settings{AdcResolution::TWELVE_BIT,
                            AdcClkPrescaler::PCLK2_DIV_2,
                            AdcTriggerSource::SOFTWARE,
-                           AdcOverrunInt::OVRIE_DIS,
+                           AdcOverrunInt::OVRIE_EN,
                            AdcDma::DMA_ENABLE,
                            adc_seq,
                            adc_ch_cycles};
@@ -146,6 +146,10 @@ bool board_init()
         result && Stmf4::timebase.init(hclk, kTimerFreq, kTimerPeriod, true);
 
     /* Interrupt Enables */
+    // Enable ADC1 interrupts in NVIC
+    NVIC_EnableIRQ(ADC_IRQn);
+    NVIC_SetPriority(ADC_IRQn, 0);
+
     // Enable TIM1 interrupt in NVIC
     NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
     NVIC_SetPriority(TIM1_UP_TIM10_IRQn, 0);
@@ -157,28 +161,48 @@ bool board_init()
     return result;
 }
 
-bool board_recover()
+void board_recover()
 {
-    // TODO: Finish board_recover()
-    // Could use atomic instead of disabling interrupts
-    __disable_irq();
+    // Stop TIM1 from firing during recovery
+    NVIC_DisableIRQ(TIM1_UP_TIM10_IRQn);
+
+    // Stop any in-progress ADC conversion before aborting DMA
+    Stmf4::adc.stop();
+
+    // Abort any in-progress DMA transfer
+    Stmf4::dma.abort();
+
+    // Clear ADC overrun flag and re-enable DMA requests
+    Stmf4::adc.ovr_recover();
+    Stmf4::adc.en_dma_req();
+
+    // Turn off all IR emitters
+    Stmf4::led1.set(0);
+    Stmf4::led2.set(0);
+    Stmf4::led3.set(0);
+    Stmf4::led4.set(0);
+
+    // Reset IR controller and all sensor state machines
+    Stmf4::ircontroller.reset();
+
+    // Clear fault flag
     g_adc_ovr = false;
-    /*
-     * stop timer-triggered conversions
-     * stop or disable the ADC/DMA path
-     * clear the ADC overrun flag
-     * reset your IR sequencing state
-     * reset or re-arm DMA
-     * turn all LEDs off
-     * restart from sensor 0 / ambient sample 1
-     */
-    __enable_irq();
-    return true;
+
+    // Re-enable interrupts used by the IR pipeline
+    NVIC_EnableIRQ(ADC_IRQn);
+    NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
 }
 
 Board& get_board()
 {
     return board;
+}
+
+extern "C" void ADC_IRQHandler()
+{
+    // Latch fault and disable ADC IRQ to prevent re-entry until board_recover()
+    g_adc_ovr = true;
+    NVIC_DisableIRQ(ADC_IRQn);
 }
 
 extern "C" void USART2_IRQHandler(void)
@@ -197,9 +221,15 @@ extern "C" void USART2_IRQHandler(void)
 
 extern "C" void TIM1_IRQHandler()
 {
-    // TODO: Finish this
     // Clear the update interrupt flag
     TIM1->SR &= ~TIM_SR_UIF;
+
+    // Handle ADC overrun recovery before running the IR state machine
+    if (g_adc_ovr)
+    {
+        board_recover();
+        return;
+    }
 
     // IrController update state
     Stmf4::ircontroller.update();

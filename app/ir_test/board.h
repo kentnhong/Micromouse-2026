@@ -20,7 +20,7 @@ struct Board
     Usart& usart;
 };
 
-bool board_recover();
+void board_recover();
 bool board_init();
 Board& get_board();
 }  // namespace MM

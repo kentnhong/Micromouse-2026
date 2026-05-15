@@ -136,6 +136,11 @@ public:
     bool convert(bool single, size_t samples) override;
 
     /**
+     * @brief Stops the current ADC conversion
+     */
+    void stop() override;
+
+    /**
      * @brief Read converted analog values from ADC buffer (for non-DMA)
      * 
      * @return true Read successful, false otherwise

@@ -90,34 +90,9 @@ bool board_init()
     return result;
 }
 
-bool board_recover()
-{
-    // Could use atomic instead of disabling interrupts
-    __disable_irq();
-    g_adc_ovr = false;
-    /*
-     * stop timer-triggered conversions
-     * stop or disable the ADC/DMA path
-     * clear the ADC overrun flag
-     * reset your IR sequencing state
-     * reset or re-arm DMA
-     * turn all LEDs off
-     * restart from sensor 0 / ambient sample 1
-     */
-    __enable_irq();
-    return true;
-}
-
 Board& get_board()
 {
     return board;
-}
-
-// Interrupt Handler for ADC overrun
-extern "C" void ADC_IRQHandler()
-{
-    // Set global interrupt flag to true for ADC overrun
-    g_adc_ovr = true;
 }
 
 extern "C" void USART2_IRQHandler(void)

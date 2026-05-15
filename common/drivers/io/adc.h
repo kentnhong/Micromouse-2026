@@ -28,6 +28,11 @@ public:
     virtual bool convert(bool single, size_t samples) = 0;
 
     /**
+     * @brief Stops the current ADC conversion
+     */
+    virtual void stop() = 0;
+
+    /**
     * @brief Read converted analog values from ADC buffer
     *
     * @param val Variable to store adc conversion
