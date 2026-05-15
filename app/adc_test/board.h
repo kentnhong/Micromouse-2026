@@ -19,7 +19,6 @@ struct Board
     Clock& clk;
 };
 
-bool board_recover();
 bool board_init();
 Board& get_board();
 };  // namespace MM

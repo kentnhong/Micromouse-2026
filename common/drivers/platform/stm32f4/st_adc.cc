@@ -169,6 +169,15 @@ bool HwAdc::convert(bool single, size_t samples)
     return true;
 }
 
+void HwAdc::stop()
+{
+    if (base_addr->SR & ADC_SR_STRT)
+    {
+        // Turn off ADC in ADC_CR2
+        base_addr->CR2 &= ~ADC_CR2_ADON;
+    }
+}
+
 bool HwAdc::en_dma_req()
 {
     if (settings.dma == AdcDma::DMA_ENABLE)
@@ -268,6 +277,9 @@ bool HwAdc::ovr_recover()
 
     // Clear OVR bit
     base_addr->SR &= ~ADC_SR_OVR;
+
+    // Turn on ADC in ADC_CR2
+    base_addr->CR2 |= ADC_CR2_ADON;
 
     return true;
 }

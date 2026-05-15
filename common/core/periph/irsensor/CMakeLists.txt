@@ -2,6 +2,7 @@ add_library(irsensor INTERFACE)
 
 target_sources(irsensor INTERFACE
     irsensor.cc
+    ircontroller.cc
 )
 
 target_include_directories(irsensor INTERFACE
