@@ -1,15 +1,7 @@
 #pragma once
 #include "floodfill.h"
-
-// #include "ir_interface.h"
-
-/**
-* @note Inherit from the IR interface class to get access to the latest 
-* IR sensor data for decision making.
-*
-* @note The wholepoint of the Navigation control is for the "floodfill"
-* To knows the next move, and for the Navigation class to execute that move
-*/
+#include "ircontroller.h"
+// #include "bno055_imu.h"
 
 namespace MM
 {
@@ -27,14 +19,14 @@ class Navigation
     };
 
 public:
-    explicit Navigation();
+
+    Navigation();
 
     /**
-    * @brief Update the navigation state based on the latest IMU and IR sensor data.
-    * @param imu The latest IMU data, used for precise movement control.
+    * @brief Update the navigation state based on the latest IR sensor data.
     * @param ir The latest IR sensor data, used for maze-solving decisions.
     */
-    void update(const Bno055Data& imu, /*const IrData& ir*/);
+    void update(const IrValues& ir);
 
     State get_current_state() const
     {
