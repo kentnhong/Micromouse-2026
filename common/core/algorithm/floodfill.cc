@@ -102,8 +102,7 @@ void Floodfill::update_search()
 
 void Floodfill::update_zooming()
 {
-    // TODO : Implement the logic to update the floodfill algorithm in ZOOMING mode
-    flood();
+    get_next_move();
 }
 
 Floodfill::Direction Floodfill::relative_direction(int relative_turn) const
@@ -301,4 +300,20 @@ void Floodfill::set_sensor_data(bool front_wall, bool right_wall,
     sensor_left_wall = left_wall;
 }
 
+void Floodfill::process_ir_data(const IrValues& ir_vals)
+{
+    constexpr uint16_t kThresholdFront{
+        200};  // TODO: Change based on the readings
+    constexpr uint16_t kThresholdSide{
+        150};  // TODO: Change based on the readings
+
+    // Process front sensor data (Since we have left and right front sensors)
+    bool wall_front = (ir_vals.front_left > kThresholdFront) ||
+                      (ir_vals.front_right > kThresholdFront);
+    bool wall_right = ir_vals.right > kThresholdSide;
+    bool wall_left = ir_vals.left > kThresholdSide;
+
+    // Update the sensor data for the floodfill algorithm
+    set_sensor_data(wall_front, wall_right, wall_left);
+}
 }  // namespace MM

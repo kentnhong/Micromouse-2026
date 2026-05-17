@@ -215,7 +215,6 @@ bool HwSpi::seq_transfer(std::span<uint8_t> tx_data, std::span<uint8_t> rx_data)
  */
 bool HwSpi::init()
 {
-    // TODO: Runtime validation of enum values (will change to compile time checks in the future and maybe make a private function for these checks)
     if (static_cast<uint8_t>(settings.baudrate) > 7)
     {
         return false;

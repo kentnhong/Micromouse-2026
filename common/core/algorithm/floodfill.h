@@ -8,9 +8,7 @@
 #pragma once
 #include <algorithm>
 #include <cstdint>
-
-// TODO: Right now we rely on the fake sensor data being set in the main loop of the simulator,
-// but eventually we will need to replace this with real sensor data coming in from the mouse
+#include "ircontroller.h"
 
 namespace MM
 {
@@ -66,6 +64,12 @@ public:
     {
         return maze[x][y];
     }
+
+    /**
+    * @brief Process the IR sensor data to update the floodfill algo
+    * @param ir_vals The IR sensor values to process (raw values from the sensors)
+    */
+    void process_ir_data(const IrValues& ir_vals);
 
 private:
     /**
@@ -158,7 +162,7 @@ private:
     int current_x{0};
     int current_y{0};
 
-    // TODO: IR interface will make decision for this variables to be T/F
+    // Default values for the sensor data
     bool sensor_front_wall{false};
     bool sensor_right_wall{false};
     bool sensor_left_wall{false};
