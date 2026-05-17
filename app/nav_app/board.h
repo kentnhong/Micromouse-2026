@@ -17,12 +17,7 @@ namespace MM
 
 struct Board
 {
-<<<<<<< HEAD
     IrController& ir_controller;
-=======
-    Bno055& imu;
-    // TODO: IR sensors, motors, encoders, Gpio, etc.
->>>>>>> 73a34e4 (structure the state machine for the navigational control)
 };
 
 bool bsp_init(void);

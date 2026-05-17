@@ -7,13 +7,9 @@ target_include_directories(navigation PUBLIC
     ${CMAKE_SOURCE_DIR}/common/core/math
     ${CMAKE_SOURCE_DIR}/common/core/periph/bno055
     ${CMAKE_SOURCE_DIR}/common/drivers/time
-<<<<<<< HEAD
 )
 
 target_link_libraries(navigation PUBLIC
     algorithm
     api
 )
-=======
-)
->>>>>>> ea30492 (navigation)

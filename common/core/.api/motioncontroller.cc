@@ -2,7 +2,6 @@
 
 namespace MM
 {
-// TODO: Implement the motion controller methods to control the robot's movements based on the navigation state and IR sensor data.
 
 bool MotionController::forward(const IrValues& ir)
 {
