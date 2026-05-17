@@ -9,6 +9,8 @@ if ("${TARGET_DEVICE}" MATCHES "NATIVE")
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_SOURCE_DIR}/common/core/algorithm
         ${CMAKE_SOURCE_DIR}/common/core/periph/irsensor
+        ${CMAKE_SOURCE_DIR}/common/drivers/io
+        ${CMAKE_SOURCE_DIR}/common/drivers/memory
     )
 
 endif()
