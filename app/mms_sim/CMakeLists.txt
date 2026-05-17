@@ -8,6 +8,7 @@ if ("${TARGET_DEVICE}" MATCHES "NATIVE")
     target_include_directories(mms_sim PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_SOURCE_DIR}/common/core/algorithm
+        ${CMAKE_SOURCE_DIR}/common/core/periph/irsensor
     )
 
 endif()
