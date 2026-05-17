@@ -7,10 +7,10 @@
 
 #pragma once
 
-#include "bno055_imu.h"
 #include "delay.h"
 #include "gpio.h"
 #include "i2c.h"
+#include "ircontroller.h"
 #include "nav.h"
 
 namespace MM
@@ -18,11 +18,9 @@ namespace MM
 
 struct Board
 {
-    Bno055& imu;
-    // TODO: IR sensors, motors, encoders, Gpio, etc.
+    IrController& ir_controller;
 };
 
 bool bsp_init(void);
 Board& get_board(void);
-
 }  // namespace MM
