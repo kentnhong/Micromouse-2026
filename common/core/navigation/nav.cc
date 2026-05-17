@@ -6,24 +6,25 @@ namespace MM
 Navigation::Navigation() : state(State::STOPPED)
 {
 }
+
 Navigation::~Navigation()
 {
 }
 
-void Navigation::update(const IrData& ir)
+void Navigation::update(const IrValues& ir)
 {
     if (at_cell_center)
     {
-        // Feed current wall data
-        floodfill.set_sensor_data(ir.front_wall, ir.right_wall, ir.left_wall);
+        // Feed it into your perfectly prepared Floodfill
+        floodfill.process_ir_data(ir);
 
-        // Run the algorithm
+        // Let Floodfill update its internal arrays
         floodfill.update();
 
-        // Get the next move
+        // Ask Floodfill "Where to next?"
         char move = floodfill.get_next_move();
 
-        // Change the robot's state based on the move
+        // Tell Navigation to execute the physical move
         if (move == 'F')
         {
             state = State::STRAIGHT;
@@ -41,47 +42,45 @@ void Navigation::update(const IrData& ir)
             state = State::U_TURN;
         }
 
-        at_cell_center = false;  // Decision made, now we execute it
+        at_cell_center = false;
     }
+}
 
-    switch (state)
+void Navigation::execute(MotionController& motion, const IrValues& ir)
+{
+    // The Execution State Machine
+    switch (get_current_state())
     {
         case State::STRAIGHT:
-            // TODO: Drive forward.
-
-            if (/* Check if we've reached the center of the next cell using IMU data */)
+            if (motion.forward(ir))
             {
-                at_cell_center = true;
+                complete();  // Done! tell Nav to make next decision
             }
             break;
 
         case State::TURNING_LEFT:
-            // TODO: Rotate left.
-            if (/* IR sensor on the side that has no wall drive it left */)
+            if (motion.turn_left())
             {
-                at_cell_center = true;  // Ready for next move!
+                complete();
             }
             break;
 
         case State::TURNING_RIGHT:
-            // TODO: Rotate right.
-            if (/* IR sensor on the side that has no wall drive it right */)
+            if (motion.turn_right())
             {
-                at_cell_center = true;
+                complete();
             }
             break;
 
         case State::U_TURN:
-            // TODO: Rotate 180 degrees.
-            if (/* IR sensor detects the robot has turned 180 degrees */)
+            if (motion.u_turn())
             {
-                at_cell_center = true;
+                complete();
             }
             break;
 
         case State::STOPPED:
-            // TODO: Stop motors
-
+            motion.stop();
             break;
 
         case State::RESET:
