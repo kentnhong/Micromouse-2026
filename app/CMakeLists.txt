@@ -11,3 +11,7 @@ add_subdirectory(adc_test)
 add_subdirectory(hc-05_test)
 add_subdirectory(timebase_test)
 add_subdirectory(ir_test)
+
+if ("${TARGET_DEVICE}" MATCHES "NATIVE")
+    add_subdirectory(mms_sim)
+endif()
