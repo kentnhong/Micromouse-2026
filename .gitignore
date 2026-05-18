@@ -14,3 +14,4 @@ CMakeCache.txt
 .cache
 compile_commands.json
 clangd
+docs/doxygen/
