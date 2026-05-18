@@ -67,7 +67,7 @@ bool SystemClock_ConfigHSI16()
 }
 
 /**
-* @brief Setting the system clock to 24 MHz using an external 8 MHz crystal (HSE) and the PLL.
+* @brief Setting the system clock to 24 MHz using an external 24 MHz crystal (HSE) and the PLL.
 *        This is a common configuration for STM32F4 boards, providing a stable clock source.
 */
 bool SystemClock_ConfigHSE24()
@@ -86,11 +86,11 @@ bool SystemClock_ConfigHSE24()
         RCC_HSE_BYPASS;  // using external clock source (e.g., from ST-Link) instead of crystal
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;  // enabled PLL
     RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-    RCC_OscInitStruct.PLL.PLLM = 8;    // 8 MHz / 8 = 1 MHz
-    RCC_OscInitStruct.PLL.PLLN = 336;  // 1 MHz * 336 = 336 MHz
+    RCC_OscInitStruct.PLL.PLLM = 24;   // 24 MHz / 24 = 1 MHz
+    RCC_OscInitStruct.PLL.PLLN = 192;  // 1 MHz * 192 = 192 MHz
     RCC_OscInitStruct.PLL.PLLP =
-        RCC_PLLP_DIV4;               // 336 MHz / 4 = 84 MHz (SYSCLK)
-    RCC_OscInitStruct.PLL.PLLQ = 7;  // 336 MHz / 7 = 48 MHz (USB, SDIO, RNG)
+        RCC_PLLP_DIV8;               // 192 MHz / 8 = 24 MHz (SYSCLK)
+    RCC_OscInitStruct.PLL.PLLQ = 4;  // 192 MHz / 4 = 48 MHz (USB, SDIO, RNG)
 
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
     {
@@ -112,7 +112,7 @@ bool SystemClock_ConfigHSE24()
 }
 
 /**
-* @brief Setting the system clock to 64 MHz using an external 8 MHz crystal (HSE) and the PLL.
+* @brief Setting the system clock to 64 MHz using an external 24 MHz crystal (HSE) and the PLL.
 *        This configuration provides higher performance for the system.
 */
 bool SystemClock_ConfigHSE64()
@@ -131,12 +131,11 @@ bool SystemClock_ConfigHSE64()
         RCC_HSE_BYPASS;  // using external clock source (e.g., from ST-Link) instead of crystal
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;  // enabled PLL
     RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-    RCC_OscInitStruct.PLL.PLLM = 8;    // 8 MHz / 8 = 1 MHz
-    RCC_OscInitStruct.PLL.PLLN = 512;  // 1 MHz * 512 = 512 MHz
+    RCC_OscInitStruct.PLL.PLLM = 24;   // 24 MHz / 24 = 1 MHz
+    RCC_OscInitStruct.PLL.PLLN = 384;  // 1 MHz * 384 = 384 MHz
     RCC_OscInitStruct.PLL.PLLP =
-        RCC_PLLP_DIV8;  // 512 MHz / 8 = 64 MHz (SYSCLK)
-    RCC_OscInitStruct.PLL.PLLQ =
-        7;  // 512 MHz / 7 ≈ 73.14 MHz (USB, SDIO, RNG - may not be valid for USB)
+        RCC_PLLP_DIV6;               // 4384 MHz / 6 = 64 MHz (SYSCLK)
+    RCC_OscInitStruct.PLL.PLLQ = 8;  // 384 MHz / 8 = 48 MHz (USB, SDIO, RNG)
 
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
     {
@@ -147,7 +146,8 @@ bool SystemClock_ConfigHSE64()
                                   RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
     RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
     RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider =
+        RCC_HCLK_DIV2;  // 64 MHz / 2 = 32 MHz for PCLK1 or APB1 clock
     RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
     if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
@@ -157,7 +157,11 @@ bool SystemClock_ConfigHSE64()
     return true;
 }
 
-bool SystemClock_ConfigHSE8()
+/**
+* @brief Setting the system clock to 100 MHz using an external 24 MHz crystal (HSE) and the PLL.
+*        This configuration provides the max performance for the system.
+*/
+bool SystemClock_ConfigHSE100()
 {
     RCC_OscInitTypeDef RCC_OscInitStruct = {0};
     RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
@@ -169,8 +173,16 @@ bool SystemClock_ConfigHSE8()
     }
 
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-    RCC_OscInitStruct.HSEState = RCC_HSE_ON;  // using external crystal at 8 MHz
-    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_OFF;  // PLL disabled
+    RCC_OscInitStruct.HSEState =
+        RCC_HSE_BYPASS;  // using external clock source (e.g., from ST-Link) instead of crystal
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;  // enabled PLL
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+    RCC_OscInitStruct.PLL.PLLM = 24;   // 24 MHz / 24 = 1 MHz
+    RCC_OscInitStruct.PLL.PLLN = 400;  // 1 MHz * 400 = 400 MHz
+    RCC_OscInitStruct.PLL.PLLP =
+        RCC_PLLP_DIV4;  // 400 MHz / 4 = 100 MHz (SYSCLK)
+    RCC_OscInitStruct.PLL.PLLQ =
+        10;  // 400 MHz / 10 = 40 MHz (USB, SDIO, RNG - not valid for USB OTG FS which requuires 48MHz)
 
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
     {
@@ -179,12 +191,12 @@ bool SystemClock_ConfigHSE8()
 
     RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK |
                                   RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
-    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
     RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
     RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3) != HAL_OK)
     {
         return false;
     }
@@ -214,11 +226,11 @@ bool HwClk::init()
             config = Configuration::SYSCLK_HSE_64MHZ;
             hz = 64'000'000;
             break;
-        case Configuration::HSE_8MHZ:
-            if (!SystemClock_ConfigHSE8())
+        case Configuration::SYSCLK_HSE_100MHZ:
+            if (!SystemClock_ConfigHSE100())
                 return false;
-            config = Configuration::HSE_8MHZ;
-            hz = 8'000'000;
+            config = Configuration::SYSCLK_HSE_100MHZ;
+            hz = 100'000'000;
             break;
         default:
             return false;

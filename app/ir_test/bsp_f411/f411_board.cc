@@ -90,8 +90,7 @@ StTimebaseParams timebase_params{TIM1};
 HwTimebase timebase{timebase_params};
 
 /* Sysclk Initialization */
-// TODO: Change to HSE 24MHz (need sysclk hotfix)
-HwClk clk{Configuration::HSI_16MHZ};
+HwClk clk{Configuration::SYSCLK_HSE_100MHZ};
 
 /* USART Initialization */
 StUsartSettings usart_settings{UsartOversample::X8, UsartSampleMode::SINGLE};

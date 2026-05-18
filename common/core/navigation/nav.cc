@@ -15,11 +15,19 @@ void Navigation::update(const IrValues& ir)
 {
     if (at_cell_center)
     {
-        // Feed it into your perfectly prepared Floodfill
-        floodfill.process_ir_data(ir);
+        switch (floodfill.get_mode())
+        {
+            case Floodfill::Mode::SEARCH:
+                // Feed it into your perfectly prepared Floodfill
+                floodfill.process_ir_data(ir);
 
-        // Let Floodfill update its internal arrays
-        floodfill.update();
+                // Let Floodfill update its internal arrays
+                floodfill.update();
+                break;
+
+            case Floodfill::Mode::ZOOMING:
+                break;
+        }
 
         // Ask Floodfill "Where to next?"
         char move = floodfill.get_next_move();

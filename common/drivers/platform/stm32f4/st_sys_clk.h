@@ -22,9 +22,9 @@ namespace MM::Stmf4
 enum class Configuration
 {
     HSI_16MHZ,  // Internal RC oscillator at 16 MHz (default after reset) PLL disabled
-    SYSCLK_HSE_24MHZ,  // main “run” mode (PLL or HSE) at 24 MHz
-    SYSCLK_HSE_64MHZ,  // Higher performance option (via PLL)
-    HSE_8MHZ           // External crystal at 8 MHz (on STM32F4 boards)
+    SYSCLK_HSE_24MHZ,   // main “run” mode (PLL or HSE) at 24 MHz
+    SYSCLK_HSE_64MHZ,   // Higher performance option (via PLL)
+    SYSCLK_HSE_100MHZ,  // Max performance option (via PLL)
 };
 class HwClk : public Clock
 {
