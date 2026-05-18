@@ -19,7 +19,6 @@ void Floodfill::update()
             update_search();
             break;
         case Mode::ZOOMING:
-            update_zooming();
             break;
     }
 }
@@ -98,11 +97,6 @@ void Floodfill::update_search()
     mark_wall(current, relative_direction(1), sensor_right_wall);
     mark_wall(current, relative_direction(3), sensor_left_wall);
     flood();
-}
-
-void Floodfill::update_zooming()
-{
-    get_next_move();
 }
 
 Floodfill::Direction Floodfill::relative_direction(int relative_turn) const
