@@ -144,8 +144,6 @@ private:
     /**
     * @brief Updates the zooming mode of the algorithm
     */
-    void update_zooming();
-
     /**
     * @brief Converts a relative turn to an absolute direction based on the current direction
     * @param relative_turn The relative turn (0 for forward, 1 for right, 2 for backward, 3 for left)
