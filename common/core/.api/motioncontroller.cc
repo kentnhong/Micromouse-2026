@@ -14,7 +14,6 @@ bool MotionController::turn_left()
 {
 
     return false;
-    
 }
 
 bool MotionController::turn_right()
