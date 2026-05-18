@@ -20,7 +20,7 @@ if (TARGET nav_bsp)
 		PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 		PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/bsp_f411
 		PRIVATE ${CMAKE_SOURCE_DIR}/common/core/navigation
-		PRIVATE ${CMAKE_SOURCE_DIR}/common/core/.api
+		PRIVATE ${CMAKE_SOURCE_DIR}/common/core/api
 		PRIVATE ${CMAKE_SOURCE_DIR}/common/core/periph/irsensor
 		PRIVATE ${CMAKE_SOURCE_DIR}/common/core/periph/drv8231
 		PRIVATE ${CMAKE_SOURCE_DIR}/common/core/periph/encoder

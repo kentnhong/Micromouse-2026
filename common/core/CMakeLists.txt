@@ -1,7 +1,7 @@
 add_subdirectory(periph)
 add_subdirectory(utils)
 add_subdirectory(algorithm)
-add_subdirectory(.api)
+add_subdirectory(api)
 add_subdirectory(navigation)
 
 # Make core consumers also get utils and chip_select by adding them to the INTERFACE core target
