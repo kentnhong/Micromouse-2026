@@ -76,7 +76,9 @@ extern "C"
                             and STM32F412Zx/STM32F412Vx/STM32F412Rx/STM32F412Cx/STM32F413xx/STM32F423xx devices.
                             This parameter must be a number between Min_Data = 2 and Max_Data = 7     */
 #endif /* STM32F410xx || STM32F446xx || STM32F469xx || STM32F479xx || STM32F412Zx || STM32F412Vx || STM32F412Rx || STM32F412Cx || STM32F413xx || STM32F423xx */
-    } RCC_PLLInitTypeDef;
+    } 
+    
+    RCC_PLLInitTypeDef;
 
 #if defined(STM32F446xx)
     /**
