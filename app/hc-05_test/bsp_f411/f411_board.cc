@@ -14,13 +14,13 @@ Stmf4::StGpioSettings gpio_settings{
     Stmf4::GpioPupd::NO_PULL, 7};
 
 // KEY Pin config HC-05 KEY pin is connected to PA12
-Stmf4::StGpioSettings key_gpio_settings{
-    Stmf4::GpioMode::GPOUT, Stmf4::GpioOtype::PUSH_PULL, Stmf4::GpioOspeed::LOW,
-    Stmf4::GpioPupd::NO_PULL, 12};
+// Stmf4::StGpioSettings key_gpio_settings{
+//     Stmf4::GpioMode::GPOUT, Stmf4::GpioOtype::PUSH_PULL, Stmf4::GpioOspeed::LOW,
+//     Stmf4::GpioPupd::NO_PULL, 12};
 
 //Stmf4::StGpioParams key_params{12, GPIOA, key_gpio_settings};  // PA12 KEY
-Stmf4::StGpioParams tx_params{11, GPIOA, gpio_settings};  // PA11 USART2_TX
-Stmf4::StGpioParams rx_params{7, GPIOC, gpio_settings};   // PC7 USART2_RX
+Stmf4::StGpioParams tx_params{2, GPIOA, gpio_settings};  // PA2 USART2_TX
+Stmf4::StGpioParams rx_params{3, GPIOA, gpio_settings};  // PA3 USART2_RX
 
 Stmf4::HwGpio tx_gpio(tx_params);
 Stmf4::HwGpio rx_gpio(rx_params);

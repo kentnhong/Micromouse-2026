@@ -13,20 +13,19 @@ Stmf4::StGpioSettings in1_settings{
     Stmf4::GpioMode::GPOUT, Stmf4::GpioOtype::PUSH_PULL,
     Stmf4::GpioOspeed::HIGH, Stmf4::GpioPupd::NO_PULL, 0};
 
-const Stmf4::StGpioParams in1_params{0, GPIOA, in1_settings};  // PA0
-
 Stmf4::StGpioSettings in2_settings{
     Stmf4::GpioMode::GPOUT, Stmf4::GpioOtype::PUSH_PULL,
     Stmf4::GpioOspeed::HIGH, Stmf4::GpioPupd::NO_PULL, 0};
-
-const Stmf4::StGpioParams in2_params{1, GPIOA, in2_settings};  // PA1
 
 // PWM Config
 Stmf4::StPwmSettings pwm_settings{Stmf4::PwmMode::EDGE_ALIGNED,
                                   Stmf4::PwmOutputMode::PWM_MODE_1,
                                   Stmf4::PwmDir::UPCOUNTING};
 
-const Stmf4::StPwmParams pwm_params{TIM3, Stmf4::PwmChannel::CH1, pwm_settings};
+const Stmf4::StGpioParams in1_params{0, GPIOA, in1_settings};  // PA0
+const Stmf4::StGpioParams in2_params{1, GPIOA, in2_settings};  // PA1
+const Stmf4::StPwmParams pwm_params{TIM3, Stmf4::PwmChannel::CH1,
+                                    pwm_settings};  // PB4 (TIM3_CH1)
 
 Stmf4::HwClk clock{MM::Stmf4::Configuration::HSI_16MHZ};
 

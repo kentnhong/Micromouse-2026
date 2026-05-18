@@ -14,7 +14,8 @@ target_include_directories(driver INTERFACE
     time 
 )
 
-target_link_libraries(driver INTERFACE
-    hal
-    
-)
+target_link_libraries(driver INTERFACE)
+
+if (TARGET_DEVICE MATCHES "^(STM32)[0-9A-Z]+")
+    target_link_libraries(driver INTERFACE hal)
+endif()
