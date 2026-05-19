@@ -28,7 +28,7 @@ Stmf4::HwGpio led_c{led_c_params};
 
 Board board{.led_a = led_a, .led_b = led_b, .led_c = led_c};
 
-Stmf4::HwClk clock{MM::Stmf4::Configuration::SYSCLK_HSE_24MHZ};
+Stmf4::HwClk clock{MM::Stmf4::Configuration::SYSCLK_HSE_100MHZ};
 
 bool board_init()
 {
