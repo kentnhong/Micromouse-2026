@@ -284,6 +284,18 @@ bool Floodfill::init_wall()
 void Floodfill::set_mode(Mode next_mode)
 {
     mode = next_mode;
+
+    // TODO: If mouse searches maze more than once, may need to reset mouse state to start from beginning cell as well
+
+    // Resets mouse state to start from beginning cell
+    if (mode == Mode::ZOOMING)
+    {
+        // Mouse starts out facing North
+        dir = 0;
+        // Mouse starts at cell 0,0
+        current_x = 0;
+        current_y = 0;
+    }
 }
 
 void Floodfill::set_sensor_data(bool front_wall, bool right_wall,
