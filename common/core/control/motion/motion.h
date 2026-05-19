@@ -30,5 +30,6 @@ public:
 private:
     Board& hw;
     PID pid;
+    Sample::EncoderTiming encoder_timing;
 };
 }  // namespace MM

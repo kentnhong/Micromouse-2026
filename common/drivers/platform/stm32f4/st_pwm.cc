@@ -27,6 +27,7 @@ HwPwm::HwPwm(const StPwmParams& params)
     : base_addr{params.base_addr},
       channel{params.channel},
       settings{params.settings},
+      p_clk{params.p_clk},
       current_frequency{params.p_clk},
       current_duty_cycle{0}
 {
@@ -146,16 +147,14 @@ bool HwPwm::init()
     // Enable counter
     base_addr->CR1 |= TIM_CR1_CEN;
 
+    // Apply the configured frequency to set the PSC register
+    set_frequency(current_frequency);
+
     return true;
 }
 
 bool HwPwm::set_frequency(uint32_t frequency)
 {
-    if (!(base_addr->CR1 & TIM_CR1_CEN_Msk))
-    {
-        return false;
-    }
-
     if (frequency < 1)
     {
         return false;
@@ -205,11 +204,6 @@ bool HwPwm::set_frequency(uint32_t frequency)
 
 bool HwPwm::set_duty_cycle(uint8_t duty_cycle)
 {
-    if (!(base_addr->CR1 & TIM_CR1_CEN_Msk))
-    {
-        return false;
-    }
-
     if (duty_cycle > 100)
     {
         return false;

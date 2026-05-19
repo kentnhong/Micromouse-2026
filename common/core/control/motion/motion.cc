@@ -6,13 +6,20 @@ static constexpr float kTicksPerMotorRev = 12.0f;
 static constexpr float kMmPerTick =
     (kWheelDiameterMm * std::numbers::pi_v<float>) /
     (kGearRatio * kTicksPerMotorRev);
-static constexpr float kPidTargetSpeedMmPerSec = 100.0f;
+static constexpr float kPidTargetSpeedMmPerSec = 30.0f;
+static constexpr uint32_t kFallbackEncoderSampleUs = 1'000;
 
 namespace MM
 {
-Motion::Motion(Board& hw, const Gains& gains) : hw(hw), pid(hw.motor, gains)
+Motion::Motion(Board& hw, const Gains& gains)
+    : hw(hw),
+      pid(hw.motor, gains),
+      encoder_timing(Sample::init_encoder_timing(
+          hw.encoder, hw.encoder_sample_us != 0 ? hw.encoder_sample_us
+                                                : kFallbackEncoderSampleUs))
 {
     hw.motor.drive(Drv8231::Direction::FORWARD, 0);
+    pid.set_output_limits(-0.25f, 0.25f);
 }
 
 // Motion layer: physical robot units, mm/s
@@ -27,9 +34,6 @@ bool Motion::update()
 {
     // CHANGE_VALUE
     float target_ticks_per_sec = 0.0f;
-
-    const Sample::EncoderTiming encoder_timing =
-        Sample::init_encoder_timing(hw.encoder, hw.encoder_sample_us);
 
     const int32_t sample_ticks =
         Sample::sample_encoder(hw.encoder, encoder_timing);

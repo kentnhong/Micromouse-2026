@@ -15,11 +15,6 @@ namespace MM
 class Drv8231
 {
 public:
-    /**
-    * @brief Direction of motor rotation
-    * FORWARD: Motor rotates in the forward direction
-    * REVERSE: Motor rotates in the reverse direction
-    */
     enum class Direction : uint8_t
     {
         COAST = 0,
@@ -29,12 +24,20 @@ public:
     };
 
     /**
-     * @brief Constructor for DRV8231 motor driver
+     * @brief Constructor for DRV8231 motor driver using separate direction pins
+     * and one speed PWM pin.
      * @param in1 GPIO pin for direction 1
      * @param in2 GPIO pin for direction 2
      * @param speed PWM driver object for speed control
      */
     Drv8231(Gpio& in1, Gpio& in2, Pwm& speed);
+
+    /**
+     * @brief Constructor for DRV8231 motor driver using IN/IN PWM control.
+     * @param pwm1 PWM output for IN1
+     * @param pwm2 PWM output for IN2
+     */
+    Drv8231(Pwm& pwm1, Pwm& pwm2);
 
     /**
      * @brief Drive the motor with a specific direction and duty cycle
@@ -53,9 +56,11 @@ public:
 
 private:
     int state;
-    Gpio& in1;
-    Gpio& in2;
-    Pwm& speed;
+    Gpio* in1;
+    Gpio* in2;
+    Pwm* speed;
+    Pwm* pwm1;
+    Pwm* pwm2;
 };
 
 }  // namespace MM

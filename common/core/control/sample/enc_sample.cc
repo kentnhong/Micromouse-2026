@@ -4,13 +4,18 @@ namespace MM
 {
 
 static constexpr float kUsToSec = 1'000'000.0f;
+static constexpr uint32_t kFallbackCyclesPerUs = 16;
 
 Sample::EncoderTiming Sample::init_encoder_timing(Encoder& timing_encoder,
                                                   uint32_t sample_time_us)
 {
     timing_encoder.init_cycle_counter();
 
-    const uint32_t cycles_per_us = timing_encoder.cycles_per_us();
+    uint32_t cycles_per_us = timing_encoder.cycles_per_us();
+    if (cycles_per_us == 0)
+    {
+        cycles_per_us = kFallbackCyclesPerUs;
+    }
 
     return {.sample_cycles = sample_time_us * cycles_per_us,
             .sample_time_sec = static_cast<float>(sample_time_us) / kUsToSec};

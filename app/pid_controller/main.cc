@@ -17,15 +17,14 @@
 using namespace MM;
 
 /// NOTE: sample_encoder waits 1000 us -> PID runs about 1 kHz
-///       with TIM4 generating an interrupt every 1000 us to set the control tick flag.
 
-int main(int argc, char* argv[])
+int main()
 {
     bsp_init();
     Board& hw = get_board();
 
     // CHANGE_VALUE
-    constexpr Gains kVelocityGains{0.001f, 0.0f, 0.0f};
+    const Gains kVelocityGains{0.001f, 0.0f, 0.0f};
     Motion motion(hw, kVelocityGains);
 
     hw.encoder.reset_ticks();
@@ -51,7 +50,17 @@ int main(int argc, char* argv[])
 
     while (1)
     {
-        motion.update();
+        hw.motor.drive(Drv8231::Direction::FORWARD, 5);
+        MM::Utils::delay_ms(5'000);
+
+        hw.motor.drive(Drv8231::Direction::COAST, 0);
+        MM::Utils::delay_ms(3'000);
+
+        hw.motor.drive(Drv8231::Direction::FORWARD, 80);
+        MM::Utils::delay_ms(5'000);
+
+        hw.motor.drive(Drv8231::Direction::COAST, 0);
+        MM::Utils::delay_ms(3'000);
     }
 
     return 0;

@@ -12,7 +12,22 @@ static inline float clamp_drive(float drive)
 }
 
 Drv8231::Drv8231(Gpio& in1, Gpio& in2, Pwm& speed)
-    : in1(in1), in2(in2), speed(speed)
+    : state{static_cast<int>(Direction::COAST)},
+      in1{&in1},
+      in2{&in2},
+      speed{&speed},
+      pwm1{nullptr},
+      pwm2{nullptr}
+{
+}
+
+Drv8231::Drv8231(Pwm& pwm1, Pwm& pwm2)
+    : state{static_cast<int>(Direction::COAST)},
+      in1{nullptr},
+      in2{nullptr},
+      speed{nullptr},
+      pwm1{&pwm1},
+      pwm2{&pwm2}
 {
 }
 
@@ -25,27 +40,54 @@ bool Drv8231::init()
 
 void Drv8231::drive(Direction dir, uint8_t duty_cycle)
 {
+    duty_cycle = std::clamp<uint8_t>(duty_cycle, 0, 100);
+
     switch (dir)
     {
         case Direction::COAST:
-            in1.set(0);
-            in2.set(0);
+            pwm1->set_duty_cycle(0);
+            pwm2->set_duty_cycle(0);
             break;
         case Direction::FORWARD:
-            in1.set(1);
-            in2.set(0);
+            // Fast decay mapping (Drive/Coast):
+            pwm1->set_duty_cycle(100 - duty_cycle);
+            pwm2->set_duty_cycle(100);
             break;
         case Direction::REVERSE:
-            in1.set(0);
-            in2.set(1);
+            // Fast decay mapping (Drive/Coast):
+            pwm1->set_duty_cycle(0);
+            pwm2->set_duty_cycle(100 - duty_cycle);
             break;
         case Direction::BRAKE:
-            in1.set(1);
-            in2.set(1);
+            // 100% duty cycle on both shorts the motor to GND (Braking)
+            pwm1->set_duty_cycle(100);
+            pwm2->set_duty_cycle(100);
             break;
     }
     state = static_cast<int>(dir);
-    speed.set_duty_cycle(std::clamp<uint8_t>(duty_cycle, 0, 100));
+    return;
+
+    // switch (dir)
+    // {
+    //     case Direction::COAST:
+    //         in1->set(0);
+    //         in2->set(0);
+    //         break;
+    //     case Direction::FORWARD:
+    //         in1->set(1);
+    //         in2->set(0);
+    //         break;
+    //     case Direction::REVERSE:
+    //         in1->set(0);
+    //         in2->set(1);
+    //         break;
+    //     case Direction::BRAKE:
+    //         in1->set(1);
+    //         in2->set(1);
+    //         break;
+    // }
+    // state = static_cast<int>(dir);
+    // speed->set_duty_cycle(duty_cycle);
 }
 
 int Drv8231::get_state() const
