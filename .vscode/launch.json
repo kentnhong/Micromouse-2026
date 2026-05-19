@@ -4,7 +4,7 @@
   "configurations": [
     {
       "cwd": "${workspaceFolder}",
-      "executable": "${workspaceRoot}/build/stm32f411/app/cli_app/cli_app",
+      "executable": "${workspaceRoot}/build/stm32f411/app/cli_app/cli_app.elf",
       "name": "DEBUG CLI F4",
       "request": "launch",
       "type": "cortex-debug",
@@ -19,7 +19,7 @@
       ],
       "debuggerArgs": ["-d", "${workspaceRoot}"],
       "preRestartCommands": [
-        "add-symbol-file /build/stm32f411/app/cli_app/cli_app",
+        "add-symbol-file /build/stm32f411/app/cli_app/cli_app.elf",
         "load",
         "enable breakpoint",
         "monitor reset"
@@ -28,7 +28,7 @@
     },
     {
       "cwd": "${workspaceFolder}",
-      "executable": "${workspaceRoot}/build/stm32f411/app/blink/blink",
+      "executable": "${workspaceRoot}/build/stm32f411/app/blink/blink.elf",
       "name": "DEBUG BLINK F4",
       "request": "launch",
       "type": "cortex-debug",
@@ -43,7 +43,7 @@
       ],
       "debuggerArgs": ["-d", "${workspaceRoot}"],
       "preRestartCommands": [
-        "add-symbol-file build/stm32f411/app/blink/blink",
+        "add-symbol-file build/stm32f411/app/blink/blink.elf",
         "load",
         "enable breakpoint",
         "monitor reset"
@@ -52,7 +52,7 @@
     },
     {
       "cwd": "${workspaceFolder}",
-      "executable": "${workspaceRoot}/build/stm32f411/app/spi_test/spi_test",
+      "executable": "${workspaceRoot}/build/stm32f411/app/spi_test/spi_test.elf",
       "name": "DEBUG SPI F4",
       "request": "launch",
       "type": "cortex-debug",
@@ -67,7 +67,7 @@
       ],
       "debuggerArgs": ["-d", "${workspaceRoot}"],
       "preRestartCommands": [
-        "add-symbol-file build/stm32f411/app/spi_test/spi_test",
+        "add-symbol-file build/stm32f411/app/spi_test/spi_test.elf",
         "load",
         "enable breakpoint",
         "monitor reset"
@@ -76,7 +76,7 @@
     },
     {
       "cwd": "${workspaceFolder}",
-      "executable": "${workspaceRoot}/build/stm32f411/app/i2c_test/i2c_test",
+      "executable": "${workspaceRoot}/build/stm32f411/app/i2c_test/i2c_test.elf",
       "name": "DEBUG I2C F4",
       "request": "launch",
       "type": "cortex-debug",
@@ -91,7 +91,7 @@
       ],
       "debuggerArgs": ["-d", "${workspaceRoot}"],
       "preRestartCommands": [
-        "add-symbol-file build/stm32f411/app/i2c_test/i2c_test",
+        "add-symbol-file build/stm32f411/app/i2c_test/i2c_test.elf",
         "load",
         "enable breakpoint",
         "monitor reset"
@@ -100,7 +100,7 @@
     },
     {
       "cwd": "${workspaceFolder}",
-      "executable": "${workspaceRoot}/build/stm32f411/app/imu_test/imu_test",
+      "executable": "${workspaceRoot}/build/stm32f411/app/imu_test/imu_test.elf",
       "name": "DEBUG IMU BNO055 F4",
       "request": "launch",
       "type": "cortex-debug",
@@ -115,7 +115,7 @@
       ],
       "debuggerArgs": ["-d", "${workspaceRoot}"],
       "preRestartCommands": [
-        "add-symbol-file build/stm32f411/app/imu_test/imu_test",
+        "add-symbol-file build/stm32f411/app/imu_test/imu_test.elf",
         "load",
         "enable breakpoint",
         "monitor reset"
@@ -127,7 +127,7 @@
     },
     {
       "cwd": "${workspaceFolder}",
-      "executable": "${workspaceRoot}/build/stm32f411/app/pwm_test/pwm_test",
+      "executable": "${workspaceRoot}/build/stm32f411/app/pwm_test/pwm_test.elf",
       "name": "DEBUG PWM F4",
       "request": "launch",
       "type": "cortex-debug",
@@ -142,7 +142,7 @@
       ],
       "debuggerArgs": ["-d", "${workspaceRoot}"],
       "preRestartCommands": [
-        "add-symbol-file build/stm32f411/app/pwm_test/pwm_test",
+        "add-symbol-file build/stm32f411/app/pwm_test/pwm_test.elf",
         "load",
         "enable breakpoint",
         "monitor reset"
@@ -151,7 +151,7 @@
     },
     {
       "cwd": "${workspaceFolder}",
-      "executable": "${workspaceRoot}/build/stm32f411/app/usart_test/usart_test",
+      "executable": "${workspaceRoot}/build/stm32f411/app/usart_test/usart_test.elf",
       "name": "DEBUG USART F4",
       "request": "launch",
       "type": "cortex-debug",
@@ -166,7 +166,7 @@
       ],
       "debuggerArgs": ["-d", "${workspaceRoot}"],
       "preRestartCommands": [
-        "add-symbol-file build/stm32f411/app/uart_test/usart_test",
+        "add-symbol-file build/stm32f411/app/usart_test/usart_test",
         "load",
         "enable breakpoint",
         "monitor reset"
@@ -175,7 +175,7 @@
     },
     {
       "cwd": "${workspaceFolder}",
-      "executable": "${workspaceRoot}/build/stm32f411/app/adc_test/adc_test",
+      "executable": "${workspaceRoot}/build/stm32f411/app/adc_test/adc_test.elf",
       "name": "DEBUG ADC F4",
       "request": "launch",
       "type": "cortex-debug",
@@ -190,7 +190,7 @@
       ],
       "debuggerArgs": ["-d", "${workspaceRoot}"],
       "preRestartCommands": [
-        "add-symbol-file build/stm32f411/app/adc_test/adc_test",
+        "add-symbol-file build/stm32f411/app/adc_test/adc_test.elf",
         "load",
         "enable breakpoint",
         "monitor reset"
@@ -202,7 +202,7 @@
     },
     {
       "cwd": "${workspaceFolder}",
-      "executable": "${workspaceRoot}/build/stm32f411/app/w25q_test/w25q_test",
+      "executable": "${workspaceRoot}/build/stm32f411/app/w25q_test/w25q_test.elf",
       "name": "DEBUG W25Q F4",
       "request": "launch",
       "type": "cortex-debug",
@@ -217,7 +217,7 @@
       ],
       "debuggerArgs": ["-d", "${workspaceRoot}"],
       "preRestartCommands": [
-        "add-symbol-file build/stm32f411/app/w25q_test/w25q_test",
+        "add-symbol-file build/stm32f411/app/w25q_test/w25q_test.elf",
         "load",
         "enable breakpoint",
         "monitor reset"
@@ -229,7 +229,7 @@
     },
     {
       "cwd": "${workspaceFolder}",
-      "executable": "${workspaceRoot}/build/stm32f411/app/hc-05_test/hc-05_test",
+      "executable": "${workspaceRoot}/build/stm32f411/app/hc-05_test/hc-05_test.elf",
       "name": "DEBUG HC-05 USART F4",
       "request": "launch",
       "type": "cortex-debug",
@@ -244,7 +244,7 @@
       ],
       "debuggerArgs": ["-d", "${workspaceRoot}"],
       "preRestartCommands": [
-        "add-symbol-file build/stm32f411/app/hc-05_test/hc-05_test",
+        "add-symbol-file build/stm32f411/app/hc-05_test/hc-05_test.elf",
         "load",
         "enable breakpoint",
         "monitor reset"
@@ -253,7 +253,7 @@
     },
     {
       "cwd": "${workspaceFolder}",
-      "executable": "${workspaceRoot}/build/stm32f411/app/encoder_test/encoder_test",
+      "executable": "${workspaceRoot}/build/stm32f411/app/encoder_test/encoder_test.elf",
       "name": "DEBUG ENCODER F4",
       "request": "launch",
       "type": "cortex-debug",
@@ -268,7 +268,7 @@
       ],
       "debuggerArgs": ["-d", "${workspaceRoot}"],
       "preRestartCommands": [
-        "add-symbol-file build/stm32f411/app/encoder_test/encoder_test",
+        "add-symbol-file build/stm32f411/app/encoder_test/encoder_test.elf",
         "load",
         "enable breakpoint",
         "monitor reset"
@@ -277,7 +277,7 @@
     },
     {
       "cwd": "${workspaceFolder}",
-      "executable": "${workspaceRoot}/build/stm32f411/app/drv8231_test/drv8231_test",
+      "executable": "${workspaceRoot}/build/stm32f411/app/drv8231_test/drv8231_test.elf",
       "name": "DEBUG DRV8231 F4",
       "request": "launch",
       "type": "cortex-debug",
@@ -292,7 +292,7 @@
       ],
       "debuggerArgs": ["-d", "${workspaceRoot}"],
       "preRestartCommands": [
-        "add-symbol-file build/stm32f411/app/drv8231_test/drv8231_test",
+        "add-symbol-file build/stm32f411/app/drv8231_test/drv8231_test.elf",
         "load",
         "enable breakpoint",
         "monitor reset"
@@ -301,7 +301,7 @@
     },
     {
       "cwd": "${workspaceFolder}",
-      "executable": "${workspaceRoot}/build/stm32f411/app/timebase_test/timebase_test",
+      "executable": "${workspaceRoot}/build/stm32f411/app/timebase_test/timebase_test.elf",
       "name": "DEBUG TIMEBASE F4",
       "request": "launch",
       "type": "cortex-debug",
@@ -316,12 +316,36 @@
       ],
       "debuggerArgs": ["-d", "${workspaceRoot}"],
       "preRestartCommands": [
-        "add-symbol-file build/stm32f411/app/timebase_test/timebase_test",
+        "add-symbol-file build/stm32f411/app/timebase_test/timebase_test.elf",
         "load",
         "enable breakpoint",
         "monitor reset"
       ],
-      "showDevDebugOutput": true,
+      "showDevDebugOutput": true
+    },
+    {
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceRoot}/build/stm32f411/app/pcb-blinky/pcb-blinky.elf",
+      "name": "DEBUG PCB BLINK",
+      "request": "launch",
+      "type": "cortex-debug",
+      "servertype": "openocd",
+      "device": "STM32F411",
+      "svdFile": "${workspaceRoot}/mcu_support/f4xx/STM32F4x1.svd",
+      "searchDir": ["${workspaceRoot}/mcu_support/stm32"],
+      "runToMain": true,
+      "configFiles": [
+        "${workspaceRoot}/mcu_support/stm32/stlink-dap.cfg",
+        "${workspaceRoot}/mcu_support/stm32/f4xx/stm32f4x.cfg"
+      ],
+      "debuggerArgs": ["-d", "${workspaceRoot}"],
+      "preRestartCommands": [
+        "add-symbol-file build/stm32f411/app/pcb-blinky/pcb-blinky.elf",
+        "load",
+        "enable breakpoint",
+        "monitor reset"
+      ],
+      "showDevDebugOutput": true
     }
   ]
 }
