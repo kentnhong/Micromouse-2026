@@ -69,7 +69,8 @@ Stmf4::HwGpio encoder_ch2(enc_input_params_2);  // PB7 -> TIM4_CH2
 Drv8231 motor(pwm1, pwm2);
 
 Board board{.encoder = encoder,
-            .speed = pwm1,
+            .pwm1 = pwm1,
+            .pwm2 = pwm2,
             .motor = motor,
             .in1 = in1,
             .in2 = in2,

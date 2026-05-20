@@ -61,6 +61,9 @@ int main()
     ///         final_drive
     ///         duty_cycle
 
+    hw.pwm1.set_frequency(2000);
+    hw.pwm2.set_frequency(2000);
+
     while (1)
     {
         motion.update();

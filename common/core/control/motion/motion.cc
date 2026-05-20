@@ -8,7 +8,7 @@ static constexpr float kMmPerTick =
     (kWheelDiameterMm * kPi) / (kGearRatio * kTicksPerMotorRev);
 
 // TEMP: open-loop top-speed test (so PID setpoint should not matter)
-static constexpr float kPidTargetSpeedMmPerSec = 1541.0f;
+static constexpr float kPidTargetSpeedMmPerSec = 1000.0f;
 static constexpr uint32_t kFallbackEncoderSampleUs = 1'000;
 
 namespace MM
@@ -20,7 +20,7 @@ Motion::Motion(Board& hw, const Gains& gains)
           hw.encoder, hw.encoder_sample_us != 0 ? hw.encoder_sample_us
                                                 : kFallbackEncoderSampleUs))
 {
-    hw.motor.drive(Drv8231::Direction::FORWARD, 0);
+    hw.motor.drive(Drv8231::Direction::REVERSE, 50);
     pid.set_output_limits(-0.25f, 0.25f);
 }
 

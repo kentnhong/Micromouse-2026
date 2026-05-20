@@ -27,7 +27,9 @@ struct Board
 {
     // Peripherals
     Encoder& encoder;
-    Pwm& speed;
+    Pwm& pwm1;
+    Pwm& pwm2;
+
     Drv8231& motor;
 
     // GPIO pins for motor direction control
