@@ -71,6 +71,13 @@ public:
     */
     void process_ir_data(const IrValues& ir_vals);
 
+    /**
+     * @brief Checks if the mouse is done searching the maze
+     * 
+     * @return true Maze has been searched, false still searching
+     */
+    bool is_searched();
+
 private:
     /**
     * @brief Enum for the four cardinal directions
@@ -164,6 +171,9 @@ private:
     bool sensor_front_wall{false};
     bool sensor_right_wall{false};
     bool sensor_left_wall{false};
+
+    // Search completed
+    bool searched = false;
 };
 
 }  // namespace MM

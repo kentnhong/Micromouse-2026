@@ -57,11 +57,29 @@ char Floodfill::get_next_move()
             continue;
         }
 
-        // Update the best direction if the neighboring cell has a smaller distance value than the current best distance
-        if (maze[next_x][next_y] < best_distance)
+        if (mode == Mode::ZOOMING)
         {
-            best_distance = maze[next_x][next_y];
-            best_dir = next_dir;
+            if (maze[next_x][next_y] < best_distance)
+            {
+                best_distance = maze[next_x][next_y];
+                best_dir = next_dir;
+            }
+            else if (maze[next_x][next_y] == best_distance)
+            {
+                if (dir == next_dir)
+                {
+                    best_dir = next_dir;
+                }
+            }
+        }
+        else
+        {
+            // Update the best direction if the neighboring cell has a smaller distance value than the current best distance
+            if (maze[next_x][next_y] < best_distance)
+            {
+                best_distance = maze[next_x][next_y];
+                best_dir = next_dir;
+            }
         }
     }
 
@@ -163,8 +181,12 @@ bool Floodfill::track_path()
     {
         current_x--;  // X because we are moving WEST
     }
-    else if (current_x == 7 && current_y == 7)
+    else if ((current_x == 7 && current_y == 7) ||
+             (current_x == 7 && current_y == 8) ||
+             (current_x == 8 && current_y == 7) ||
+             (current_x == 8 && current_y == 8))
     {
+        searched = true;
         return true;  // Goal reached
     }
 
@@ -283,18 +305,22 @@ bool Floodfill::init_wall()
 
 void Floodfill::set_mode(Mode next_mode)
 {
-    mode = next_mode;
-
-    // TODO: If mouse searches maze more than once, may need to reset mouse state to start from beginning cell as well
-
-    // Resets mouse state to start from beginning cell
-    if (mode == Mode::ZOOMING)
+    // Only allow zooming mode if the maze has been searched
+    if (next_mode == Mode::ZOOMING)
     {
-        // Mouse starts out facing North
-        dir = 0;
-        // Mouse starts at cell 0,0
-        current_x = 0;
-        current_y = 0;
+        if (searched)
+        {
+            mode = next_mode;
+            // Mouse starts out facing North
+            dir = 0;
+            // Mouse starts at cell 0,0
+            current_x = 0;
+            current_y = 0;
+        }
+    }
+    else
+    {
+        mode = next_mode;
     }
 }
 
