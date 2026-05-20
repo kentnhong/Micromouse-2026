@@ -41,30 +41,34 @@ const Stmf4::StGpioParams enc_input_params_2{7, GPIOB,
                                              enc_input_settings};  // PB7
 
 // Motor control pins
+// Requested mapping for debugging/consistency with DRV8231 IN/IN PWM:
+// PA2 => TIM2_CH3
+// PA3 => TIM2_CH4
 const Stmf4::StGpioParams in1_params{
-    2, GPIOA, motor_pwm_settings};  // PA2 for Motor IN1/PWM1
+    2, GPIOA, motor_pwm_settings};  // PA2 for Motor IN1/PWM1 (TIM2_CH3)
 const Stmf4::StGpioParams in2_params{
-    3, GPIOA, motor_pwm_settings};  // PA3 for Motor IN2/PWM2
+    3, GPIOA, motor_pwm_settings};  // PA3 for Motor IN2/PWM2 (TIM2_CH4)
 
 const Stmf4::StEncoderParams encoder_params{TIM4, encoder_settings};  // TIM4
 
 /// PWM: 1KHz frequency to match the control loop and encoder sampling rate
 const Stmf4::StPwmParams pwm1_params{TIM2, Stmf4::PwmChannel::CH3, pwm_settings,
-                                     16000000};
+                                     32000000};
 const Stmf4::StPwmParams pwm2_params{TIM2, Stmf4::PwmChannel::CH4, pwm_settings,
-                                     16000000};
+                                     32000000};
 
 Stmf4::HwClk clock(Stmf4::Configuration::HSI_16MHZ);
 Stmf4::HwGpio in1(in1_params);
 Stmf4::HwGpio in2(in2_params);
-Stmf4::HwPwm pwm1(pwm1_params);
-Stmf4::HwPwm pwm2(pwm2_params);
+Stmf4::HwPwm pwm1(pwm1_params); // PA2 -> TIM2_CH3
+Stmf4::HwPwm pwm2(pwm2_params); // PA3 -> TIM2_CH4
 Stmf4::HwEncoder encoder(encoder_params);
-Stmf4::HwGpio encoder_ch1(enc_input_params_1);
-Stmf4::HwGpio encoder_ch2(enc_input_params_2);
+Stmf4::HwGpio encoder_ch1(enc_input_params_1); // PB6 -> TIM4_CH1
+Stmf4::HwGpio encoder_ch2(enc_input_params_2); // PB7 -> TIM4_CH2
 
 Drv8231 motor(pwm1, pwm2);
 
+    
 Board board{.encoder = encoder,
             .speed = pwm1,
             .motor = motor,

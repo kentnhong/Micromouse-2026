@@ -10,6 +10,7 @@
 #include "board.h"
 #include "enc_sample.h"
 #include "motion.h"
+#include "st_timebase.h"
 
 /// NOTE: Currently running at 1KHz, which is the max sampling rate of the encoders.
 /// PWM at 1KHZ as well to match the control loop frequency.
@@ -24,8 +25,20 @@ int main()
     Board& hw = get_board();
 
     // CHANGE_VALUE
-    const Gains kVelocityGains{0.001f, 0.0f, 0.0f};
+    const Gains kVelocityGains{0.001f, 0.001f, 0.0f};
     Motion motion(hw, kVelocityGains);
+    
+    StTimebaseParams tb_params = {TIM5};
+    Stmf4::HwTimebase timebase(tb_params);
+
+    RCC->APB1ENR |= RCC_APB1ENR_TIM5EN;
+
+    // Initialize timebase (50MHz PCLK, 1MHz timer frequency)
+    timebase.init(50'000'000, 1'000'000, std::chrono::microseconds(0xFFFFFFFF));
+    timebase.start();
+
+    // Bind timebase to use delay functions
+    Utils::bind_timebase(timebase);
 
     hw.encoder.reset_ticks();
 
@@ -50,17 +63,7 @@ int main()
 
     while (1)
     {
-        hw.motor.drive(Drv8231::Direction::FORWARD, 5);
-        MM::Utils::delay_ms(5'000);
-
-        hw.motor.drive(Drv8231::Direction::COAST, 0);
-        MM::Utils::delay_ms(3'000);
-
-        hw.motor.drive(Drv8231::Direction::FORWARD, 80);
-        MM::Utils::delay_ms(5'000);
-
-        hw.motor.drive(Drv8231::Direction::COAST, 0);
-        MM::Utils::delay_ms(3'000);
+        motion.update();
     }
 
     return 0;

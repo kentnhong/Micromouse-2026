@@ -50,13 +50,13 @@ void Drv8231::drive(Direction dir, uint8_t duty_cycle)
             break;
         case Direction::FORWARD:
             // Fast decay mapping (Drive/Coast):
-            pwm1->set_duty_cycle(100 - duty_cycle);
-            pwm2->set_duty_cycle(100);
+            pwm1->set_duty_cycle(100);
+            pwm2->set_duty_cycle(duty_cycle);
             break;
         case Direction::REVERSE:
             // Fast decay mapping (Drive/Coast):
-            pwm1->set_duty_cycle(0);
-            pwm2->set_duty_cycle(100 - duty_cycle);
+            pwm1->set_duty_cycle(duty_cycle);
+            pwm2->set_duty_cycle(100);
             break;
         case Direction::BRAKE:
             // 100% duty cycle on both shorts the motor to GND (Braking)

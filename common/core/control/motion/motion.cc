@@ -4,7 +4,7 @@ static constexpr float kWheelDiameterMm = 14.0f;
 static constexpr float kGearRatio = 15.25f;
 static constexpr float kTicksPerMotorRev = 12.0f;
 static constexpr float kMmPerTick =
-    (kWheelDiameterMm * std::numbers::pi_v<float>) /
+    (kWheelDiameterMm * 3.14159265358979323846f) /
     (kGearRatio * kTicksPerMotorRev);
 static constexpr float kPidTargetSpeedMmPerSec = 30.0f;
 static constexpr uint32_t kFallbackEncoderSampleUs = 1'000;
@@ -22,17 +22,8 @@ Motion::Motion(Board& hw, const Gains& gains)
     pid.set_output_limits(-0.25f, 0.25f);
 }
 
-// Motion layer: physical robot units, mm/s
-// PID layer: encoder/control units, ticks/s
-
-/// SEQUENCE: target mm/s -> target ticks/s
-///           sample encoder ticks
-///           PID compares target ticks/s vs measured ticks/sample_time
-///           PID outputs PWM
-
 bool Motion::update()
 {
-    // CHANGE_VALUE
     float target_ticks_per_sec = 0.0f;
 
     const int32_t sample_ticks =
@@ -41,13 +32,9 @@ bool Motion::update()
     pid.set_target_ticks_per_sec(kPidTargetSpeedMmPerSec / kMmPerTick,
                                  target_ticks_per_sec);
 
-    // PID inputs:
-    // - target_ticks_per_sec: desired motor speed in ticks/s
-    // - FORWARD: commanded motor polarity
-    // - sample_ticks: encoder ticks measured during this sample window
-    // - sample_time_sec: dt for converting sample_ticks to measured ticks/s
     return pid.update(target_ticks_per_sec, Drv8231::Direction::FORWARD,
                       sample_ticks, encoder_timing.sample_time_sec);
 }
 
 }  // namespace MM
+

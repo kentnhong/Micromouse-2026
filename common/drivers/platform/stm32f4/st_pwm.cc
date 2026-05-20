@@ -155,6 +155,11 @@ bool HwPwm::init()
 
 bool HwPwm::set_frequency(uint32_t frequency)
 {
+    if (!(base_addr->CR1 & TIM_CR1_CEN_Msk))
+    {
+        return false;
+    }
+
     if (frequency < 1)
     {
         return false;
@@ -204,6 +209,11 @@ bool HwPwm::set_frequency(uint32_t frequency)
 
 bool HwPwm::set_duty_cycle(uint8_t duty_cycle)
 {
+    if (!(base_addr->CR1 & TIM_CR1_CEN_Msk))
+    {
+        return false;
+    }
+
     if (duty_cycle > 100)
     {
         return false;

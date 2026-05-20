@@ -18,8 +18,8 @@ namespace MM
 struct Board
 {
     Drv8231& drv8231;
-    Gpio& in1;
-    Gpio& in2;
+    //Gpio& in1;
+    //Gpio& in2;
     Pwm& pwm1;
     Pwm& pwm2;
 };
