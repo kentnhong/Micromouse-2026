@@ -6,7 +6,6 @@
 */
 
 #pragma once
-#include <algorithm>
 #include <cstdint>
 #include "ircontroller.h"
 
@@ -55,6 +54,12 @@ public:
     * ('F' for forward, 'R' for turn right, 'L' for turn left, 'U' for U-turn)
     */
     char get_next_move();
+
+    /**
+     * @brief Count how many cells can be driven straight ahead from the current cell.
+     * @note This is used by zoom mode to decide how long to keep accelerating before a turn.
+     */
+    int count_straight_ahead() const;
 
     /**
     * @brief Get the calculated distance value for a specific cell

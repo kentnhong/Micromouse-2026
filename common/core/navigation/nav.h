@@ -68,6 +68,7 @@ public:
 private:
     State state;
     Floodfill floodfill;
+    int pending_straight_cells{0};
 
     // Flag for decision phase; true when we are ready to make a new move
     bool at_cell_center{true};

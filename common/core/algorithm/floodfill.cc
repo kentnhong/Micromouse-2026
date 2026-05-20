@@ -108,6 +108,21 @@ char Floodfill::get_next_move()
     return 'L';
 }
 
+int Floodfill::count_straight_ahead() const
+{
+    // PSEUDOCODE:
+    // 1. Start from the current cell and the current facing direction.
+    // 2. Look one cell ahead at a time.
+    // 3. Stop when any of these happen:
+    //    - the next cell is out of bounds
+    //    - there is a known wall in front
+    //    - the next cell's distance is not strictly decreasing
+    // 4. Return the number of valid forward cells.
+    //
+    // Fill in the real walk here when you are ready to connect zoom-mode speed planning.
+    return 1;
+}
+
 void Floodfill::update_search()
 {
     Position current{current_x, current_y};

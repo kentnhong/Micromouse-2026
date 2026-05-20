@@ -7,8 +7,6 @@
 
 #pragma once
 
-#include "drv8231.h"
-#include "encoder.h"
 #include "ircontroller.h"
 // #include "pid.h" TODO: Add PID header when implemented
 
@@ -21,6 +19,11 @@ public:
     * @brief Drive straight for one cell, using IR sensor data to maintain alignment.
     */
     bool forward(const IrValues& ir);
+
+    /**
+    * @brief Tell the motion controller how many straight cells are left in the current run.
+    */
+    void set_straight_cells(int cells);
 
     /**
     * @brief Turn the robot 90 degrees to the left.
@@ -49,5 +52,6 @@ private:
     // PID
     // Encoder
     // Hardware references (e.g., motor drivers)
+    int straight_cells_remaining{0};
 };
 }  // namespace MM
