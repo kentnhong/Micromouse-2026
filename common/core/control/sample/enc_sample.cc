@@ -23,15 +23,24 @@ Sample::EncoderTiming Sample::init_encoder_timing(Encoder& timing_encoder,
 
 int32_t Sample::sample_encoder(Encoder& encoder, const EncoderTiming& timing)
 {
+    // Measure signed delta directly in tick domain.
+    // Encoder::get_ticks() is expected to return a meaningful signed tick value
+    // consistent with reset_ticks() and direction.
     const uint32_t start_time = encoder.get_time_cycles();
+    const int32_t start_ticks = encoder.get_ticks();
+    (void)start_ticks;
+
     while ((encoder.get_time_cycles() - start_time) < timing.sample_cycles)
     {
     }
 
-    const int32_t ticks = encoder.get_ticks();
+    const int32_t end_ticks = encoder.get_ticks();
+
     encoder.reset_ticks();
 
-    return ticks;
+    // DIAGNOSTIC: return absolute end_ticks to confirm the encoder counter
+    // is changing in the PID sampling path.
+    return end_ticks;
 }
 
 MM::EncoderInput Sample::sample_encoders(Encoder& phase_a, Encoder& phase_b,

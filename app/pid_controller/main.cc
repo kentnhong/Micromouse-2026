@@ -27,7 +27,7 @@ int main()
     // CHANGE_VALUE
     const Gains kVelocityGains{0.001f, 0.001f, 0.0f};
     Motion motion(hw, kVelocityGains);
-    
+
     StTimebaseParams tb_params = {TIM5};
     Stmf4::HwTimebase timebase(tb_params);
 

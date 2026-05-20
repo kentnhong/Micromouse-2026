@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
 
     while (1)
     {
-        
+
         /* You don't need to change the set_frequency() because as the motor speed changes, the frequency will remain 
          constant and the duty cycle will adjust to maintain the desired speed. You can experiment with different 
          frequencies and duty cycles to see how they affect the motor's behavior. */

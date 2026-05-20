@@ -60,15 +60,14 @@ const Stmf4::StPwmParams pwm2_params{TIM2, Stmf4::PwmChannel::CH4, pwm_settings,
 Stmf4::HwClk clock(Stmf4::Configuration::HSI_16MHZ);
 Stmf4::HwGpio in1(in1_params);
 Stmf4::HwGpio in2(in2_params);
-Stmf4::HwPwm pwm1(pwm1_params); // PA2 -> TIM2_CH3
-Stmf4::HwPwm pwm2(pwm2_params); // PA3 -> TIM2_CH4
+Stmf4::HwPwm pwm1(pwm1_params);  // PA2 -> TIM2_CH3
+Stmf4::HwPwm pwm2(pwm2_params);  // PA3 -> TIM2_CH4
 Stmf4::HwEncoder encoder(encoder_params);
-Stmf4::HwGpio encoder_ch1(enc_input_params_1); // PB6 -> TIM4_CH1
-Stmf4::HwGpio encoder_ch2(enc_input_params_2); // PB7 -> TIM4_CH2
+Stmf4::HwGpio encoder_ch1(enc_input_params_1);  // PB6 -> TIM4_CH1
+Stmf4::HwGpio encoder_ch2(enc_input_params_2);  // PB7 -> TIM4_CH2
 
 Drv8231 motor(pwm1, pwm2);
 
-    
 Board board{.encoder = encoder,
             .speed = pwm1,
             .motor = motor,

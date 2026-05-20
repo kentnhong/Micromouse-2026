@@ -182,19 +182,22 @@ int32_t HwEncoder::get_ticks()
 {
     // Read the current encoder ticks from the timer's CNT register
     uint32_t raw_cnt = base_addr->CNT;
-    
+
     // If it's a 16-bit timer (like TIM1, TIM3, TIM4), we need to manually sign-extend
     // it so that backwards values (like 65535) become negative (-1).
-    if (!is_timer_1_to_5(base_addr) || base_addr == TIM1 || base_addr == TIM3 || base_addr == TIM4)
+    if (!is_timer_1_to_5(base_addr))
     {
-        current_ticks = static_cast<int32_t>(static_cast<int16_t>(raw_cnt));
+        // For non TIM1..5 timers, assume 32-bit.
+        current_ticks = static_cast<int32_t>(raw_cnt);
     }
     else
     {
-        // 32-bit timers (TIM2, TIM5)
-        current_ticks = static_cast<int32_t>(raw_cnt);
+        // TIM1/TIM3/TIM4 are 16-bit on STM32F4. Interpret CNT as signed
+        // so counting direction (up/down) is reflected in the tick delta
+        // after reset.
+        current_ticks = static_cast<int32_t>(static_cast<int16_t>(raw_cnt));
     }
-    
+
     return current_ticks;
 }
 
@@ -214,7 +217,7 @@ bool HwEncoder::init_cycle_counter()
 
     // Unlock DWT Lock Access Register (LAR) - Required on many STM32 Cortex-M4/M7 cores
     // The CMSIS headers for F4 sometimes omit the 'LAR' property, so we use the raw address.
-    volatile uint32_t *dwt_lar = (volatile uint32_t *)0xE0001FB0;
+    volatile uint32_t* dwt_lar = (volatile uint32_t*)0xE0001FB0;
     *dwt_lar = 0xC5ACCE55;
 
     // Reset the cycle counter
@@ -233,7 +236,11 @@ uint32_t HwEncoder::get_time_cycles()
 
 uint32_t HwEncoder::cycles_per_us()
 {
-    return SystemCoreClock / 1'000'000u;
+    // DWT->CYCCNT increments on the core clock. This project currently runs the
+    // MCU at HSI_16MHz via Stmf4::Configuration::HSI_16MHZ in the PID board BSP.
+    // Using SystemCoreClock here can be wrong if SystemCoreClock wasn't updated.
+    // Until clock-tree is verified, hardcode 16 MHz for consistent dt.
+    return 16u;
 }
 
 EncoderStats HwEncoder::measure_encoder_stats(uint32_t sample_cycles,

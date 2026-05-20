@@ -1,27 +1,11 @@
-# TODO - PID/Encoder debugging (sample_ticks stuck / PID not responding)
+TODO LIST:
 
-## Encoder + measurement validation
-- [ ] Inspect `app/pid_controller/bsp_f411/f411_board.cc` for actual encoder TIM configuration.
-- [ ] In debugger, break in `common/drivers/platform/stm32f4/st_encoder.cc:HwEncoder::get_ticks()` and record `base_addr->CNT` and computed `current_ticks` for multiple samples.
-- [ ] Verify what `sample_ticks` equals at breakpoint in `common/core/control/sample/enc_sample.cc`.
-- [ ] Check for wrap-around behavior (0..65535) if the timer CNT is 16-bit; confirm whether negative/constant deltas correlate with wrap.
+**HAL Driver replacement:**
+- st_pwm_hal.cc / st_enc_hal.cc
+- testing it on the NUCLEO & custom HW
 
-## PID observability (P/I/D build-up)
-- [ ] Add temporary debugger-visible variables in `common/core/control/pid/pid.cc` to expose:
-  - [ ] `error`
-  - [ ] `p = gains.kp * error`
-  - [ ] `state.integral`
-  - [ ] `i = gains.ki * state.integral`
-  - [ ] `derivative = (error - state.prev_error)/dt_sec`
-  - [ ] `d = gains.kd * derivative`
-  - [ ] unclamped `p+i+d` and clamped `final_drive`
-
-## Fix measurement logic
-- [ ] If encoder returns wrong sign/scale due to CNT wrap or casting, change `HwEncoder::get_ticks()` to return **delta ticks** using modulo arithmetic and `prev_ticks`.
-- [ ] Ensure `reset_ticks()` and sampling flow are consistent (delta since last reset).
-
-## Validate + tune
-- [ ] Re-run PID debug: `measured_ticks` should vary with motor motion (not constant).
-- [ ] Confirm PID output no longer saturates/clamps unexpectedly.
-- [ ] Tune gains: start with non-zero `ki` (and `kd` when ready) only after measurement is correct.
-
+**HIGHER ABSTRACTION NEED TO FIX**
+- PID controller math is fine
+    - Encoder  & PWM replace the method of measuring the ticks and outputting the PWM 
+- Drv8231 logic need to check again if the PWM pulsing out is clean
+- Trapezoial profile 

@@ -1,5 +1,6 @@
 if (TARGET_DEVICE MATCHES "^(STM32F4)[0-9]+")
     add_subdirectory(platform/stm32f4)
+    add_subdirectory(platform/stm32f4_hal)
 endif()
 
 add_subdirectory(time)
@@ -17,5 +18,5 @@ target_include_directories(driver INTERFACE
 target_link_libraries(driver INTERFACE)
 
 if (TARGET_DEVICE MATCHES "^(STM32)[0-9A-Z]+")
-    target_link_libraries(driver INTERFACE hal)
+    target_link_libraries(driver INTERFACE hal hal2)
 endif()

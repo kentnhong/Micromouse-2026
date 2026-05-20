@@ -40,7 +40,7 @@ EncoderTiming init_encoder_timing(Encoder& timing_encoder,
 int32_t sample_encoder(Encoder& encoder, const EncoderTiming& timing);
 
 /**
-* @brief Samples two encoders for a specified duration based on the provided timing
+ * @brief Samples two encoders for a specified duration based on the provided timing
 * @param phase_a Phase A encoder to sample
 * @param phase_b Phase B encoder to sample
 * @param timing The EncoderTiming struct containing the sample duration information
