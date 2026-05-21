@@ -11,9 +11,11 @@ target_include_directories(motion PUBLIC
     ${CMAKE_SOURCE_DIR}/common/drivers/bus
     ${CMAKE_SOURCE_DIR}/common/core/control/sample
     ${CMAKE_SOURCE_DIR}/common/core/control/pid
+    ${CMAKE_SOURCE_DIR}/common/core/control/profile
 )
 
 target_link_libraries(motion PUBLIC
+    profile
     sample
     pid
 )

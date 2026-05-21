@@ -4,9 +4,9 @@
 * @author Bex Saw
 */
 
-#include <tuple>
 #include "enc_sample.h"
 #include "pid.h"
+#include "trapezoidal.h"
 #include "pid_controller/board.h"
 
 namespace MM
@@ -29,6 +29,7 @@ public:
 private:
     Board& hw;
     PID pid;
+    Trapezoidal profile;
     Sample::EncoderTiming encoder_timing;
 };
 }  // namespace MM
