@@ -33,7 +33,7 @@ struct Board
     // MOTOR
     Drv8231& motor;
 
-    // GPIO 
+    // GPIO
     Gpio& in1;
     Gpio& in2;
     Gpio& encoder_ch1;

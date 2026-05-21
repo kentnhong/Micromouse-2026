@@ -44,7 +44,7 @@ const Stmf4::StGpioParams in1_params{
     2, GPIOA, motor_pwm_settings};  // PA2 for Motor IN1/PWM1 (TIM2_CH3)
 const Stmf4::StGpioParams in2_params{
     3, GPIOA, motor_pwm_settings};  // PA3 for Motor IN2/PWM2 (TIM2_CH4)
-    
+
 const Stmf4::StEncoderParams encoder_params{TIM4, encoder_settings};  // TIM4
 
 /// PWM: 1KHz frequency to match the control loop and encoder sampling rate

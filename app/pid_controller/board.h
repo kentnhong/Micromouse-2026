@@ -8,8 +8,6 @@
 #pragma once
 
 #include <cstdint>
-#include <tuple>
-
 #include "delay.h"
 #include "drv8231.h"
 #include "enc_sample.h"
@@ -21,15 +19,11 @@
 namespace MM
 {
 
-/// NOTE: This is currently a setup for one motor and encoder.
-
 struct Board
 {
     // Peripherals
     Encoder& encoder;
-    Pwm& pwm1;
-    Pwm& pwm2;
-
+    Pwm& speed;
     Drv8231& motor;
 
     // GPIO pins for motor direction control

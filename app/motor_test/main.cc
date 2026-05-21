@@ -12,7 +12,7 @@ static constexpr float kTicksPerOutputRev =
 
 static constexpr float kCmPerTick =
     (kWheelDiameterCm * std::numbers::pi_v<float>) / kTicksPerOutputRev;
-    
+
 int main()
 {
     bsp_init();
@@ -22,7 +22,7 @@ int main()
     hw.pwm1.set_frequency(2000);
     hw.pwm2.set_frequency(2000);
 
-    // encoder 
+    // encoder
     uint32_t cycles_per_us = hw.encoder.cycles_per_us();
     const uint32_t sample_cycles = kSampleTimeUs * cycles_per_us;
 
