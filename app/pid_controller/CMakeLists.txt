@@ -31,5 +31,5 @@ if (TARGET pid_bsp)
 endif()
 
 if("${TARGET_DEVICE}" STREQUAL "NATIVE")
-    add_subdirectory(test)
+    # No native test subdirectory exists for this app.
 endif()
