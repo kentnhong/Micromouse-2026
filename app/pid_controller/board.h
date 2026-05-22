@@ -21,21 +21,14 @@ namespace MM
 
 struct Board
 {
-    // Peripherals
     Encoder& encoder;
     Pwm& pwm1;
     Pwm& pwm2;
     Drv8231& motor;
-
-    // GPIO pins for motor direction control
     Gpio& in1;
     Gpio& in2;
-
-    // Encoder channel GPIO pins A/B for inputs
     Gpio& encoder_ch1;
     Gpio& encoder_ch2;
-
-    // Need to feed this into the control loop for timing the encoder sampling
     uint32_t encoder_sample_us;
 };
 

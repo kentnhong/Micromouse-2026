@@ -1,5 +1,5 @@
 
-set(EXECUTABLE pcb-blinky)
+set(EXECUTABLE pcb_blinky)
 set(LDF ${CMAKE_CURRENT_BINARY_DIR}/${EXECUTABLE}.ld)
 
 set(PREPROCESS_DEFS

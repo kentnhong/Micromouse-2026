@@ -6,8 +6,8 @@
 */
 
 #pragma once
-#include <cstdint>
 #include <cmath>
+#include <cstdint>
 #include "enc_math.h"
 
 /**

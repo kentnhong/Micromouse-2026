@@ -345,10 +345,120 @@
         "enable breakpoint",
         "monitor reset"
       ],
+      "showDevDebugOutput": true
+    },
+    {
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceRoot}/build/stm32f411/app/pid_controller/pid_controller.elf",
+      "name": "DEBUG PID CONTROLLER",
+      "request": "launch",
+      "type": "cortex-debug",
+      "servertype": "openocd",
+      "device": "STM32F411",
+      "svdFile": "${workspaceRoot}/mcu_support/f4xx/STM32F4x1.svd",
+      "searchDir": ["${workspaceRoot}/mcu_support/stm32"],
+      "runToMain": true,
+      "configFiles": [
+        "${workspaceRoot}/mcu_support/stm32/stlink-dap.cfg",
+        "${workspaceRoot}/mcu_support/stm32/f4xx/stm32f4x.cfg"
+      ],
+      "debuggerArgs": ["-d", "${workspaceRoot}"],
+      "preRestartCommands": [
+        "add-symbol-file build/stm32f411/app/pid_controller/pid_controller.elf",
+        "load",
+        "enable breakpoint",
+        "monitor reset"
+      ],
+      "showDevDebugOutput": true
+    },
+    {
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceRoot}/build/stm32f411/app/ir_single_test/ir_single_test.elf",
+      "name": "DEBUG IR TEST SINGLE",
+      "request": "launch",
+      "type": "cortex-debug",
+      "servertype": "openocd",
+      "device": "STM32F411",
+      "svdFile": "${workspaceRoot}/mcu_support/f4xx/STM32F4x1.svd",
+      "searchDir": ["${workspaceRoot}/mcu_support/stm32"],
+      "runToMain": true,
+      "configFiles": [
+        "${workspaceRoot}/mcu_support/stm32/stlink-dap.cfg",
+        "${workspaceRoot}/mcu_support/stm32/f4xx/stm32f4x.cfg"
+      ],
+      "debuggerArgs": ["-d", "${workspaceRoot}"],
+      "preRestartCommands": [
+        "add-symbol-file build/stm32f411/app/ir_single_test/ir_single_test.elf",
+        "load",
+        "enable breakpoint",
+        "monitor reset"
+      ],
       "showDevDebugOutput": true,
       "liveWatch": {
         "enabled": true
       }
+    },
+    {
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceRoot}/build/stm32f411/app/ir_test/ir_test.elf",
+      "name": "DEBUG IR TEST F4",
+      "request": "launch",
+      "type": "cortex-debug",
+      "servertype": "openocd",
+      "device": "STM32F411",
+      "svdFile": "${workspaceRoot}/mcu_support/f4xx/STM32F4x1.svd",
+      "searchDir": ["${workspaceRoot}/mcu_support/stm32"],
+      "runToMain": true,
+      "configFiles": [
+        "${workspaceRoot}/mcu_support/stm32/stlink-dap.cfg",
+        "${workspaceRoot}/mcu_support/stm32/f4xx/stm32f4x.cfg"
+      ],
+      "debuggerArgs": ["-d", "${workspaceRoot}"],
+      "preRestartCommands": [
+        "add-symbol-file build/stm32f411/app/ir_test/ir_test.elf",
+        "load",
+        "enable breakpoint",
+        "monitor reset"
+      ],
+      "showDevDebugOutput": true,
+      "liveWatch": {
+      "enabled": true,
+      "samplingPeriod": 100,
+      "watches": [
+        { "variable": "g_sequence_n" },
+        { "variable": "g_ir_left" },
+        { "variable": "g_ir_front_left" },
+        { "variable": "g_ir_front_right" },
+        { "variable": "g_ir_right" }
+        ]
+      }
+    },
+    {
+    "cwd": "${workspaceFolder}",
+      "executable": "${workspaceRoot}/build/stm32f411/app/pcb_blinky/pcb_blinky.elf",
+      "name": "DEBUG PCB BLINK F4",
+      "request": "launch",
+      "type": "cortex-debug",
+      "servertype": "openocd",
+      "device": "STM32F411",
+      "svdFile": "${workspaceRoot}/mcu_support/f4xx/STM32F4x1.svd",
+      "searchDir": ["${workspaceRoot}/mcu_support/stm32"],
+      "runToMain": true,
+      "configFiles": [
+        "${workspaceRoot}/mcu_support/stm32/stlink-dap.cfg",
+        "${workspaceRoot}/mcu_support/stm32/f4xx/stm32f4x.cfg"
+      ],
+      "debuggerArgs": ["-d", "${workspaceRoot}"],
+      "preRestartCommands": [
+        "add-symbol-file build/stm32f411/app/pcb_blinky/pcb_blinky.elf",
+        "load",
+        "enable breakpoint",
+        "monitor reset"
+      ],
+      "showDevDebugOutput": true,
+      "liveWatch": {
+      "enabled": true
     }
-  ]
+  }
+]
 }

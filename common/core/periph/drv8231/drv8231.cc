@@ -64,7 +64,7 @@ void Drv8231::drive(Direction dir, uint8_t duty_cycle)
             break;
     }
     state = static_cast<int>(dir);
-    
+
     return;
 }
 

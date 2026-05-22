@@ -6,8 +6,8 @@
 
 #include "enc_sample.h"
 #include "pid.h"
-#include "trapezoidal.h"
 #include "pid_controller/board.h"
+#include "trapezoidal.h"
 
 namespace MM
 {

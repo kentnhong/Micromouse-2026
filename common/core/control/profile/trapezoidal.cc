@@ -58,20 +58,20 @@ bool Trapezoidal::trapezoidal(const EncoderInput& input, float dt_sec)
         float decel_distance = 0.0f;
         if (decel_rate > 0.0f)
         {
-            decel_distance = (speed_setpoint * speed_setpoint -
-                              min_speed * min_speed) /
-                             (2.0f * decel_rate);
+            decel_distance =
+                (speed_setpoint * speed_setpoint - min_speed * min_speed) /
+                (2.0f * decel_rate);
         }
 
         if (static_cast<float>(remaining_ticks) <= decel_distance)
         {
-            speed_setpoint = std::max(min_speed,
-                                      speed_setpoint - decel_rate * dt_sec);
+            speed_setpoint =
+                std::max(min_speed, speed_setpoint - decel_rate * dt_sec);
         }
         else
         {
-            speed_setpoint = std::min(max_speed,
-                                      speed_setpoint + accel_rate * dt_sec);
+            speed_setpoint =
+                std::min(max_speed, speed_setpoint + accel_rate * dt_sec);
         }
 
         if (progress_ticks >= distance_goal_ticks &&
