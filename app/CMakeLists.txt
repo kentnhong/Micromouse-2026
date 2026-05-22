@@ -12,7 +12,7 @@ add_subdirectory(hc-05_test)
 add_subdirectory(timebase_test)
 add_subdirectory(ir_test)
 add_subdirectory(pcb-blinky)
-add_subdirectory(nav_app)
+#add_subdirectory(nav_app)
 
 if ("${TARGET_DEVICE}" MATCHES "NATIVE")
     add_subdirectory(mms_sim)

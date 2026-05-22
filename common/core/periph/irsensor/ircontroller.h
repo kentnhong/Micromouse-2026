@@ -83,6 +83,6 @@ private:
         ir_sequence;    // Store references as pointers to 4 IR Sensors
     IrValues& ir_vals;  // Store ir vals for all 4 sensors
     IrControllerStates current_state = IrControllerStates::LEFT;
-    bool sequence_done = false;
+    volatile bool sequence_done = false;
 };
 }  // namespace MM

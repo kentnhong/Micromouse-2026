@@ -136,6 +136,11 @@ public:
     bool convert(bool single, size_t samples) override;
 
     /**
+     * @brief Fire SWSTART without blocking — for use when DMA captures the result.
+     */
+    bool trigger() override;
+
+    /**
      * @brief Stops the current ADC conversion
      */
     void stop() override;

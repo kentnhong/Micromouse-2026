@@ -28,6 +28,12 @@ public:
     virtual bool convert(bool single, size_t samples) = 0;
 
     /**
+     * @brief Fire SWSTART without blocking — for use when DMA captures the result.
+     * @return true if triggered, false if peripheral not in software-trigger mode
+     */
+    virtual bool trigger() = 0;
+
+    /**
      * @brief Stops the current ADC conversion
      */
     virtual void stop() = 0;

@@ -135,6 +135,15 @@ bool HwAdc::init()
     return true;
 }
 
+bool HwAdc::trigger()
+{
+    if (settings.source != AdcTriggerSource::SOFTWARE)
+        return false;
+    base_addr->CR2 &= ~ADC_CR2_CONT;
+    base_addr->CR2 |= ADC_CR2_SWSTART;
+    return true;
+}
+
 bool HwAdc::convert(bool single, size_t samples)
 {
     if (settings.source == AdcTriggerSource::EXTERNAL)

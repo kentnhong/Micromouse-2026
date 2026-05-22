@@ -93,10 +93,14 @@ HwTimebase timebase{timebase_params};
 HwClk clk{Configuration::SYSCLK_HSE_100MHZ};
 
 /* USART Initialization */
-StGpioSettings tx_settings{GpioMode::AF, GpioOtype::PUSH_PULL, GpioOspeed::LOW,
-                           GpioPupd::NO_PULL, 7};
-StGpioParams tx_params{9, GPIOA, tx_settings};  // PA9 USART1_TX
-HwGpio tx{tx_params};
+StGpioSettings usart_gpio_settings{GpioMode::AF, GpioOtype::PUSH_PULL,
+                                   GpioOspeed::VERY_HIGH, GpioPupd::NO_PULL, 7};
+StGpioParams usart_tx_params{9, GPIOA,
+                             usart_gpio_settings};  // PA9  USART1_TX AF7
+StGpioParams usart_rx_params{10, GPIOA,
+                             usart_gpio_settings};  // PA10 USART1_RX AF7
+HwGpio usart_tx{usart_tx_params};
+HwGpio usart_rx{usart_rx_params};
 StUsartSettings usart_settings{UsartOversample::X8, UsartSampleMode::SINGLE};
 StUsartParams usart_params{USART1, clk.get_freq(), 115200, usart_settings};
 StUsart usart{usart_params};
@@ -117,7 +121,7 @@ bool board_init()
 
     /* Init SYSCLK/HCLK and configure prescalers for APB1 and APB2 */
     result = result && Stmf4::clk.init();
-    result &= Stmf4::usart.set_clock_freq(Stmf4::clk.get_freq());
+    result = result && Stmf4::usart.set_clock_freq(Stmf4::clk.get_freq());
     uint32_t hclk = Stmf4::clk.get_freq();
     // Timebase driver currently validates against APB max (50 MHz), so pass APB-style clock.
     // TIM1 is on APB2 and may run faster internally depending on prescalers.
@@ -127,8 +131,8 @@ bool board_init()
     // Enable GPIO Bus Clocks
     RCC->AHB1ENR |= (RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN |
                      RCC_AHB1ENR_GPIOCEN | RCC_AHB1ENR_DMA2EN);
-    // Enable USART2 Bus Clock
-    RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
+    // Enable USART1 Bus Clock (USART1 is on APB2)
+    RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
     // Enable ADC1 and TIM1 Bus Clock
     RCC->APB2ENR |= (RCC_APB2ENR_ADC1EN | RCC_APB2ENR_TIM1EN);
 
@@ -146,10 +150,17 @@ bool board_init()
     result = result && Stmf4::pt4.init();
 
     // DMA, ADC, USART, and Timebase Inits
-    result = result && Stmf4::tx.init();
     result = result && Stmf4::dma.init();
     result = result && Stmf4::adc.init();
+    result = result && Stmf4::usart_tx.init();
+    result = result && Stmf4::usart_rx.init();
     result = result && Stmf4::usart.init();
+    if (result)
+    {
+        static constexpr uint8_t kBootMsg[] = "BOOT\r\n";
+        Stmf4::usart.send(
+            std::span<const uint8_t>(kBootMsg, sizeof(kBootMsg) - 1));
+    }
     result = result &&
              Stmf4::timebase.init(tim_pclk, kTimerFreq, kTimerPeriod, true);
     if (!result)
@@ -160,7 +171,6 @@ bool board_init()
     Stmf4::timebase.start();
 
     /* Interrupt Enables */
-
     // Enable ADC1 interrupts in NVIC
     NVIC_EnableIRQ(ADC_IRQn);
     NVIC_SetPriority(ADC_IRQn, 0);
@@ -169,9 +179,9 @@ bool board_init()
     NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
     NVIC_SetPriority(TIM1_UP_TIM10_IRQn, 0);
 
-    // Enable USART1 IRQ for RXNE interrupt handling.
-    NVIC_SetPriority(USART1_IRQn, 1);
+    // Enable USART1 interrupt in NVIC
     NVIC_EnableIRQ(USART1_IRQn);
+    NVIC_SetPriority(USART1_IRQn, 1);
 
     return result;
 }

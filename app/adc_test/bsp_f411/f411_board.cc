@@ -14,11 +14,11 @@ namespace MM
 namespace Stmf4
 {
 StGpioSettings ir_led_settings{GpioMode::GPOUT, GpioOtype::PUSH_PULL,
-                               GpioOspeed::MEDIUM, GpioPupd::PULL_DOWN, 0};
-StGpioParams ir_led_params{6, GPIOA, ir_led_settings};
+                               GpioOspeed::MEDIUM, GpioPupd::NO_PULL, 0};
+StGpioParams ir_led_params{4, GPIOA, ir_led_settings};
 HwGpio ir_led{ir_led_params};
 
-// Pair 1 test: emitter on PA7, phototransistor input on PB1 (ADC1_IN9).
+// ADC1 channel 8 maps to PB0 on STM32F411.
 StGpioSettings phototrans_settings{GpioMode::ANALOG, GpioOtype::PUSH_PULL,
                                    GpioOspeed::LOW, GpioPupd::NO_PULL, 0};
 StGpioParams phototrans_params{0, GPIOB, phototrans_settings};
@@ -32,7 +32,7 @@ StDmaParams dma_params{
 HwDma dma{dma_params};
 
 std::array<uint8_t, 1> adc_seq{8};
-AdcChCycles ch_cycles{.ch = 8, .cycles = AdcCycles::CYCLES_144};
+AdcChCycles ch_cycles{.ch = 8, .cycles = AdcCycles::CYCLES_480};
 std::array<AdcChCycles, 1> adc_ch_cycles{ch_cycles};
 
 StAdcSettings adc_settings{AdcResolution::TWELVE_BIT,
@@ -45,15 +45,15 @@ StAdcSettings adc_settings{AdcResolution::TWELVE_BIT,
 StAdcParams adc_params{adc_settings, ADC1, ADC1_COMMON};
 HwAdc adc{adc_params};
 
-HwClk clk{Configuration::SYSCLK_HSE_100MHZ};
+HwClk clk{Configuration::HSI_16MHZ};
 
-// USART settings
 StGpioSettings tx_settings{GpioMode::AF, GpioOtype::PUSH_PULL, GpioOspeed::LOW,
                            GpioPupd::NO_PULL, 7};
-StGpioParams tx_params{9, GPIOA, tx_settings};  // PA9 USART1_TX
+StGpioParams tx_params{2, GPIOA, tx_settings};  // PA2 USART2_TX AF7
 HwGpio tx{tx_params};
+
 StUsartSettings usart_settings{UsartOversample::X8, UsartSampleMode::SINGLE};
-StUsartParams usart_params{USART1, clk.get_freq(), 115200, usart_settings};
+StUsartParams usart_params{USART2, clk.get_freq(), 115200, usart_settings};
 StUsart usart{usart_params};
 
 };  // namespace Stmf4
@@ -84,7 +84,8 @@ bool board_init()
     // Init Periph Clks
     RCC->AHB1ENR |=
         (RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN | RCC_AHB1ENR_DMA2EN);
-    RCC->APB2ENR |= (RCC_APB2ENR_ADC1EN | RCC_APB2ENR_USART1EN);
+    RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
+    RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;
 
     // Init Periphs
     result &= Stmf4::ir_led.init();
@@ -94,10 +95,6 @@ bool board_init()
     result &= Stmf4::adc.init();
     result &= Stmf4::usart.init();
 
-    // Enable USART1 IRQ for RXNE interrupt handling.
-    NVIC_SetPriority(USART1_IRQn, 1);
-    NVIC_EnableIRQ(USART1_IRQn);
-
     return result;
 }
 
@@ -106,7 +103,7 @@ Board& get_board()
     return board;
 }
 
-extern "C" void USART1_IRQHandler(void)
+extern "C" void USART2_IRQHandler(void)
 {
     // Check if data is available
     if (Stmf4::usart.get_addr()->SR & USART_SR_RXNE)

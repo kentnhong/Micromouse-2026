@@ -33,7 +33,7 @@ bool IrSensor::update()
                     result &&
                     dma.arm_p2m(reinterpret_cast<uintptr_t>(ambient.data()), 2);
                 result = result && dma.start();
-                result = result && adc.convert(true, 1);
+                result = result && adc.trigger();
                 if (result)
                 {
                     current_state = IrStates::SAMPLE_OFF_2;
@@ -41,7 +41,7 @@ bool IrSensor::update()
             }
             break;
         case IrStates::SAMPLE_OFF_2:
-            result = result && adc.convert(true, 1);
+            result = result && adc.trigger();
             if (result)
             {
                 current_state = IrStates::EMITTER_ON;
@@ -64,7 +64,7 @@ bool IrSensor::update()
                          dma.arm_p2m(
                              reinterpret_cast<uintptr_t>(combined.data()), 2);
                 result = result && dma.start();
-                result = result && adc.convert(true, 1);
+                result = result && adc.trigger();
                 if (result)
                 {
                     current_state = IrStates::SAMPLE_ON_2;
@@ -72,7 +72,7 @@ bool IrSensor::update()
             }
             break;
         case IrStates::SAMPLE_ON_2:
-            result = result && adc.convert(true, 1);
+            result = result && adc.trigger();
             if (result)
             {
                 current_state = IrStates::EMITTER_OFF;
