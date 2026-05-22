@@ -325,8 +325,8 @@
     },
     {
       "cwd": "${workspaceFolder}",
-      "executable": "${workspaceRoot}/build/stm32f411/app/pcb-blinky/pcb-blinky.elf",
-      "name": "DEBUG PCB BLINK",
+      "executable": "${workspaceRoot}/build/stm32f411/app/ir_test/ir_test",
+      "name": "DEBUG IR F4",
       "request": "launch",
       "type": "cortex-debug",
       "servertype": "openocd",
@@ -340,12 +340,15 @@
       ],
       "debuggerArgs": ["-d", "${workspaceRoot}"],
       "preRestartCommands": [
-        "add-symbol-file build/stm32f411/app/pcb-blinky/pcb-blinky.elf",
+        "add-symbol-file build/stm32f411/app/ir_test/ir_test",
         "load",
         "enable breakpoint",
         "monitor reset"
       ],
-      "showDevDebugOutput": true
+      "showDevDebugOutput": true,
+      "liveWatch": {
+        "enabled": true
+      }
     }
   ]
 }

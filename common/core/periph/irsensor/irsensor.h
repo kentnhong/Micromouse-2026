@@ -32,6 +32,7 @@ struct IrParams
     Adc& adc;
     Dma& dma;
     Gpio& emitter;
+    uint8_t adc_channel;
 };
 
 class IrSensor
@@ -97,6 +98,7 @@ private:
     Adc& adc;
     Dma& dma;
     Gpio& emitter;
+    uint8_t adc_channel;
     IrStates current_state = IrStates::SAMPLE_OFF_1;
     std::array<uint16_t, 2> ambient{};  // ADC samples with ambient light
     std::array<uint16_t, 2>
@@ -105,5 +107,3 @@ private:
     bool done = false;
 };
 };  // namespace MM
-
-//yo mama so fat that she obsesed with da meat (shawty in love with the meatn)

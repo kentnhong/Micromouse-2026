@@ -140,6 +140,9 @@ bool HwAdc::convert(bool single, size_t samples)
     if (settings.source == AdcTriggerSource::EXTERNAL)
         return false;
 
+    if (samples == 0)
+        return false;
+
     if (!single)
     {
         // Set continuous conversion mode in ADC_CR2
@@ -153,17 +156,19 @@ bool HwAdc::convert(bool single, size_t samples)
         base_addr->CR2 &= ~ADC_CR2_CONT;
         for (size_t i = 0; i < samples; i++)
         {
-            // Best-effort wait for active conversion to finish before retriggering.
+            // Trigger one conversion, then wait for completion/fault with a bounded poll.
+            base_addr->CR2 |= ADC_CR2_SWSTART;
+
             uint32_t polls = 0;
-            while ((base_addr->SR & ADC_SR_STRT) != 0u)
+            while ((base_addr->SR & (ADC_SR_EOC | ADC_SR_OVR)) == 0u)
             {
                 polls++;
                 if (polls >= kStrtPollLimit)
-                    break;
+                    return false;
             }
 
-            // Set start conversion of regular channel in ADC_CR2
-            base_addr->CR2 |= ADC_CR2_SWSTART;
+            if ((base_addr->SR & ADC_SR_OVR) != 0u)
+                return false;
         }
     }
     return true;
@@ -171,11 +176,8 @@ bool HwAdc::convert(bool single, size_t samples)
 
 void HwAdc::stop()
 {
-    if (base_addr->SR & ADC_SR_STRT)
-    {
-        // Turn off ADC in ADC_CR2
-        base_addr->CR2 &= ~ADC_CR2_ADON;
-    }
+    // Turn off ADC in ADC_CR2
+    base_addr->CR2 &= ~ADC_CR2_ADON;
 }
 
 bool HwAdc::en_dma_req()
@@ -275,8 +277,9 @@ bool HwAdc::ovr_recover()
     if (!(base_addr->SR & ADC_SR_OVR))
         return false;
 
-    // Clear OVR bit
-    base_addr->SR &= ~ADC_SR_OVR;
+    // Clear OVR by reading SR then DR per STM32F4 ADC overrun handling.
+    [[maybe_unused]] volatile uint32_t sr = base_addr->SR;
+    [[maybe_unused]] volatile uint32_t dr = base_addr->DR;
 
     // Turn on ADC in ADC_CR2
     base_addr->CR2 |= ADC_CR2_ADON;

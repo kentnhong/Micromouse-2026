@@ -17,6 +17,7 @@ struct Board
     Gpio& ir_led;
     Usart& usart;
     Clock& clk;
+    Gpio& tx;
 };
 
 bool board_init();

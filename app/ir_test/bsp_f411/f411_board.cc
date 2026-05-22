@@ -21,7 +21,7 @@ namespace Stmf4
 {
 /* Emitters Initialization */
 StGpioSettings led_settings{GpioMode::GPOUT, GpioOtype::PUSH_PULL,
-                            GpioOspeed::VERY_HIGH, GpioPupd::NO_PULL, 0};
+                            GpioOspeed::VERY_HIGH, GpioPupd::PULL_DOWN, 0};
 StGpioParams led1_params{7, GPIOA, led_settings};
 StGpioParams led2_params{6, GPIOA, led_settings};
 StGpioParams led3_params{4, GPIOA, led_settings};
@@ -33,7 +33,7 @@ HwGpio led4{led4_params};
 
 /* Phototransistors Initialization */
 StGpioSettings pt_settings{GpioMode::ANALOG, GpioOtype::PUSH_PULL,
-                           GpioOspeed::VERY_HIGH};
+                           GpioOspeed::VERY_HIGH, GpioPupd::NO_PULL, 0};
 StGpioParams pt1_params{1, GPIOB, pt_settings};
 StGpioParams pt2_params{0, GPIOB, pt_settings};
 StGpioParams pt3_params{1, GPIOC, pt_settings};
@@ -52,7 +52,7 @@ StDmaParams dma_params{
 HwDma dma{dma_params};
 
 /* ADC Initialization */
-std::array<uint8_t, 4> adc_seq{9, 8, 11, 10};
+std::array<uint8_t, 1> adc_seq{9};
 AdcChCycles ch9_cycles{9, AdcCycles::CYCLES_144};
 AdcChCycles ch8_cycles{8, AdcCycles::CYCLES_144};
 AdcChCycles ch11_cycles{11, AdcCycles::CYCLES_144};
@@ -70,10 +70,10 @@ StAdcParams adc_params{adc_settings, ADC1, ADC1_COMMON};
 HwAdc adc{adc_params};
 
 /* IR Sensors Initialization */
-IrParams ir1_params{adc, dma, led1};
-IrParams ir2_params{adc, dma, led2};
-IrParams ir3_params{adc, dma, led3};
-IrParams ir4_params{adc, dma, led4};
+IrParams ir1_params{adc, dma, led1, 9};
+IrParams ir2_params{adc, dma, led2, 8};
+IrParams ir3_params{adc, dma, led3, 11};
+IrParams ir4_params{adc, dma, led4, 10};
 IrSensor ir1{ir1_params};
 IrSensor ir2{ir2_params};
 IrSensor ir3{ir3_params};
@@ -114,6 +114,9 @@ bool board_init()
     /* Init SYSCLK/HCLK and configure prescalers for APB1 and APB2 */
     result = result && Stmf4::clk.init();
     uint32_t hclk = Stmf4::clk.get_freq();
+    // Timebase driver currently validates against APB max (50 MHz), so pass APB-style clock.
+    // TIM1 is on APB2 and may run faster internally depending on prescalers.
+    uint32_t tim_pclk = hclk / 2u;
 
     /* Init Periph Clks */
     // Enable GPIO Bus Clocks
@@ -141,8 +144,14 @@ bool board_init()
     result = result && Stmf4::dma.init();
     result = result && Stmf4::adc.init();
     result = result && Stmf4::usart.init();
-    result =
-        result && Stmf4::timebase.init(hclk, kTimerFreq, kTimerPeriod, true);
+    result = result &&
+             Stmf4::timebase.init(tim_pclk, kTimerFreq, kTimerPeriod, true);
+    if (!result)
+    {
+        return false;
+    }
+
+    Stmf4::timebase.start();
 
     /* Interrupt Enables */
     // Enable ADC1 interrupts in NVIC
@@ -162,6 +171,8 @@ bool board_init()
 
 void board_recover()
 {
+    bool result = true;
+
     // Stop TIM1 from firing during recovery
     NVIC_DisableIRQ(TIM1_UP_TIM10_IRQn);
 
@@ -169,11 +180,11 @@ void board_recover()
     Stmf4::adc.stop();
 
     // Abort any in-progress DMA transfer
-    Stmf4::dma.abort();
+    result = result && Stmf4::dma.abort();
 
     // Clear ADC overrun flag and re-enable DMA requests
-    Stmf4::adc.ovr_recover();
-    Stmf4::adc.en_dma_req();
+    result = result && Stmf4::adc.ovr_recover();
+    result = result && Stmf4::adc.en_dma_req();
 
     // Turn off all IR emitters
     Stmf4::led1.set(0);
@@ -182,7 +193,16 @@ void board_recover()
     Stmf4::led4.set(0);
 
     // Reset IR controller and all sensor state machines
-    Stmf4::ircontroller.reset();
+    result = result && Stmf4::ircontroller.reset();
+
+    // Ensure a failed recover pass retriggers recovery on next tick.
+    if (!result)
+    {
+        g_adc_ovr = true;
+        NVIC_EnableIRQ(ADC_IRQn);
+        NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
+        return;
+    }
 
     // Clear fault flag
     g_adc_ovr = false;
@@ -218,7 +238,7 @@ extern "C" void USART2_IRQHandler(void)
     }
 }
 
-extern "C" void TIM1_IRQHandler()
+extern "C" void TIM1_UP_TIM10_IRQHandler()
 {
     // Clear the update interrupt flag
     TIM1->SR &= ~TIM_SR_UIF;

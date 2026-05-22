@@ -323,9 +323,12 @@ bool HwDma::complete()
 
 bool HwDma::abort()
 {
-    // Check if DMA is in a transfer
+    // If already idle, treat abort as successful to keep recovery idempotent.
     if (state != DmaState::BUSY)
-        return false;
+    {
+        state = DmaState::READY;
+        return true;
+    }
 
     // Clear EN in DMA_SxCR to disable stream
     stream_base_addr->CR &= ~DMA_SxCR_EN;

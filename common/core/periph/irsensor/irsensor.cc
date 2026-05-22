@@ -3,7 +3,10 @@
 namespace MM
 {
 IrSensor::IrSensor(IrParams params_)
-    : adc{params_.adc}, dma{params_.dma}, emitter{params_.emitter}
+    : adc{params_.adc},
+      dma{params_.dma},
+      emitter{params_.emitter},
+      adc_channel{params_.adc_channel}
 {
 }
 
@@ -25,20 +28,31 @@ bool IrSensor::update()
         case IrStates::SAMPLE_OFF_1:
             if (dma.complete())
             {
+                result = result && adc.set_channel(1, adc_channel);
                 result =
                     result &&
                     dma.arm_p2m(reinterpret_cast<uintptr_t>(ambient.data()), 2);
+                result = result && dma.start();
                 result = result && adc.convert(true, 1);
-                current_state = IrStates::SAMPLE_OFF_2;
+                if (result)
+                {
+                    current_state = IrStates::SAMPLE_OFF_2;
+                }
             }
             break;
         case IrStates::SAMPLE_OFF_2:
             result = result && adc.convert(true, 1);
-            current_state = IrStates::EMITTER_ON;
+            if (result)
+            {
+                current_state = IrStates::EMITTER_ON;
+            }
             break;
         case IrStates::EMITTER_ON:
             result = result && emitter.set(1);
-            current_state = IrStates::SETTLE;
+            if (result)
+            {
+                current_state = IrStates::SETTLE;
+            }
             break;
         case IrStates::SETTLE:
             current_state = IrStates::SAMPLE_ON_1;
@@ -49,17 +63,27 @@ bool IrSensor::update()
                 result = result &&
                          dma.arm_p2m(
                              reinterpret_cast<uintptr_t>(combined.data()), 2);
+                result = result && dma.start();
                 result = result && adc.convert(true, 1);
-                current_state = IrStates::SAMPLE_ON_2;
+                if (result)
+                {
+                    current_state = IrStates::SAMPLE_ON_2;
+                }
             }
             break;
         case IrStates::SAMPLE_ON_2:
             result = result && adc.convert(true, 1);
-            current_state = IrStates::EMITTER_OFF;
+            if (result)
+            {
+                current_state = IrStates::EMITTER_OFF;
+            }
             break;
         case IrStates::EMITTER_OFF:
             result = result && emitter.set(0);
-            current_state = IrStates::CALCULATE;
+            if (result)
+            {
+                current_state = IrStates::CALCULATE;
+            }
             break;
         case IrStates::CALCULATE:
             calculate();

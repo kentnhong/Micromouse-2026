@@ -26,6 +26,7 @@ int main(int argc, char* argv[])
 
     while (1)
     {
+        std::array<uint8_t, 128> tx_buf{};
         // Re-arm DMA to the beginning of samples for each 4-conversion burst.
         result &= board.dma.arm_p2m(reinterpret_cast<uintptr_t>(samples.data()),
                                     kNumSamples);
@@ -54,41 +55,22 @@ int main(int argc, char* argv[])
         [[maybe_unused]] uint16_t sample_avg =
             static_cast<uint16_t>(sample_sum / samples.size());
 
-        // std::array<uint8_t, 14> ir_txt{"IR Sensor 1\r\n"};
-        // std::array<uint8_t, 13> divider{"----------\r\n"};
-        // std::array<uint8_t, 14> raw_sample_txt{"Raw Samples: "};
-        // uint8_t raw_lower_avg_0 = static_cast<uint8_t>((samples[0] & 0xFF));
-        // uint8_t raw_upper_avg_0 = static_cast<uint8_t>((samples[0] >> 8));
-        // uint8_t raw_lower_avg_1 = static_cast<uint8_t>((samples[1] & 0xFF));
-        // uint8_t raw_upper_avg_1 = static_cast<uint8_t>((samples[1] >> 8));
-        // uint8_t raw_lower_avg_2 = static_cast<uint8_t>((samples[2] & 0xFF));
-        // uint8_t raw_upper_avg_2 = static_cast<uint8_t>((samples[2] >> 8));
-        // uint8_t raw_lower_avg_3 = static_cast<uint8_t>((samples[3] & 0xFF));
-        // uint8_t raw_upper_avg_3 = static_cast<uint8_t>((samples[3] >> 8));
-        // std::array<uint8_t, 13> raw_samples{raw_lower_avg_0,
-        //                                     raw_upper_avg_0,
-        //                                     ' ',
-        //                                     raw_lower_avg_1,
-        //                                     raw_upper_avg_1,
-        //                                     ' ',
-        //                                     raw_lower_avg_2,
-        //                                     raw_upper_avg_2,
-        //                                     ' ',
-        //                                     raw_lower_avg_3,
-        //                                     raw_upper_avg_3,
-        //                                     '\r',
-        //                                     '\n'};
-        // std::array<uint8_t, 17> avg_sample_txt{"Sample Average: "};
-        // uint8_t lower_avg = static_cast<uint8_t>((sample_avg & 0xFF));
-        // uint8_t upper_avg = static_cast<uint8_t>((sample_avg >> 8));
-        // std::array<uint8_t, 4> adc_avg{lower_avg, upper_avg, '\r', '\n'};
+        const int msg_len =
+            std::snprintf(reinterpret_cast<char*>(tx_buf.data()), tx_buf.size(),
+                          "IR Sensor 1\r\n----------\r\nRaw Samples: %u %u %u "
+                          "%u\r\nSample Average: %u\r\n",
+                          static_cast<unsigned>(samples[0]),
+                          static_cast<unsigned>(samples[1]),
+                          static_cast<unsigned>(samples[2]),
+                          static_cast<unsigned>(samples[3]),
+                          static_cast<unsigned>(sample_avg));
 
-        // result &= board.usart.send(ir_txt);
-        // result &= board.usart.send(divider);
-        // result &= board.usart.send(raw_sample_txt);
-        // result &= board.usart.send(raw_samples);
-        // result &= board.usart.send(avg_sample_txt);
-        // result &= board.usart.send(adc_avg);
+        if (msg_len > 0)
+        {
+            const size_t len = static_cast<size_t>(msg_len);
+            result &= board.usart.send(std::span<const uint8_t>(
+                tx_buf.data(), (len < tx_buf.size()) ? len : tx_buf.size()));
+        }
 
         MM::Utils::delay_ms(50);
     }

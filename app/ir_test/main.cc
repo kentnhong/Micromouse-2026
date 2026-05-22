@@ -4,7 +4,6 @@
 using namespace MM;
 
 uint8_t rx_byte = 0;
-
 namespace
 {
 constexpr uint32_t kPrintEveryNSequences = 10;
@@ -12,9 +11,12 @@ constexpr uint32_t kPrintEveryNSequences = 10;
 
 int main(int argc, char* argv[])
 {
-    [[maybe_unused]] bool result = true;
+    bool result = board_init();
+    if (!result)
+    {
+        return -1;
+    }
 
-    result &= board_init();
     Board& board = get_board();
 
     uint32_t sequence_counter = 0;
