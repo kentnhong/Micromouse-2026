@@ -93,8 +93,12 @@ HwTimebase timebase{timebase_params};
 HwClk clk{Configuration::SYSCLK_HSE_100MHZ};
 
 /* USART Initialization */
+StGpioSettings tx_settings{GpioMode::AF, GpioOtype::PUSH_PULL, GpioOspeed::LOW,
+                           GpioPupd::NO_PULL, 7};
+StGpioParams tx_params{9, GPIOA, tx_settings};  // PA9 USART1_TX
+HwGpio tx{tx_params};
 StUsartSettings usart_settings{UsartOversample::X8, UsartSampleMode::SINGLE};
-StUsartParams usart_params{USART2, clk.get_freq(), 115200, usart_settings};
+StUsartParams usart_params{USART1, clk.get_freq(), 115200, usart_settings};
 StUsart usart{usart_params};
 
 }  // namespace Stmf4
@@ -113,6 +117,7 @@ bool board_init()
 
     /* Init SYSCLK/HCLK and configure prescalers for APB1 and APB2 */
     result = result && Stmf4::clk.init();
+    result &= Stmf4::usart.set_clock_freq(Stmf4::clk.get_freq());
     uint32_t hclk = Stmf4::clk.get_freq();
     // Timebase driver currently validates against APB max (50 MHz), so pass APB-style clock.
     // TIM1 is on APB2 and may run faster internally depending on prescalers.
@@ -141,6 +146,7 @@ bool board_init()
     result = result && Stmf4::pt4.init();
 
     // DMA, ADC, USART, and Timebase Inits
+    result = result && Stmf4::tx.init();
     result = result && Stmf4::dma.init();
     result = result && Stmf4::adc.init();
     result = result && Stmf4::usart.init();
@@ -154,6 +160,7 @@ bool board_init()
     Stmf4::timebase.start();
 
     /* Interrupt Enables */
+
     // Enable ADC1 interrupts in NVIC
     NVIC_EnableIRQ(ADC_IRQn);
     NVIC_SetPriority(ADC_IRQn, 0);
@@ -162,9 +169,9 @@ bool board_init()
     NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
     NVIC_SetPriority(TIM1_UP_TIM10_IRQn, 0);
 
-    // Enable USART2 interrupt in NVIC
-    NVIC_EnableIRQ(USART2_IRQn);
-    NVIC_SetPriority(USART2_IRQn, 1);
+    // Enable USART1 IRQ for RXNE interrupt handling.
+    NVIC_SetPriority(USART1_IRQn, 1);
+    NVIC_EnableIRQ(USART1_IRQn);
 
     return result;
 }
@@ -224,7 +231,7 @@ extern "C" void ADC_IRQHandler()
     NVIC_DisableIRQ(ADC_IRQn);
 }
 
-extern "C" void USART2_IRQHandler(void)
+extern "C" void USART1_IRQHandler(void)
 {
     // Check if data is available
     if (Stmf4::usart.get_addr()->SR & USART_SR_RXNE)

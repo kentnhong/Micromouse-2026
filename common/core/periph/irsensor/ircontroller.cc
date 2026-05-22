@@ -19,6 +19,7 @@ bool IrController::update()
     switch (current_state)
     {
         case IrControllerStates::LEFT:
+            result = result && ir_sequence[0]->s
             result = result && ir_sequence[0]->update();
             if (ir_sequence[0]->is_done())
             {
