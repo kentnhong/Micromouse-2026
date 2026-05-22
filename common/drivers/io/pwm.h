@@ -20,6 +20,13 @@ public:
     */
     virtual bool set_duty_cycle(uint8_t duty_cycle) = 0;
 
+    /**
+    * @brief Sets the frequency of the PWM signal
+    * @param frequency Desired frequency in Hz
+    * @return true if successful, false otherwise
+    */
+    virtual bool set_frequency(uint32_t frequency) = 0;
+
     virtual ~Pwm() = default;
 };
 
