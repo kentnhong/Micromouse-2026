@@ -29,6 +29,11 @@ static inline bool is_timer_9_to_11(TIM_TypeDef* t)
 {
     return (t == TIM9 || t == TIM10 || t == TIM11);
 }
+// TIM2 and TIM5 have 32-bit CNT on STM32F4; TIM1/TIM3/TIM4 are 16-bit.
+static inline bool is_32bit_timer(TIM_TypeDef* t)
+{
+    return (t == TIM2 || t == TIM5);
+}
 
 static inline uint32_t EncoderModeToSms(EncMode mode)
 {
@@ -180,22 +185,22 @@ bool HwEncoder::init()
 
 int32_t HwEncoder::get_ticks()
 {
-    // Read the current encoder ticks from the timer's CNT register
     uint32_t raw_cnt = base_addr->CNT;
 
-    // If it's a 16-bit timer (like TIM1, TIM3, TIM4), we need to manually sign-extend
-    // it so that backwards values (like 65535) become negative (-1).
-    if (!is_timer_1_to_5(base_addr))
+    // TIM2/TIM5 have 32-bit CNT on STM32F4; all others (TIM1/TIM3/TIM4) are 16-bit.
+    // Sign-extend 16-bit CNT through int16_t so a backward tick (CNT=0xFFFF) reads as -1.
+    if (is_32bit_timer(base_addr))
     {
-        // For non TIM1..5 timers, assume 32-bit.
         current_ticks = static_cast<int32_t>(raw_cnt);
     }
     else
     {
-        // TIM1/TIM3/TIM4 are 16-bit on STM32F4. Interpret CNT as signed
-        // so counting direction (up/down) is reflected in the tick delta
-        // after reset.
         current_ticks = static_cast<int32_t>(static_cast<int16_t>(raw_cnt));
+    }
+
+    if (settings.invert_direction)
+    {
+        current_ticks = -current_ticks;
     }
 
     return current_ticks;

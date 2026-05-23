@@ -11,6 +11,7 @@
 #include "enc_sample.h"
 #include "motion.h"
 #include "st_timebase.h"
+#include "drv8231.h"
 
 /// NOTE: Currently running at 1KHz, which is the max sampling rate of the encoders.
 /// PWM at 1KHZ as well to match the control loop frequency.
@@ -25,7 +26,7 @@ int main()
     Board& hw = get_board();
 
     // CHANGE_VALUE
-    const Gains kVelocityGains{0.001f, 0.001f, 0.0f};
+    const Gains kVelocityGains{0.05f, 0.001f, 0.0f};
     Motion motion(hw, kVelocityGains);
 
     StTimebaseParams tb_params = {TIM5};
@@ -64,10 +65,15 @@ int main()
     hw.pwm1.set_frequency(2000);
     hw.pwm2.set_frequency(2000);
 
+    hw.motor.drive(Drv8231::Direction::FORWARD, 25);
+    Utils::delay_ms(2000);
+    hw.motor.drive(Drv8231::Direction::COAST, 0);
+
     while (1)
     {
-        motion.update();
+        if (!motion.update()) break;
     }
+    hw.motor.drive(Drv8231::Direction::FORWARD, 25);
 
     return 0;
 }

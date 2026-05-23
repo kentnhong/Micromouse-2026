@@ -28,8 +28,11 @@ Stmf4::StPwmSettings pwm_settings{Stmf4::PwmMode::EDGE_ALIGNED,
                                   Stmf4::PwmDir::UPCOUNTING};
 
 Stmf4::StEncoderSettings encoder_settings{
-    Stmf4::EncMode::MODE_3, Stmf4::EncChannel::BOTH,
-    Stmf4::EncInputPolarity::RISING, Stmf4::EncSlaveMode::DISABLED};
+    .mode = Stmf4::EncMode::MODE_3,
+    .channel = Stmf4::EncChannel::BOTH,
+    .polarity = Stmf4::EncInputPolarity::RISING,
+    .slave_mode = Stmf4::EncSlaveMode::DISABLED,
+    .invert_direction = true};
 
 ///GPIO: PB6 = Encoder CH1 (TIM4_CH1), PB7 = Encoder CH2 (TIM4_CH2)
 //       PA2 = Motor IN1/PWM1 (TIM2_CH3), PA3 = Motor IN2/PWM2 (TIM2_CH4)
@@ -92,8 +95,6 @@ bool bsp_init()
     // Enable GPIOA, GPIOB, TIM2, and TIM4 clocks
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN;
     RCC->APB1ENR |= RCC_APB1ENR_TIM2EN | RCC_APB1ENR_TIM4EN;
-
-    clock.init();
 
     // Initialize GPIOs
     in1.init();

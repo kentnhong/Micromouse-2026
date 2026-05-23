@@ -28,6 +28,14 @@ if (TARGET pid_bsp)
 
 	target_preprocess_for(${TARGET_DEVICE} ${EXECUTABLE} ${LINKER_SCRIPT} ${LDF} ${PREPROCESS_DEFS})
 
+	target_compile_options(${EXECUTABLE} PRIVATE -g3)
+
+	add_custom_command(TARGET ${EXECUTABLE} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy
+			$<TARGET_FILE:${EXECUTABLE}>
+			${CMAKE_CURRENT_BINARY_DIR}/${EXECUTABLE}.elf
+	)
+
 endif()
 
 if("${TARGET_DEVICE}" STREQUAL "NATIVE")

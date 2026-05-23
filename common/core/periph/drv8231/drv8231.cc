@@ -48,12 +48,10 @@ void Drv8231::drive(Direction dir, uint8_t duty_cycle)
             pwm2->set_duty_cycle(0);
             break;
         case Direction::FORWARD:
-            // Fast decay mapping (Drive/Coast):
-            pwm1->set_duty_cycle(duty_cycle);
             pwm2->set_duty_cycle(0);
+            pwm1->set_duty_cycle(duty_cycle);
             break;
         case Direction::REVERSE:
-            // Fast decay mapping (Drive/Coast):
             pwm1->set_duty_cycle(0);
             pwm2->set_duty_cycle(duty_cycle);
             break;

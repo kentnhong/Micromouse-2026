@@ -17,9 +17,12 @@ namespace MM
 
 struct Board
 {
-    Drv8231& drv8231;
-    Pwm& pwm1;
-    Pwm& pwm2;
+    Drv8231& drv8231_left;
+    Drv8231& drv8231_right;
+    Pwm& pwm1_left;
+    Pwm& pwm2_left;
+    Pwm& pwm1_right;
+    Pwm& pwm2_right;
 };
 
 bool bsp_init(void);
