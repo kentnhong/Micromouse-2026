@@ -18,6 +18,7 @@ struct Board
     IrController& ir_controller;
     Timebase& timebase;
     Usart& usart;
+    Timebase& delay;
 };
 
 void board_recover();

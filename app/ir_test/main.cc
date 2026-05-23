@@ -1,6 +1,7 @@
 #include <array>
 #include <cstdio>
 #include "board.h"
+#include "delay.h"
 using namespace MM;
 
 uint8_t rx_byte = 0;
@@ -47,6 +48,8 @@ int main(int argc, char* argv[])
             board.usart.send(std::span<const uint8_t>(
                 tx_buf.data(), (len < tx_buf.size()) ? len : tx_buf.size()));
         }
+
+        MM::Utils::delay_ms(500);
     }
 
     return 0;

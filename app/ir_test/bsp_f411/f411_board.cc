@@ -1,4 +1,5 @@
 #include "../board.h"
+#include "delay.h"
 #include "st_adc.h"
 #include "st_dma.h"
 #include "st_gpio.h"
@@ -105,6 +106,10 @@ StUsartSettings usart_settings{UsartOversample::X8, UsartSampleMode::SINGLE};
 StUsartParams usart_params{USART1, clk.get_freq(), 115200, usart_settings};
 StUsart usart{usart_params};
 
+// Delay setup
+StTimebaseParams delay_params{TIM5};
+HwTimebase delay{delay_params};
+
 }  // namespace Stmf4
 }  // namespace MM
 
@@ -113,7 +118,8 @@ namespace MM
 /* Non-hardware specific object creation and initialization */
 Board board{.ir_controller = MM::Stmf4::ircontroller,
             .timebase = MM::Stmf4::timebase,
-            .usart = MM::Stmf4::usart};
+            .usart = MM::Stmf4::usart,
+            .delay = MM::Stmf4::delay};
 
 bool board_init()
 {
@@ -135,6 +141,7 @@ bool board_init()
     RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
     // Enable ADC1 and TIM1 Bus Clock
     RCC->APB2ENR |= (RCC_APB2ENR_ADC1EN | RCC_APB2ENR_TIM1EN);
+    RCC->APB1ENR |= RCC_APB1ENR_TIM5EN;
 
     /* Init Periphs */
     // IR Emitter Inits
@@ -169,6 +176,13 @@ bool board_init()
     }
 
     Stmf4::timebase.start();
+
+    result &= Stmf4::delay.init(50'000'000u, 1'000'000u,
+                                std::chrono::microseconds(4'294'967u));
+    Stmf4::delay.start();
+
+    // Bind timebase to use delay functions
+    Utils::bind_timebase(Stmf4::delay);
 
     /* Interrupt Enables */
     // Enable ADC1 interrupts in NVIC

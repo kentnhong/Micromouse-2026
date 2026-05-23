@@ -72,6 +72,6 @@ int main(int argc, char* argv[])
                 tx_buf.data(), (len < tx_buf.size()) ? len : tx_buf.size()));
         }
 
-        MM::Utils::delay_ms(50);
+        MM::Utils::delay_ms(500);
     }
 }

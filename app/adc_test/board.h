@@ -4,6 +4,7 @@
 #include "dma.h"
 #include "gpio.h"
 #include "sys_clk.h"
+#include "timebase.h"
 #include "usart.h"
 
 extern uint8_t rx_byte;
@@ -18,6 +19,7 @@ struct Board
     Usart& usart;
     Clock& clk;
     Gpio& tx;
+    Timebase& delay;
 };
 
 bool board_init();
