@@ -32,6 +32,7 @@ bool PID::update(float desired_speed_ticks, Drv8231::Direction polarity,
 
     // 1. Calculate controller output based on difference
     float error = desired_speed_ticks - (measured_ticks / dt_sec);
+    debug_data.error = error;
     float output = compute_pid(error, dt_sec);
 
     // 2. Sum the signals and constrain proportional result
@@ -48,10 +49,7 @@ bool PID::update(float desired_speed_ticks, Drv8231::Direction polarity,
 
     if (final_drive < 0.0f)
     {
-        // Reverse whatever the desired polarity was
-        dir = (polarity == Drv8231::Direction::FORWARD)
-                  ? Drv8231::Direction::REVERSE
-                  : Drv8231::Direction::FORWARD;
+        dir = Drv8231::Direction::BRAKE;
     }
 
     // Map magnitude to 0-100 duty cycle
@@ -122,7 +120,22 @@ float PID::compute_pid(float error, float dt_sec)
 
     state.prev_error = error;
 
-    return limit_range(p + i + d, min_output, max_output);
+    const float raw = p + i + d;
+    const float out = limit_range(raw, min_output, max_output);
+
+    // Anti-windup: hold integral when output is saturated
+    if (raw < min_output || raw > max_output)
+    {
+        state.integral -= error * dt_sec;
+        state.integral =
+            limit_range(state.integral, -integral_limit, integral_limit);
+    }
+
+    debug_data.p = p;
+    debug_data.i_term = gains.ki * state.integral;
+    debug_data.d = d;
+    debug_data.output = out;
+    return out;
 }
 
 float PID::limit_range(float value, float min_value, float max_value)

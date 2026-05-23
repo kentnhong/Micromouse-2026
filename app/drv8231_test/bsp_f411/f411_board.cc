@@ -16,16 +16,22 @@ Stmf4::StPwmSettings pwm_settings{Stmf4::PwmMode::EDGE_ALIGNED,
                                   Stmf4::PwmDir::UPCOUNTING};
 
 /// MOTOR: RIGHT — PA2 (TIM2_CH3), PA3 (TIM2_CH4)
-const Stmf4::StGpioParams in1_params_left{2, GPIOA, motor_pwm_settings};   // PA2
-const Stmf4::StGpioParams in2_params_left{3, GPIOA, motor_pwm_settings};   // PA3
-const Stmf4::StPwmParams  pwm1_params_left{TIM2, Stmf4::PwmChannel::CH3, pwm_settings, 32000000};
-const Stmf4::StPwmParams  pwm2_params_left{TIM2, Stmf4::PwmChannel::CH4, pwm_settings, 32000000};
+const Stmf4::StGpioParams in1_params_left{2, GPIOA, motor_pwm_settings};  // PA2
+const Stmf4::StGpioParams in2_params_left{3, GPIOA, motor_pwm_settings};  // PA3
+const Stmf4::StPwmParams pwm1_params_left{TIM2, Stmf4::PwmChannel::CH3,
+                                          pwm_settings, 32000000};
+const Stmf4::StPwmParams pwm2_params_left{TIM2, Stmf4::PwmChannel::CH4,
+                                          pwm_settings, 32000000};
 
 /// MOTOR: LEFT — PA15 (TIM2_CH1), PB3 (TIM2_CH2)
-const Stmf4::StGpioParams in1_params_right{3, GPIOB, motor_pwm_settings}; // PB3
-const Stmf4::StGpioParams in2_params_right{15,  GPIOA, motor_pwm_settings}; // PA15
-const Stmf4::StPwmParams  pwm1_params_right{TIM2, Stmf4::PwmChannel::CH2, pwm_settings, 32000000};
-const Stmf4::StPwmParams  pwm2_params_right{TIM2, Stmf4::PwmChannel::CH1, pwm_settings, 32000000};
+const Stmf4::StGpioParams in1_params_right{3, GPIOB,
+                                           motor_pwm_settings};  // PB3
+const Stmf4::StGpioParams in2_params_right{15, GPIOA,
+                                           motor_pwm_settings};  // PA15
+const Stmf4::StPwmParams pwm1_params_right{TIM2, Stmf4::PwmChannel::CH2,
+                                           pwm_settings, 32000000};
+const Stmf4::StPwmParams pwm2_params_right{TIM2, Stmf4::PwmChannel::CH1,
+                                           pwm_settings, 32000000};
 
 Stmf4::HwGpio in1_left(in1_params_left);
 Stmf4::HwGpio in2_left(in2_params_left);
@@ -40,12 +46,12 @@ Stmf4::HwPwm pwm2_right(pwm2_params_right);
 Drv8231 drv8231_left(pwm1_left, pwm2_left);
 Drv8231 drv8231_right(pwm1_right, pwm2_right);
 
-Board board{.drv8231_left  = drv8231_left,
+Board board{.drv8231_left = drv8231_left,
             .drv8231_right = drv8231_right,
-            .pwm1_left     = pwm1_left,
-            .pwm2_left     = pwm2_left,
-            .pwm1_right    = pwm1_right,
-            .pwm2_right    = pwm2_right};
+            .pwm1_left = pwm1_left,
+            .pwm2_left = pwm2_left,
+            .pwm1_right = pwm1_right,
+            .pwm2_right = pwm2_right};
 
 bool bsp_init()
 {

@@ -13,6 +13,16 @@
 
 namespace MM
 {
+
+struct PidDebug
+{
+    float error = 0.0f;
+    float p = 0.0f;
+    float i_term = 0.0f;
+    float d = 0.0f;
+    float output = 0.0f;
+};
+
 class PID
 {
 public:
@@ -47,6 +57,14 @@ public:
     bool set_integral_limit(float integral_limit);
 
     /**
+    * @brief Returns last computed P/I/D/error/output for external logging.
+    */
+    const PidDebug& get_debug() const
+    {
+        return debug_data;
+    }
+
+    /**
     * @brief Store a target velocity value in ticks/s.
     */
     bool set_target_ticks_per_sec(float ticks_per_sec, float& target);
@@ -75,6 +93,7 @@ private:
     Drv8231& motor;
     Gains gains{};
     Context state{};
+    PidDebug debug_data{};
     float min_output{-1.0f};
     float max_output{1.0f};
     float integral_limit{1000.0f};

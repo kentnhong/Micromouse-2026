@@ -23,8 +23,9 @@ static void run_step(Board& hw, Drv8231::Direction dir, uint8_t duty,
     hw.drv8231_right.drive(dir, duty);
     g_dir = static_cast<int>(dir);
     g_duty = duty;
-    g_drv_state = hw.drv8231_left.get_state(); 
-    g_drv_state |= hw.drv8231_right.get_state() << 4; // Combine states for both drivers
+    g_drv_state = hw.drv8231_left.get_state();
+    g_drv_state |= hw.drv8231_right.get_state()
+                   << 4;  // Combine states for both drivers
     g_step++;
     MM::Utils::delay_ms(ms);
 }

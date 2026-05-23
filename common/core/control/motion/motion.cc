@@ -9,9 +9,10 @@ static constexpr float kTicksPerMotorRev = 12.0f;
 static constexpr float kMmPerTick =
     (kWheelDiameterMm * kPi) / (kGearRatio * kTicksPerMotorRev);
 
-    
-static constexpr float kPidTargetSpeedMmPerSec = 190.0f; // 1 cell per second
-static constexpr float kDistanceGoalMm = 190.0f; // 1 cell distance
+static constexpr float kPidTargetSpeedMmPerSec =
+    190.0f;  // TODO: fix this value so it's in one cell
+static constexpr float kTargetTicksPerSec =
+    kPidTargetSpeedMmPerSec / kMmPerTick;
 
 static constexpr uint32_t kFallbackEncoderSampleUs = 1'000;
 
@@ -19,23 +20,31 @@ namespace MM
 {
 Motion::Motion(Board& hw, const Gains& gains)
     : hw(hw),
-      pid(hw.motor, gains),
+      pid(hw.motor_left, gains),
       encoder_timing(Sample::init_encoder_timing(
-          hw.encoder, hw.encoder_sample_us != 0 ? hw.encoder_sample_us
-                                                : kFallbackEncoderSampleUs))
+          hw.encoder_left, hw.encoder_sample_us != 0
+                               ? hw.encoder_sample_us
+                               : kFallbackEncoderSampleUs))
 {
-    // Keep command authority conservative while tuning gains.
     pid.set_output_limits(-0.60f, 0.60f);
 }
 
 bool Motion::update()
 {
-    // TEST MODE: fixed forward drive — watch sample_ticks in debugger
-    volatile int32_t sample_ticks =
-        Sample::sample_encoder(hw.encoder, encoder_timing);
-    (void)sample_ticks;
+    const int32_t sample_ticks =
+        Sample::sample_encoder(hw.encoder_left, encoder_timing);
 
-    hw.motor.drive(Drv8231::Direction::FORWARD, 25);
+    pid.update(kTargetTicksPerSec, Drv8231::Direction::FORWARD, sample_ticks,
+               encoder_timing.sample_time_sec);
+
+    const PidDebug& pd = pid.get_debug();
+    debug_data.sample_ticks = sample_ticks;
+    debug_data.error = pd.error;
+    debug_data.p_term = pd.p;
+    debug_data.i_term = pd.i_term;
+    debug_data.d_term = pd.d;
+    debug_data.output = pd.output;
+
     return true;
 }
 
