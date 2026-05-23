@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: ["main"]
 
+permissions:
+  contents: read
+
 jobs:
   # Make sure code abides by the clang-format.
   lint:
@@ -14,7 +17,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
 
       - name: Install clang-format 20
         run: |
@@ -32,12 +37,14 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
 
       - name: Set up CMake
         uses: lukka/get-cmake@latest
         with:
-          cmake-version: "3.27"
+          cmakeVersion: "3.27"
 
       - name: Pull git submodules
         run: |
@@ -46,7 +53,7 @@ jobs:
       - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
         uses: carlosperate/arm-none-eabi-gcc-action@v1
         with:
-          release: '15.2.Rel1' # <-- The compiler release to use
+          release: "15.2.Rel1" # <-- The compiler release to use
 
       # - name: Configure CMake for F746
       #   run: |
@@ -83,12 +90,14 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
 
       - name: Set up CMake
         uses: lukka/get-cmake@latest
         with:
-          cmake-version: "3.27"
+          cmakeVersion: "3.27"
 
       - name: Pull git submodules
         run: |
