@@ -8,13 +8,18 @@
 
 using namespace MM;
 
-int main(int argc, char* argv[])
+int main()
 {
-    board_init();
-    Board hw = get_board();
+    if (!board_init())
+    {
+        return 1;
+    }
+
+    Board& hw = get_board();
+
     while (1)
     {
-        // cli function
+        hw.cli.update();
     }
 
     return 0;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../../common/core/cli/cli.h"
+
 // NOTE: Will things a bit differently I will have the class for the BSP init with a class so it's easier to manage different things
 
 /*
@@ -34,7 +36,7 @@ namespace MM
 
 struct Board
 {
-    Gpio& led;
+    Cli& cli;
 };
 
 bool board_init(void);
