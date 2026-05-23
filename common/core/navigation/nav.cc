@@ -11,6 +11,16 @@ Navigation::~Navigation()
 {
 }
 
+void Navigation::set_mode(Floodfill::Mode m)
+{
+    floodfill.set_mode(m);
+}
+
+bool Navigation::is_searched()
+{
+    return floodfill.is_searched();
+}
+
 void Navigation::update(const IrValues& ir)
 {
     if (at_cell_center)
@@ -71,13 +81,10 @@ void Navigation::execute(MotionController& motion, const IrValues& ir)
     switch (get_current_state())
     {
         case State::STRAIGHT:
-            // PSEUDOCODE:
-            // 1. Push pending_straight_cells into MotionController.
-            // 2. Let MotionController decide accel/cruise/decel with PID + trapezoid.
-            // 3. Return true when the next cell center is reached.
+            motion.set_straight_cells(pending_straight_cells);
             if (motion.forward(ir))
             {
-                complete();  // Done! tell Nav to make next decision
+                complete();
             }
             break;
 

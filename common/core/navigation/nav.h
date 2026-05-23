@@ -63,6 +63,16 @@ public:
     */
     void execute(MotionController& motion, const IrValues& ir);
 
+    /**
+    * @brief Set the floodfill operating mode (SEARCH or ZOOMING).
+    */
+    void set_mode(Floodfill::Mode m);
+
+    /**
+    * @brief Check whether the maze has been fully searched.
+    */
+    bool is_searched();
+
     ~Navigation();
 
 private:

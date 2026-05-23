@@ -374,6 +374,11 @@ void Floodfill::set_sensor_data(bool front_wall, bool right_wall,
     sensor_left_wall = left_wall;
 }
 
+bool Floodfill::is_searched()
+{
+    return searched;
+}
+
 void Floodfill::process_ir_data(const IrValues& ir_vals)
 {
     constexpr uint16_t kThresholdFront{

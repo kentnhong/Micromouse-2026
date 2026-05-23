@@ -7,7 +7,7 @@ target_include_directories(cli_core PUBLIC
 )
 
 target_link_libraries(cli_core PUBLIC
-    algorithm
+    navigation
+    api
     driver
 )
-

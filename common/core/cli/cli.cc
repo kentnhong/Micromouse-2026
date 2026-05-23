@@ -11,33 +11,33 @@ Cli::Cli(CliParams params_)
       led3(params_.led3),
       search_bt(params_.search_bt),
       zoom_bt(params_.zoom_bt),
-      floodfill(params_.floodfill),
+      nav(params_.nav),
+      motion(params_.motion),
       ir_controller(params_.ir_controller)
 {
-    floodfill.set_mode(Floodfill::Mode::SEARCH);
+    nav.set_mode(Floodfill::Mode::SEARCH);
     set_leds(true, false, false);
 }
 
-bool Cli::run_floodfill_step()
+bool Cli::run_nav_step()
 {
-    // If no IR controller is wired in this app yet, still run floodfill.
-    if (ir_controller == nullptr)
+    IrValues ir{};
+
+    if (ir_controller != nullptr)
     {
-        floodfill.update();
-        return true;
+        ir_controller->update();
+        if (!ir_controller->is_sequence_done())
+        {
+            return false;
+        }
+        ir = ir_controller->get_ir_vals();
     }
 
-    ir_controller->update();
-    if (!ir_controller->is_sequence_done())
-    {
-        return false;
-    }
+    nav.update(ir);
+    nav.execute(motion, ir);
 
-    floodfill.process_ir_data(ir_controller->get_ir_vals());
-    // TODO(kent): Replace direct floodfill stepping with a motion pipeline
-    // (floodfill next move -> MotionController execute -> completion ack).
-    floodfill.update();
-    return true;
+    // A step is "done" when nav has completed a move and is ready to decide again.
+    return nav.has_reached_cell_center();
 }
 
 void Cli::set_leds(bool led1_on, bool led2_on, bool led3_on)
@@ -102,13 +102,13 @@ void Cli::update()
         case State::SEARCH_START_DELAY:
             if ((now_ms - transition_start_ms) >= kStartDelayMs)
             {
-                floodfill.set_mode(Floodfill::Mode::SEARCH);
+                nav.set_mode(Floodfill::Mode::SEARCH);
                 state = State::SEARCH_ACTIVE;
             }
             break;
 
         case State::SEARCH_ACTIVE:
-            if (run_floodfill_step() && floodfill.is_searched())
+            if (run_nav_step() && nav.is_searched())
             {
                 state = State::WAIT_ZOOM_TRIGGER;
             }
@@ -125,13 +125,13 @@ void Cli::update()
         case State::ZOOM_START_DELAY:
             if ((now_ms - transition_start_ms) >= kStartDelayMs)
             {
-                floodfill.set_mode(Floodfill::Mode::ZOOMING);
+                nav.set_mode(Floodfill::Mode::ZOOMING);
                 state = State::ZOOM_ACTIVE;
             }
             break;
 
         case State::ZOOM_ACTIVE:
-            run_floodfill_step();
+            run_nav_step();
             break;
     }
 

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem \"c:\\\\Project\\\\Micromouse\\\\MM-master\\\\Micromouse-2026\\\\build\\\\stm32f411\" -Recurse -File | Where-Object {$_.Length -gt 50000} | Select-Object Name, DirectoryName, @{N='KB';E={[int]\\($_.Length/1024\\)}})"
+    ]
+  }
+}

@@ -1,4 +1,3 @@
-
 set(EXECUTABLE cli)
 set(LDF ${CMAKE_CURRENT_BINARY_DIR}/${EXECUTABLE}.ld)
 
@@ -16,16 +15,20 @@ if (TARGET cli_bsp)
         ${STARTUP_FILE}
     )
 
-    target_include_directories_for(${TARGET_DEVICE} ${EXECUTABLE} 
+    target_include_directories_for(${TARGET_DEVICE} ${EXECUTABLE}
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
         PRIVATE ${CMAKE_SOURCE_DIR}/common/core/cli
+        PRIVATE ${CMAKE_SOURCE_DIR}/common/core/navigation
+        PRIVATE ${CMAKE_SOURCE_DIR}/common/core/api
         PRIVATE ${CMAKE_SOURCE_DIR}/common/core/algorithm
+        PRIVATE ${CMAKE_SOURCE_DIR}/common/core/periph/irsensor
         PRIVATE ${CMAKE_SOURCE_DIR}/common/drivers/io
     )
 
     target_link_libraries_for(${TARGET_DEVICE} ${EXECUTABLE} PRIVATE
         cli_bsp
         cli_core
+        navigation
     )
 
     target_preprocess_for(${TARGET_DEVICE} ${EXECUTABLE} ${LINKER_SCRIPT} ${LDF} ${PREPROCESS_DEFS})

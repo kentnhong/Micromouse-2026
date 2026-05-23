@@ -4,15 +4,16 @@
 * @brief Command Line Interface (CLI) for the application.
 */
 
-#include "floodfill.h"
-#include "gpio.h"
-
-/// NOTE: This is the CLI interface where the push button dictate the state of the system.
-///        The CLI will be used to control the state of the system
-
 #pragma once
 
 #include <cstdint>
+#include "gpio.h"
+#include "ircontroller.h"
+#include "motioncontroller.h"
+#include "nav.h"
+
+/// NOTE: Button-driven state machine that controls search and zoom runs.
+/// Navigation + MotionController execute the physical movement pipeline.
 
 namespace MM
 {
@@ -24,7 +25,8 @@ struct CliParams
     Gpio& led3;
     Gpio& search_bt;
     Gpio& zoom_bt;
-    Floodfill& floodfill;
+    Navigation& nav;
+    MotionController& motion;
     IrController* ir_controller{nullptr};
 };
 
@@ -33,11 +35,11 @@ class Cli
 public:
     explicit Cli(CliParams params_);
 
-    // Poll buttons and update floodfill mode/LED state.
+    // Poll buttons and drive the nav+motion pipeline.
     void update();
 
 private:
-    bool run_floodfill_step();
+    bool run_nav_step();
 
     enum class State
     {
@@ -60,8 +62,9 @@ private:
     Gpio& led3;
     Gpio& search_bt;
     Gpio& zoom_bt;
-    Floodfill& floodfill;
-    IrController* ir_controller{nullptr};  // Added ir_controller to the class
+    Navigation& nav;
+    MotionController& motion;
+    IrController* ir_controller{nullptr};
 
     State state{State::WAIT_SEARCH_TRIGGER};
     uint32_t transition_start_ms{0};

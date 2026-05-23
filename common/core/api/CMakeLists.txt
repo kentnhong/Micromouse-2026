@@ -9,4 +9,7 @@ target_include_directories(api PUBLIC
 target_link_libraries(api PUBLIC
     irsensor
     drv8231
+    pid
+    profile
+    sample
 )
