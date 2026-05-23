@@ -6,35 +6,50 @@
 */
 
 #include "board.h"
+#include "common/drivers/time/delay.h"
+#include "drv8231.h"
 
 using namespace MM;
 
-int main(int argc, char* argv[])
+volatile int g_dir = 0;
+volatile uint8_t g_duty = 0;
+volatile int g_drv_state = 0;
+volatile uint32_t g_step = 0;
+
+static void run_step(Board& hw, Drv8231::Direction dir, uint8_t duty,
+                     uint32_t ms)
+{
+    hw.drv8231_left.drive(dir, duty);
+    hw.drv8231_right.drive(dir, duty);
+    g_dir = static_cast<int>(dir);
+    g_duty = duty;
+    g_drv_state = hw.drv8231_left.get_state();
+    g_drv_state |= hw.drv8231_right.get_state()
+                   << 4;  // Combine states for both drivers
+    g_step++;
+    MM::Utils::delay_ms(ms);
+}
+
+int main()
 {
     bsp_init();
     Board& hw = get_board();
 
+    hw.pwm1_left.set_frequency(2000);
+    hw.pwm2_left.set_frequency(2000);
+    hw.pwm1_right.set_frequency(2000);
+    hw.pwm2_right.set_frequency(2000);
+
     while (1)
     {
-        // Test motor sequences (FORWARD -> REVERSE -> BRAKE -> COAST)
-        hw.drv8231.set_direction(Drv8231::Direction::FORWARD);
-        hw.drv8231.set_speed(128);  // 50% speed
-
-        hw.drv8231.get_state();  // Should return 1 (FORWARD)
-
-        hw.drv8231.set_direction(Drv8231::Direction::REVERSE);
-        hw.drv8231.set_speed(128);  // 50% speed
-
-        hw.drv8231.get_state();  // Should return 2 (REVERSE)
-
-        hw.drv8231.set_direction(Drv8231::Direction::BRAKE);
-
-        hw.drv8231.get_state();  // Should return 3 (BRAKE)
-
-        hw.drv8231.set_direction(Drv8231::Direction::COAST);
-        hw.drv8231.set_speed(0);  // Stop the motor
-
-        hw.drv8231.get_state();  // Should return 0 (COAST)
+        run_step(hw, Drv8231::Direction::FORWARD, 25, 500);
+        run_step(hw, Drv8231::Direction::FORWARD, 15, 500);
+        run_step(hw, Drv8231::Direction::FORWARD, 5, 500);
+        run_step(hw, Drv8231::Direction::COAST, 0, 300);
+        run_step(hw, Drv8231::Direction::REVERSE, 5, 500);
+        run_step(hw, Drv8231::Direction::REVERSE, 15, 500);
+        run_step(hw, Drv8231::Direction::REVERSE, 25, 500);
+        run_step(hw, Drv8231::Direction::REVERSE, 100, 500);
     }
 
     return 0;

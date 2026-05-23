@@ -27,6 +27,7 @@ HwPwm::HwPwm(const StPwmParams& params)
     : base_addr{params.base_addr},
       channel{params.channel},
       settings{params.settings},
+      p_clk{params.p_clk},
       current_frequency{params.p_clk},
       current_duty_cycle{0}
 {
@@ -145,6 +146,8 @@ bool HwPwm::init()
 
     // Enable counter
     base_addr->CR1 |= TIM_CR1_CEN;
+
+    set_frequency(current_frequency);
 
     return true;
 }

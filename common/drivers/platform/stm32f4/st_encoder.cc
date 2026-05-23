@@ -29,6 +29,11 @@ static inline bool is_timer_9_to_11(TIM_TypeDef* t)
 {
     return (t == TIM9 || t == TIM10 || t == TIM11);
 }
+// TIM2 and TIM5 have 32-bit CNT on STM32F4; TIM1/TIM3/TIM4 are 16-bit.
+static inline bool is_32bit_timer(TIM_TypeDef* t)
+{
+    return (t == TIM2 || t == TIM5);
+}
 
 static inline uint32_t EncoderModeToSms(EncMode mode)
 {
@@ -180,8 +185,24 @@ bool HwEncoder::init()
 
 int32_t HwEncoder::get_ticks()
 {
-    // Read the current encoder ticks from the timer's CNT register
-    current_ticks = static_cast<int32_t>(base_addr->CNT);
+    uint32_t raw_cnt = base_addr->CNT;
+
+    // TIM2/TIM5 have 32-bit CNT on STM32F4; all others (TIM1/TIM3/TIM4) are 16-bit.
+    // Sign-extend 16-bit CNT through int16_t so a backward tick (CNT=0xFFFF) reads as -1.
+    if (is_32bit_timer(base_addr))
+    {
+        current_ticks = static_cast<int32_t>(raw_cnt);
+    }
+    else
+    {
+        current_ticks = static_cast<int32_t>(static_cast<int16_t>(raw_cnt));
+    }
+
+    if (settings.invert_direction)
+    {
+        current_ticks = -current_ticks;
+    }
+
     return current_ticks;
 }
 
@@ -198,6 +219,11 @@ bool HwEncoder::init_cycle_counter()
 {
     // Enable TRC
     CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+
+    // Unlock DWT Lock Access Register (LAR) - Required on many STM32 Cortex-M4/M7 cores
+    // The CMSIS headers for F4 sometimes omit the 'LAR' property, so we use the raw address.
+    volatile uint32_t* dwt_lar = (volatile uint32_t*)0xE0001FB0;
+    *dwt_lar = 0xC5ACCE55;
 
     // Reset the cycle counter
     DWT->CYCCNT = 0;

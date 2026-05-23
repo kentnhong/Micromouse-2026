@@ -102,7 +102,7 @@ public:
     * @param frequency Desired frequency in Hz
     * @return true if the frequency was set successfully, false otherwise
     */
-    bool set_frequency(uint32_t frequency);
+    bool set_frequency(uint32_t frequency) override;
 
     /**
     * @brief Sets the duty cycle of the PWM signal

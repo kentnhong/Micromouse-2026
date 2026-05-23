@@ -4,9 +4,10 @@ add_subdirectory(algorithm)
 add_subdirectory(cli)
 add_subdirectory(api)
 add_subdirectory(navigation)
+add_subdirectory(control)
 
 # Make core consumers also get utils and chip_select by adding them to the INTERFACE core target
 # `core` is defined in the parent `common/CMakeLists.txt` as an INTERFACE target.
 if (TARGET core)
-	target_link_libraries(core INTERFACE utils chip_select bno055 w25q128 irsensor algorithm cli_core navigation api)
+	target_link_libraries(core INTERFACE utils chip_select bno055 w25q128 irsensor algorithm cli_core navigation api control)
 endif()

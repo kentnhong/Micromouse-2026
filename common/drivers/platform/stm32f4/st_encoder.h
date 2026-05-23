@@ -76,6 +76,7 @@ struct StEncoderSettings
     EncChannel channel;
     EncInputPolarity polarity;
     EncSlaveMode slave_mode;
+    bool invert_direction = false;
 };
 
 struct StEncoderParams
