@@ -32,34 +32,32 @@ void Navigation::update(const IrValues& ir)
         // Ask Floodfill "Where to next?"
         char move = floodfill.get_next_move();
 
-        // PSEUDOCODE:
-        // If the next move is forward in zoom mode, remember how many more cells
-        // can stay straight so MotionController can keep the speed profile going.
-        // Fill in the real straight-count logic once count_straight_ahead() is complete.
-        if (move == 'F')
-        {
-            pending_straight_cells = floodfill.count_straight_ahead();
-        }
-        else
-        {
-            pending_straight_cells = 0;
-        }
-
         // Tell Navigation to execute the physical move
         if (move == 'F')
         {
+            if (floodfill.get_mode() == Floodfill::Mode::ZOOMING)
+            {
+                pending_straight_cells = floodfill.count_straight_ahead() + 1;
+            }
+            else
+            {
+                pending_straight_cells = 1;
+            }
             state = State::STRAIGHT;
         }
         else if (move == 'R')
         {
+            pending_straight_cells = 0;
             state = State::TURNING_RIGHT;
         }
         else if (move == 'L')
         {
+            pending_straight_cells = 0;
             state = State::TURNING_LEFT;
         }
         else if (move == 'U')
         {
+            pending_straight_cells = 0;
             state = State::U_TURN;
         }
 
