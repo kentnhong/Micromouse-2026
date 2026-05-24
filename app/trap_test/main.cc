@@ -24,7 +24,7 @@ static constexpr float kTicksPerMotorRev = 8.0f;
 static constexpr float kMmPerTick =
     (kWheelDiameterMm * kPi) / (kGearRatio * kTicksPerMotorRev);
 
-static constexpr float   kCellDistanceMm = 100.0f;
+static constexpr float   kCellDistanceMm = 125.0f;
 static constexpr int32_t kCellTicks = static_cast<int32_t>(kCellDistanceMm / kMmPerTick);
 
 static constexpr uint32_t kEncoderSampleUs = 20'000;
@@ -39,7 +39,7 @@ static constexpr float kMaxTicks   = kMaxMmPerSec   / kMmPerTick;
 static constexpr float kAccelTicks = kAccelMmPerSec2 / kMmPerTick;
 static constexpr float kDecelTicks = kDecelMmPerSec2 / kMmPerTick;
 
-static constexpr Gains kGains{.kp = 0.003f, .ki = 0.0005f, .kd = 0.0f};
+static constexpr Gains kGains{.kp = 0.005f, .ki = 0.0005f, .kd = 0.0f};
 
 static void usart_print(Usart& usart, const char* str)
 {
@@ -87,6 +87,10 @@ int main()
 
         usart_print(hw.usart, "n,goal,prog,setpt,L_ticks,R_ticks\r\n");
 
+        static constexpr float kEmaAlpha = 0.5f;
+        float vel_left_smooth  = 0.0f;
+        float vel_right_smooth = 0.0f;
+
         int32_t n = 0;
         while (!profile.is_complete())
         {
@@ -94,11 +98,18 @@ int main()
                 Sample::sample_encoders(hw.encoder_left, hw.encoder_right, timing);
             const float dt = timing.sample_time_sec;
 
+            const float raw_left  = static_cast<float>(-enc.left_ticks);
+            const float raw_right = static_cast<float>(-enc.right_ticks);
+            vel_left_smooth  = kEmaAlpha * vel_left_smooth  + (1.0f - kEmaAlpha) * raw_left;
+            vel_right_smooth = kEmaAlpha * vel_right_smooth + (1.0f - kEmaAlpha) * raw_right;
+            const float vel_avg = (vel_left_smooth + vel_right_smooth) * 0.5f;
+
             profile.trapezoidal(enc, dt);
             const float setpt = profile.get_speed_setpoint();
 
-            pid_left.update(setpt, Drv8231::Direction::FORWARD, enc.left_ticks, dt);
-            pid_right.update(setpt, Drv8231::Direction::FORWARD, enc.right_ticks, dt);
+            const int32_t vel_feedback = static_cast<int32_t>(vel_avg);
+            pid_left.update(setpt, Drv8231::Direction::FORWARD, vel_feedback, dt);
+            pid_right.update(setpt, Drv8231::Direction::FORWARD, vel_feedback, dt);
 
             const int32_t prog = profile.get_progress_ticks();
             snprintf(buf, sizeof(buf), "%ld,%ld,%ld,%.1f,%ld,%ld\r\n",

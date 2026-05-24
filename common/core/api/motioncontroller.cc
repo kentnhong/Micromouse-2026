@@ -42,7 +42,7 @@ static constexpr float kTurnAccelTicks = kTurnAccelMmPerSec2 / kMmPerTick;
 static constexpr float kTurnDecelTicks = kTurnDecelMmPerSec2 / kMmPerTick;
 
 // Wall centering: correction in ticks/s per raw IR unit of imbalance
-static constexpr uint16_t kWallSideThreshold = 3700;
+static constexpr uint16_t kWallSideThreshold = 2000;
 static constexpr float kWallCenterGain = 0.005f;
 
 namespace MM

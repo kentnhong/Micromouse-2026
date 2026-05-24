@@ -20,7 +20,7 @@ namespace
 {
 // Must match values in floodfill.cc — tune them together.
 constexpr uint16_t kThresholdFront{2000};
-constexpr uint16_t kThresholdSide{3700};
+constexpr uint16_t kThresholdSide{2000};
 
 constexpr uint32_t kPrintEveryNSequences{10};
 }  // namespace

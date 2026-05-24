@@ -44,28 +44,11 @@ static void usart_print(Usart& usart, const char* str)
                                         __builtin_strlen(str)));
 }
 
-static void print_motor(Usart& usart, const char* label, const PidDebug& d,
-                        int32_t ticks)
+static void usart_print_csv(Usart& usart, float t_sec, float speed_mm_s)
 {
-    const float abs_out = d.output >= 0.0f ? d.output : -d.output;
-    const int duty = static_cast<int>(abs_out * 100.0f);
-    const char* dir = (d.output > 0.01f)    ? "FWD"
-                      : (d.output < -0.01f) ? "BRK"
-                                            : "COAST";
-
-    char buf[160];
-    snprintf(buf, sizeof(buf),
-             "%s\r\n"
-             "  ticks  : %ld\r\n"
-             "  error  : %.2f\r\n"
-             "  P      : %.4f\r\n"
-             "  I      : %.4f\r\n"
-             "  D      : %.4f\r\n"
-             "  out    : %.3f\r\n"
-             "  status : %s %d%%\r\n",
-             label, static_cast<long>(ticks), d.error, d.p, d.i_term, d.d,
-             d.output, dir, duty);
-
+    char buf[64];
+    snprintf(buf, sizeof(buf), "%.3f,%.3f\r\n",
+             static_cast<double>(t_sec), static_cast<double>(speed_mm_s));
     usart_print(usart, buf);
 }
 
@@ -89,8 +72,8 @@ int main()
     hw.pwm1_right.set_frequency(2000);
     hw.pwm2_right.set_frequency(2000);
 
-    hw.encoder_left.reset_ticks();
-    hw.encoder_right.reset_ticks();
+    //hw.encoder_left.reset_ticks();
+    //hw.encoder_right.reset_ticks();
 
     // PID objects
     /// CHANGE: PID gains
@@ -107,7 +90,7 @@ int main()
     profile.configure(0.0f, kCruiseTicks, kAccelTicksPerSec2,
                       kDecelTicksPerSec2, kCellTicks);
 
-    // Encoder timing (20 ms sample)
+    // Encoder timing (1ms)
     Sample::EncoderTiming timing =
         Sample::init_encoder_timing(hw.encoder_left, hw.encoder_sample_us);
 
@@ -115,21 +98,25 @@ int main()
 
     unsigned print_count = 0;
 
-    while (!profile.is_complete())
+    while (1)
     {
+
         const int32_t ticks_left =
             Sample::sample_encoder(hw.encoder_left, timing);
         const int32_t ticks_right =
             Sample::sample_encoder(hw.encoder_right, timing);
 
+        usart_print_csv(hw.usart, timing.sample_time_sec, ticks_left);
+        usart_print_csv(hw.usart, timing.sample_time_sec, ticks_right);
+
         profile.trapezoidal(EncoderInput{ticks_left, ticks_right},
                             timing.sample_time_sec);
 
-        const float target = profile.get_speed_setpoint();
-
-        pid_left.update(target, Drv8231::Direction::FORWARD, ticks_left,
+        // const float target = profile.get_speed_setpoint();
+        const float ktarget = 3000.0f;  
+        pid_left.update(ktarget, Drv8231::Direction::FORWARD, ticks_left,
                         timing.sample_time_sec);
-        pid_right.update(target, Drv8231::Direction::FORWARD, ticks_right,
+        pid_right.update(ktarget, Drv8231::Direction::FORWARD, ticks_right,
                          timing.sample_time_sec);
 
         if (++print_count % 10 != 0)
@@ -137,12 +124,10 @@ int main()
 
         char hdr[64];
         snprintf(hdr, sizeof(hdr), "--- sp:%.0f t/s  dist:%ld/%ld ticks\r\n",
-                 target, static_cast<long>(profile.get_progress_ticks()),
+                 ktarget, static_cast<long>(profile.get_progress_ticks()),
                  static_cast<long>(kCellTicks));
         usart_print(hw.usart, hdr);
 
-        print_motor(hw.usart, "LEFT:", pid_left.get_debug(), ticks_left);
-        print_motor(hw.usart, "RIGHT:", pid_right.get_debug(), ticks_right);
     }
 
     hw.motor_left.drive(Drv8231::Direction::COAST, 0);

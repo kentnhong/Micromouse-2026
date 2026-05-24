@@ -9,8 +9,7 @@
 
 namespace
 {
-static constexpr uint32_t kEncoderSampleUs{
-    20'000};  // 20 ms — ~8 ticks/sample at 100 mm/s
+static constexpr uint32_t kEncoderSampleUs{1'000};  
 }
 
 namespace MM
