@@ -5,6 +5,7 @@
  */
 
 #include "board.h"
+#include "delay.h"
 #include "nav.h"
 
 using namespace MM;
@@ -18,6 +19,11 @@ int main()
 
     Board& hw = get_board();
     Navigation nav;
+
+    // Wait for PB4 button press (active low) before starting
+    while (hw.start_bt.read() != 0) {}
+    Utils::delay_ms(50);  // debounce
+    while (hw.start_bt.read() != 0) {}
 
     while (1)
     {

@@ -459,6 +459,61 @@
       "liveWatch": {
       "enabled": true
     }
+  },
+  {
+    "cwd": "${workspaceFolder}",
+      "executable": "${workspaceRoot}/build/stm32f411/app/nav_app/nav_app.elf",
+      "name": "DEBUG NAV_APP F4",
+      "request": "launch",
+      "type": "cortex-debug",
+      "servertype": "openocd",
+      "device": "STM32F411",
+      "svdFile": "${workspaceRoot}/mcu_support/stm32/f4xx/STM32F4x1.svd",
+      "searchDir": ["${workspaceRoot}/mcu_support/stm32"],
+      "runToMain": true,
+      "configFiles": [
+        "${workspaceRoot}/mcu_support/stm32/stlink-dap.cfg",
+        "${workspaceRoot}/mcu_support/stm32/f4xx/stm32f4x.cfg"
+      ],
+      "debuggerArgs": ["-d", "${workspaceRoot}"],
+      "preRestartCommands": [
+        "add-symbol-file build/stm32f411/app/nav_app/nav_app.elf",
+        "load",
+        "enable breakpoint",
+        "monitor reset"
+      ],
+      "showDevDebugOutput": true,
+      "liveWatch": {
+        "enabled": true,
+        "samplingPeriod": 100,
+        "watches": [
+          { "variable": "g_adc_ovr" }
+        ]
+      }
+  },
+  {
+    "cwd": "${workspaceFolder}",
+      "executable": "${workspaceRoot}/build/stm32f411/app/trap_test/trap_test.elf",
+      "name": "DEBUG TRAP_TEST F4",
+      "request": "launch",
+      "type": "cortex-debug",
+      "servertype": "openocd",
+      "device": "STM32F411",
+      "svdFile": "${workspaceRoot}/mcu_support/stm32/f4xx/STM32F4x1.svd",
+      "searchDir": ["${workspaceRoot}/mcu_support/stm32"],
+      "runToMain": true,
+      "configFiles": [
+        "${workspaceRoot}/mcu_support/stm32/stlink-dap.cfg",
+        "${workspaceRoot}/mcu_support/stm32/f4xx/stm32f4x.cfg"
+      ],
+      "debuggerArgs": ["-d", "${workspaceRoot}"],
+      "preRestartCommands": [
+        "add-symbol-file build/stm32f411/app/trap_test/trap_test.elf",
+        "load",
+        "enable breakpoint",
+        "monitor reset"
+      ],
+      "showDevDebugOutput": true
   }
 ]
 }

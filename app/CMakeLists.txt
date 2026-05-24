@@ -17,6 +17,7 @@
 #add_subdirectory(pid_controller)
 add_subdirectory(cli)
 add_subdirectory(nav_app)
+add_subdirectory(trap_test)
 add_subdirectory(ir_threshold_test)
 
 if ("${TARGET_DEVICE}" MATCHES "NATIVE")

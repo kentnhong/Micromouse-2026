@@ -21,6 +21,7 @@ if (TARGET nav_bsp)
         PRIVATE ${CMAKE_SOURCE_DIR}/common/core/api
         PRIVATE ${CMAKE_SOURCE_DIR}/common/core/periph/irsensor
         PRIVATE ${CMAKE_SOURCE_DIR}/common/drivers/io
+        PRIVATE ${CMAKE_SOURCE_DIR}/common/drivers/time
     )
 
     target_link_libraries_for(${TARGET_DEVICE} ${EXECUTABLE} PRIVATE

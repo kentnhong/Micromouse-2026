@@ -5,12 +5,12 @@
 static constexpr float kPi = 3.14159265358979f;
 static constexpr float kWheelDiameterMm = 14.0f;
 static constexpr float kGearRatio = 15.0f;
-static constexpr float kTicksPerMotorRev = 12.0f;
+static constexpr float kTicksPerMotorRev = 8.0f;
 static constexpr float kMmPerTick =
     (kWheelDiameterMm * kPi) / (kGearRatio * kTicksPerMotorRev);
 
 // Robot geometry
-static constexpr float kCellDistanceMm = 180.0f;
+static constexpr float kCellDistanceMm = 155.0f;
 static constexpr float kWheelbaseMm = 73.0f;  // center-to-center track width, tune this
 
 // Tick distances for each move type
@@ -57,8 +57,8 @@ MotionController::MotionController(MotionControllerParams p)
       pid_right(p.motor_right, p.gains),
       encoder_timing(Sample::init_encoder_timing(p.encoder_left, p.encoder_sample_us))
 {
-    pid_left.set_output_limits(-0.80f, 0.80f);
-    pid_right.set_output_limits(-0.80f, 0.80f);
+    pid_left.set_output_limits(-1.0f, 0.80f);
+    pid_right.set_output_limits(-1.0f, 0.80f);
 }
 
 bool MotionController::forward(const IrValues& ir)
@@ -95,6 +95,12 @@ bool MotionController::forward(const IrValues& ir)
 
     if (profile.is_complete())
     {
+        motor_left.drive(Drv8231::Direction::COAST, 0);
+        motor_right.drive(Drv8231::Direction::COAST, 0);
+        for (int i = 0; i < 5; ++i)
+        {
+            Sample::sample_encoders(encoder_left, encoder_right, encoder_timing);
+        }
         move_state = MoveState::IDLE;
         return true;
     }
@@ -156,6 +162,12 @@ bool MotionController::run_turn(MoveState turn_state, int32_t distance_ticks)
 
     if (profile.is_complete())
     {
+        motor_left.drive(Drv8231::Direction::COAST, 0);
+        motor_right.drive(Drv8231::Direction::COAST, 0);
+        for (int i = 0; i < 5; ++i)
+        {
+            Sample::sample_encoders(encoder_left, encoder_right, encoder_timing);
+        }
         move_state = MoveState::IDLE;
         return true;
     }
@@ -179,8 +191,8 @@ bool MotionController::u_turn()
 
 void MotionController::stop()
 {
-    motor_left.drive(Drv8231::Direction::BRAKE, 0);
-    motor_right.drive(Drv8231::Direction::BRAKE, 0);
+    motor_left.drive(Drv8231::Direction::COAST, 0);
+    motor_right.drive(Drv8231::Direction::COAST, 0);
     move_state = MoveState::IDLE;
 }
 

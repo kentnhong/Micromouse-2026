@@ -7,6 +7,7 @@
 #include <array>
 #include <cstdint>
 #include "../board.h"
+#include "delay.h"
 #include "drv8231.h"
 #include "ircontroller.h"
 #include "motioncontroller.h"
@@ -23,6 +24,7 @@ volatile bool g_adc_ovr = false;
 namespace
 {
 static constexpr uint32_t kEncoderSampleUs{20'000};
+static constexpr uint32_t kPwmFreqHz{20'000};
 static constexpr uint32_t kIrTimerFreqHz{1'000'000};
 static constexpr std::chrono::microseconds kIrTimerPeriod{100};
 }  // namespace
@@ -76,7 +78,7 @@ StEncoderSettings enc_settings{.mode = EncMode::MODE_3,
                                 .channel = EncChannel::BOTH,
                                 .polarity = EncInputPolarity::RISING,
                                 .slave_mode = EncSlaveMode::DISABLED,
-                                .invert_direction = false};
+                                .invert_direction = true};
 StEncoderParams encoder_left_params{TIM4, enc_settings};
 StEncoderParams encoder_right_params{TIM3, enc_settings};
 HwEncoder encoder_left{encoder_left_params};
@@ -160,10 +162,16 @@ HwTimebase timebase{timebase_params};
 StTimebaseParams delay_params{TIM5};
 HwTimebase delay_timer{delay_params};
 
+/* ── Start button (PB4, active low) ──────────────────────────────────── */
+StGpioSettings button_settings{GpioMode::GPI, GpioOtype::PUSH_PULL,
+                                GpioOspeed::LOW, GpioPupd::PULL_UP, 0};
+StGpioParams start_bt_params{4, GPIOB, button_settings};
+HwGpio start_bt{start_bt_params};
+
 }  // namespace Stmf4
 
 /* ── MotionController ─────────────────────────────────────────────────── */
-static constexpr Gains kDefaultGains{.kp = 1.5f, .ki = 0.3f, .kd = 0.05f};
+static constexpr Gains kDefaultGains{.kp = 0.001f, .ki = 0.005f, .kd = 0.0f};
 MotionControllerParams mc_params{.motor_left = Stmf4::motor_left,
                                   .motor_right = Stmf4::motor_right,
                                   .encoder_left = Stmf4::encoder_left,
@@ -173,8 +181,9 @@ MotionControllerParams mc_params{.motor_left = Stmf4::motor_left,
 MotionController motion_controller{mc_params};
 
 /* ── Board ────────────────────────────────────────────────────────────── */
-Board board{.ir_controller = Stmf4::ircontroller,
-            .motion_controller = motion_controller};
+Board board{.ir_controller    = Stmf4::ircontroller,
+            .motion_controller = motion_controller,
+            .start_bt          = Stmf4::start_bt};
 
 /* ── BSP init ─────────────────────────────────────────────────────────── */
 bool bsp_init()
@@ -200,6 +209,7 @@ bool bsp_init()
     ret = ret && Stmf4::pwm2_left.init();
     ret = ret && Stmf4::pwm1_right.init();
     ret = ret && Stmf4::pwm2_right.init();
+    ret = ret && Stmf4::pwm1_left.set_frequency(kPwmFreqHz);  // all 4 share TIM2
     ret = ret && Stmf4::motor_left.init();
     ret = ret && Stmf4::motor_right.init();
 
@@ -235,6 +245,9 @@ bool bsp_init()
                                           std::chrono::microseconds(4'294'967u));
     Stmf4::delay_timer.start();
     Utils::bind_timebase(Stmf4::delay_timer);
+
+    /* Start button */
+    ret = ret && Stmf4::start_bt.init();
 
     /* Interrupts */
     NVIC_SetPriority(ADC_IRQn, 0);

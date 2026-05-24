@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "gpio.h"
 #include "ircontroller.h"
 #include "motioncontroller.h"
 
@@ -16,6 +17,7 @@ struct Board
 {
     IrController& ir_controller;
     MotionController& motion_controller;
+    Gpio& start_bt;
 };
 
 bool bsp_init(void);
