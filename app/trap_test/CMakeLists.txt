@@ -17,17 +17,15 @@ if (TARGET trap_bsp)
 
     target_include_directories_for(${TARGET_DEVICE} ${EXECUTABLE}
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-        PRIVATE ${CMAKE_SOURCE_DIR}/common/core/periph/drv8231
-        PRIVATE ${CMAKE_SOURCE_DIR}/common/core/control/pid
-        PRIVATE ${CMAKE_SOURCE_DIR}/common/core/control/profile
-        PRIVATE ${CMAKE_SOURCE_DIR}/common/core/control/sample
-        PRIVATE ${CMAKE_SOURCE_DIR}/common/core/math
+        PRIVATE ${CMAKE_SOURCE_DIR}/common/core/api
+        PRIVATE ${CMAKE_SOURCE_DIR}/common/core/periph/irsensor
         PRIVATE ${CMAKE_SOURCE_DIR}/common/drivers/io
         PRIVATE ${CMAKE_SOURCE_DIR}/common/drivers/time
     )
 
     target_link_libraries_for(${TARGET_DEVICE} ${EXECUTABLE} PRIVATE
-        trap_bsp drv8231 pid profile sample
+        trap_bsp
+        api
     )
 
     target_preprocess_for(${TARGET_DEVICE} ${EXECUTABLE} ${LINKER_SCRIPT} ${LDF} ${PREPROCESS_DEFS})

@@ -1,6 +1,6 @@
 /**
  * @file f411_board.cc
- * @brief Trap test BSP — motors, encoders, USART1, start button.
+ * @brief Trap test BSP — MotionController, USART1, start button.
  * @author Bex Saw
  */
 
@@ -8,6 +8,7 @@
 #include "../board.h"
 #include "delay.h"
 #include "drv8231.h"
+#include "motioncontroller.h"
 #include "st_encoder.h"
 #include "st_gpio.h"
 #include "st_pwm.h"
@@ -17,7 +18,8 @@
 
 namespace
 {
-static constexpr uint32_t kPwmFreqHz{20'000};
+static constexpr uint32_t kEncoderSampleUs{5'000};
+static constexpr uint32_t kPwmFreqHz{323};
 }  // namespace
 
 namespace MM
@@ -26,7 +28,7 @@ namespace Stmf4
 {
 
 /* ── Clock ─────────────────────────────────────────────────────────────── */
-HwClk clk{Configuration::SYSCLK_HSE_100MHZ};
+HwClk clk{Configuration::SYSCLK_HSE_100MHZ_24MHZ_INPUT};
 
 /* ── Motor PWM GPIO (AF, TIM2) ────────────────────────────────────────── */
 StGpioSettings motor_af_settings{GpioMode::AF, GpioOtype::PUSH_PULL,
@@ -81,8 +83,8 @@ HwEncoder encoder_left{encoder_left_params};
 HwEncoder encoder_right{encoder_right_params};
 
 /* ── Motor drivers ────────────────────────────────────────────────────── */
-Drv8231 motor_left{pwm1_left, pwm2_left};
-Drv8231 motor_right{pwm2_right, pwm1_right};
+Drv8231 motor_left{pwm2_left, pwm1_left};
+Drv8231 motor_right{pwm1_right, pwm2_right};
 
 /* ── USART1 (PA9=TX, PA10=RX, AF7) ───────────────────────────────────── */
 StGpioSettings usart_gpio_settings{GpioMode::AF, GpioOtype::PUSH_PULL,
@@ -107,13 +109,20 @@ HwTimebase delay_timer{delay_params};
 
 }  // namespace Stmf4
 
+/* ── MotionController ─────────────────────────────────────────────────── */
+static constexpr Gains kGains{.kp = 0.000018f, .ki = 0.0f, .kd = 0.000018f};
+MotionControllerParams mc_params{.motor_left       = Stmf4::motor_left,
+                                  .motor_right      = Stmf4::motor_right,
+                                  .encoder_left     = Stmf4::encoder_left,
+                                  .encoder_right    = Stmf4::encoder_right,
+                                  .gains            = kGains,
+                                  .encoder_sample_us = kEncoderSampleUs};
+MotionController motion_controller{mc_params};
+
 /* ── Board ────────────────────────────────────────────────────────────── */
-Board board{.motor_left   = Stmf4::motor_left,
-            .motor_right  = Stmf4::motor_right,
-            .encoder_left = Stmf4::encoder_left,
-            .encoder_right = Stmf4::encoder_right,
-            .usart        = Stmf4::usart,
-            .start_bt     = Stmf4::start_bt};
+Board board{.motion    = motion_controller,
+            .usart     = Stmf4::usart,
+            .start_bt  = Stmf4::start_bt};
 
 /* ── BSP init ─────────────────────────────────────────────────────────── */
 bool bsp_init()
@@ -137,7 +146,7 @@ bool bsp_init()
     ret = ret && Stmf4::pwm2_left.init();
     ret = ret && Stmf4::pwm1_right.init();
     ret = ret && Stmf4::pwm2_right.init();
-    ret = ret && Stmf4::pwm1_left.set_frequency(kPwmFreqHz);  // all 4 share TIM2
+    ret = ret && Stmf4::pwm1_left.set_frequency(kPwmFreqHz);
     ret = ret && Stmf4::motor_left.init();
     ret = ret && Stmf4::motor_right.init();
 

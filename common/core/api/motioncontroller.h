@@ -90,6 +90,10 @@ private:
 
     MoveState move_state{MoveState::IDLE};
     int straight_cells_remaining{1};
+
+    // Exponential low-pass filter state for IR wall centering (match 2024 α=0.4)
+    float ir_left_smooth{0.0f};
+    float ir_right_smooth{0.0f};
 };
 
 }  // namespace MM

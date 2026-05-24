@@ -23,8 +23,8 @@ volatile bool g_adc_ovr = false;
 
 namespace
 {
-static constexpr uint32_t kEncoderSampleUs{20'000};
-static constexpr uint32_t kPwmFreqHz{20'000};
+static constexpr uint32_t kEncoderSampleUs{5'000};
+static constexpr uint32_t kPwmFreqHz{323};
 static constexpr uint32_t kIrTimerFreqHz{1'000'000};
 static constexpr std::chrono::microseconds kIrTimerPeriod{100};
 }  // namespace
@@ -176,7 +176,7 @@ HwGpio start_bt{start_bt_params};
 }  // namespace Stmf4
 
 /* ── MotionController ─────────────────────────────────────────────────── */
-static constexpr Gains kDefaultGains{.kp = 0.001f, .ki = 0.005f, .kd = 0.0f};
+static constexpr Gains kDefaultGains{.kp = 0.000018f, .ki = 0.0f, .kd = 0.000018f};
 MotionControllerParams mc_params{.motor_left = Stmf4::motor_left,
                                   .motor_right = Stmf4::motor_right,
                                   .encoder_left = Stmf4::encoder_left,

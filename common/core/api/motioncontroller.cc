@@ -5,13 +5,13 @@
 static constexpr float kPi = 3.14159265358979f;
 static constexpr float kWheelDiameterMm = 14.0f;
 static constexpr float kGearRatio = 15.0f;
-static constexpr float kTicksPerMotorRev = 8.0f;
+static constexpr float kTicksPerMotorRev = 12.0f;
 static constexpr float kMmPerTick =
     (kWheelDiameterMm * kPi) / (kGearRatio * kTicksPerMotorRev);
 
 // Robot geometry
 static constexpr float kCellDistanceMm = 155.0f;
-static constexpr float kWheelbaseMm = 73.0f;  // center-to-center track width, tune this
+static constexpr float kWheelbaseMm = 73.0f;
 
 // Tick distances for each move type
 static constexpr int32_t kCellTicks =
@@ -21,25 +21,17 @@ static constexpr int32_t k90DegTurnTicks =
 static constexpr int32_t k180DegTurnTicks =
     static_cast<int32_t>((kWheelbaseMm * kPi / 2.0f) / kMmPerTick);
 
-// Straight drive profile (mm/s and mm/s^2, converted to ticks)
-static constexpr float kStraightMinMmPerSec = 50.0f;
-static constexpr float kStraightMaxMmPerSec = 190.0f;
-static constexpr float kStraightAccelMmPerSec2 = 500.0f;
-static constexpr float kStraightDecelMmPerSec2 = 500.0f;
-static constexpr float kStraightMinTicks = kStraightMinMmPerSec / kMmPerTick;
-static constexpr float kStraightMaxTicks = kStraightMaxMmPerSec / kMmPerTick;
-static constexpr float kStraightAccelTicks = kStraightAccelMmPerSec2 / kMmPerTick;
-static constexpr float kStraightDecelTicks = kStraightDecelMmPerSec2 / kMmPerTick;
+// Straight profile — 100% = 8000 ticks/s, target cruise = 3000 ticks/s (37.5%)
+static constexpr float kStraightMinTicks   =    50.0f;  // ticks/s
+static constexpr float kStraightMaxTicks   =  3000.0f;  // ticks/s
+static constexpr float kStraightAccelTicks = 12000.0f;  // ticks/s²
+static constexpr float kStraightDecelTicks = 16000.0f;  // ticks/s²
 
-// Turn profile (slower for accuracy)
-static constexpr float kTurnMinMmPerSec = 40.0f;
-static constexpr float kTurnMaxMmPerSec = 120.0f;
-static constexpr float kTurnAccelMmPerSec2 = 400.0f;
-static constexpr float kTurnDecelMmPerSec2 = 400.0f;
-static constexpr float kTurnMinTicks = kTurnMinMmPerSec / kMmPerTick;
-static constexpr float kTurnMaxTicks = kTurnMaxMmPerSec / kMmPerTick;
-static constexpr float kTurnAccelTicks = kTurnAccelMmPerSec2 / kMmPerTick;
-static constexpr float kTurnDecelTicks = kTurnDecelMmPerSec2 / kMmPerTick;
+// Turn profile — slower for accuracy
+static constexpr float kTurnMinTicks   =  100.0f;   // ticks/s
+static constexpr float kTurnMaxTicks   = 2000.0f;   // ticks/s
+static constexpr float kTurnAccelTicks = 8000.0f;   // ticks/s²
+static constexpr float kTurnDecelTicks = 8000.0f;   // ticks/s²
 
 // Wall centering: correction in ticks/s per raw IR unit of imbalance
 static constexpr uint16_t kWallSideThreshold = 2000;
@@ -57,8 +49,6 @@ MotionController::MotionController(MotionControllerParams p)
       pid_right(p.motor_right, p.gains),
       encoder_timing(Sample::init_encoder_timing(p.encoder_left, p.encoder_sample_us))
 {
-    pid_left.set_output_limits(-1.0f, 0.80f);
-    pid_right.set_output_limits(-1.0f, 0.80f);
 }
 
 bool MotionController::forward(const IrValues& ir)
@@ -80,12 +70,15 @@ bool MotionController::forward(const IrValues& ir)
     profile.trapezoidal(enc, dt);
     const float base_speed = profile.get_speed_setpoint();
 
+    // Exponential low-pass on raw IR (α=0.4, matches 2024 SMOOTHING_VALUE_DISTANCE_INV)
+    ir_left_smooth  = 0.4f * static_cast<float>(ir.left)  + 0.6f * ir_left_smooth;
+    ir_right_smooth = 0.4f * static_cast<float>(ir.right) + 0.6f * ir_right_smooth;
+
     // Wall centering: steer away from the closer wall when walls exist on both sides
     float correction = 0.0f;
-    if (ir.left > kWallSideThreshold && ir.right > kWallSideThreshold)
+    if (ir_left_smooth > kWallSideThreshold && ir_right_smooth > kWallSideThreshold)
     {
-        correction = (static_cast<float>(ir.right) - static_cast<float>(ir.left)) *
-                     kWallCenterGain;
+        correction = (ir_right_smooth - ir_left_smooth) * kWallCenterGain;
     }
 
     pid_left.update(base_speed - correction, Drv8231::Direction::FORWARD,

@@ -22,7 +22,8 @@ volatile bool g_adc_ovr = false;
 
 namespace
 {
-static constexpr uint32_t kEncoderSampleUs{20'000};
+static constexpr uint32_t kEncoderSampleUs{5'000};
+static constexpr uint32_t kPwmFreqHz{323};
 static constexpr uint32_t kIrTimerFreqHz{1'000'000};
 static constexpr std::chrono::microseconds kIrTimerPeriod{100};
 }  // namespace
@@ -183,7 +184,7 @@ HwGpio zoom_bt{zoom_bt_params};
 }  // namespace Stmf4
 
 /* ── MotionController ─────────────────────────────────────────────────── */
-static constexpr Gains kDefaultGains{.kp = 1.5f, .ki = 0.3f, .kd = 0.05f};
+static constexpr Gains kDefaultGains{.kp = 0.000018f, .ki = 0.0f, .kd = 0.000018f};
 MotionControllerParams mc_params{.motor_left = Stmf4::motor_left,
                                   .motor_right = Stmf4::motor_right,
                                   .encoder_left = Stmf4::encoder_left,
@@ -226,6 +227,7 @@ bool board_init()
     ret = ret && Stmf4::pwm2_left.init();
     ret = ret && Stmf4::pwm1_right.init();
     ret = ret && Stmf4::pwm2_right.init();
+    ret = ret && Stmf4::pwm1_left.set_frequency(kPwmFreqHz);  // all 4 share TIM2
     ret = ret && Stmf4::motor_left.init();
     ret = ret && Stmf4::motor_right.init();
 
