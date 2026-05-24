@@ -32,12 +32,12 @@ EncoderTiming init_encoder_timing(Encoder& timing_encoder,
                                   uint32_t sample_time_us);
 
 /**
-* @brief Samples a single encoder for a specified duration based on the provided timing
+* @brief Measures encoder velocity using the T method (time-between-ticks).
 * @param encoder The encoder to sample
-* @param timing The EncoderTiming struct containing the sample duration information
-* @return The number of ticks during the sampling period
+* @param timing The EncoderTiming struct — sample_cycles is used as the timeout
+* @return Velocity in ticks/sec. Returns 0.0f if no tick arrives before the timeout (motor stopped).
 */
-int32_t sample_encoder(Encoder& encoder, const EncoderTiming& timing);
+float sample_encoder(Encoder& encoder, const EncoderTiming& timing);
 
 /**
  * @brief Samples two encoders for a specified duration based on the provided timing

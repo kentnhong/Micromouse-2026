@@ -44,13 +44,6 @@ static void usart_print(Usart& usart, const char* str)
                                         __builtin_strlen(str)));
 }
 
-static void usart_print_csv(Usart& usart, float t_sec, float speed_mm_s)
-{
-    char buf[64];
-    snprintf(buf, sizeof(buf), "%.3f,%.3f\r\n",
-             static_cast<double>(t_sec), static_cast<double>(speed_mm_s));
-    usart_print(usart, buf);
-}
 
 int main()
 {
@@ -67,23 +60,20 @@ int main()
     Utils::bind_timebase(timebase);
 
     // PWM frequencies
-    hw.pwm1_left.set_frequency(2000);
-    hw.pwm2_left.set_frequency(2000);
-    hw.pwm1_right.set_frequency(2000);
-    hw.pwm2_right.set_frequency(2000);
+    hw.pwm1_left.set_frequency(323);
+    hw.pwm2_left.set_frequency(323);
+    hw.pwm1_right.set_frequency(323);
+    hw.pwm2_right.set_frequency(323);
 
     //hw.encoder_left.reset_ticks();
     //hw.encoder_right.reset_ticks();
 
     // PID objects
     /// CHANGE: PID gains
-    const Gains kGains{0.001f, 0.0002f, 0.0f};
+    const Gains kGains{0.002f, 0.0012f, 0.000002f};
 
     PID pid_left(hw.motor_left, kGains);
     PID pid_right(hw.motor_right, kGains);
-
-    pid_left.set_output_limits(-0.30f, 0.30f);
-    pid_right.set_output_limits(-0.30f, 0.30f);
 
     // Trapezoidal profile
     Trapezoidal profile;
@@ -94,40 +84,42 @@ int main()
     Sample::EncoderTiming timing =
         Sample::init_encoder_timing(hw.encoder_left, hw.encoder_sample_us);
 
-    usart_print(hw.usart, "== PROFILE + PID DEBUG ==\r\n");
+    usart_print(hw.usart, "time_us,vel_left_mm_s,vel_right_mm_s\r\n");
 
-    unsigned print_count = 0;
+    const uint32_t start_us = timebase.get_count();
+    unsigned sample_count = 0;
+
+    //pid_left.set_output_limits(-0.30f, 0.30f);
+    //pid_right.set_output_limits(-0.30f, 0.30f);
 
     while (1)
     {
+        //hw.motor_left.drive(Drv8231::Direction::FORWARD, 100);
+        //hw.motor_right.drive(Drv8231::Direction::FORWARD, 100);
+        // T method: returns ticks/sec directly
+        const float vel_ticks_left  = Sample::sample_encoder(hw.encoder_left,  timing);
+        const float vel_ticks_right = Sample::sample_encoder(hw.encoder_right, timing);
 
-        const int32_t ticks_left =
-            Sample::sample_encoder(hw.encoder_left, timing);
-        const int32_t ticks_right =
-            Sample::sample_encoder(hw.encoder_right, timing);
+        const float vel_left  = vel_ticks_left;
+        const float vel_right = vel_ticks_right;
 
-        usart_print_csv(hw.usart, timing.sample_time_sec, ticks_left);
-        usart_print_csv(hw.usart, timing.sample_time_sec, ticks_right);
+        [[maybe_unused]] const float ktarget = 8000.0f;
+        // error = ktarget - vel_ticks (dt=1.0f so PID sees velocity directly)
+        pid_left.update(ktarget, Drv8231::Direction::FORWARD,
+                         static_cast<int32_t>(vel_ticks_left), 1.0f);
+        pid_right.update(ktarget, Drv8231::Direction::FORWARD,
+                          static_cast<int32_t>(vel_ticks_right), 1.0f);
 
-        profile.trapezoidal(EncoderInput{ticks_left, ticks_right},
-                            timing.sample_time_sec);
-
-        // const float target = profile.get_speed_setpoint();
-        const float ktarget = 3000.0f;  
-        pid_left.update(ktarget, Drv8231::Direction::FORWARD, ticks_left,
-                        timing.sample_time_sec);
-        pid_right.update(ktarget, Drv8231::Direction::FORWARD, ticks_right,
-                         timing.sample_time_sec);
-
-        if (++print_count % 10 != 0)
+        if (++sample_count % 5 != 0)
             continue;
 
-        char hdr[64];
-        snprintf(hdr, sizeof(hdr), "--- sp:%.0f t/s  dist:%ld/%ld ticks\r\n",
-                 ktarget, static_cast<long>(profile.get_progress_ticks()),
-                 static_cast<long>(kCellTicks));
-        usart_print(hw.usart, hdr);
-
+        const uint32_t elapsed_us = timebase.get_count() - start_us;
+        char buf[64];
+        snprintf(buf, sizeof(buf), "%lu,%.2f,%.2f\r\n",
+                 static_cast<unsigned long>(elapsed_us),
+                 static_cast<double>(vel_left),
+                 static_cast<double>(vel_right));
+        usart_print(hw.usart, buf);
     }
 
     hw.motor_left.drive(Drv8231::Direction::COAST, 0);

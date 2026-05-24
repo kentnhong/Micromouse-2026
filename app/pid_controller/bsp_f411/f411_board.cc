@@ -9,7 +9,7 @@
 
 namespace
 {
-static constexpr uint32_t kEncoderSampleUs{1'000};  
+static constexpr uint32_t kEncoderSampleUs{5'000};  
 }
 
 namespace MM
@@ -33,13 +33,13 @@ StEncoderSettings enc_settings_left{.mode = EncMode::MODE_3,
                                     .channel = EncChannel::BOTH,
                                     .polarity = EncInputPolarity::RISING,
                                     .slave_mode = EncSlaveMode::DISABLED,
-                                    .invert_direction = false};
+                                    .invert_direction = true};
 
 StEncoderSettings enc_settings_right{.mode = EncMode::MODE_3,
                                      .channel = EncChannel::BOTH,
                                      .polarity = EncInputPolarity::RISING,
                                      .slave_mode = EncSlaveMode::DISABLED,
-                                     .invert_direction = false};
+                                     .invert_direction = true};
 
 StUsartSettings usart_settings{UsartOversample::X8, UsartSampleMode::SINGLE};
 
@@ -69,7 +69,7 @@ StPwmParams pwm2_left_params{TIM2, PwmChannel::CH4, pwm_settings, 32000000};
 StPwmParams pwm1_right_params{TIM2, PwmChannel::CH1, pwm_settings, 32000000};
 StPwmParams pwm2_right_params{TIM2, PwmChannel::CH2, pwm_settings, 32000000};
 
-HwClk clk{Configuration::HSI_16MHZ};
+HwClk clk{Configuration::SYSCLK_HSE_100MHZ_24MHZ_INPUT};
 StUsartParams usart_params{USART1, clk.get_freq(), 115200, usart_settings};
 
 HwGpio in1_left{in1_left_params};
