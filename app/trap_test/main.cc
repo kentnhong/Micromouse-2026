@@ -24,22 +24,22 @@ static constexpr float kTicksPerMotorRev = 8.0f;
 static constexpr float kMmPerTick =
     (kWheelDiameterMm * kPi) / (kGearRatio * kTicksPerMotorRev);
 
-static constexpr float   kCellDistanceMm = 155.0f;
+static constexpr float   kCellDistanceMm = 100.0f;
 static constexpr int32_t kCellTicks = static_cast<int32_t>(kCellDistanceMm / kMmPerTick);
 
 static constexpr uint32_t kEncoderSampleUs = 20'000;
 
-static constexpr float kMinMmPerSec    = 100.0f;
-static constexpr float kMaxMmPerSec    = 300.0f;
-static constexpr float kAccelMmPerSec2 = 600.0f;
-static constexpr float kDecelMmPerSec2 = 1500.0f;
+static constexpr float kMinMmPerSec    = 50.0f;
+static constexpr float kMaxMmPerSec    = 80.0f;
+static constexpr float kAccelMmPerSec2 = 150.0f;
+static constexpr float kDecelMmPerSec2 = 150.0f;
 
 static constexpr float kMinTicks   = kMinMmPerSec   / kMmPerTick;
 static constexpr float kMaxTicks   = kMaxMmPerSec   / kMmPerTick;
 static constexpr float kAccelTicks = kAccelMmPerSec2 / kMmPerTick;
 static constexpr float kDecelTicks = kDecelMmPerSec2 / kMmPerTick;
 
-static constexpr Gains kGains{.kp = 0.001f, .ki = 0.005f, .kd = 0.0f};
+static constexpr Gains kGains{.kp = 0.003f, .ki = 0.0005f, .kd = 0.0f};
 
 static void usart_print(Usart& usart, const char* str)
 {
@@ -62,6 +62,8 @@ int main()
     PID pid_right{hw.motor_right, kGains};
     pid_left.set_output_limits(-1.0f, 0.80f);
     pid_right.set_output_limits(-1.0f, 0.80f);
+    pid_left.set_integral_limit(50.0f);
+    pid_right.set_integral_limit(50.0f);
 
     Sample::EncoderTiming timing =
         Sample::init_encoder_timing(hw.encoder_left, kEncoderSampleUs);
@@ -80,6 +82,8 @@ int main()
         profile.configure(kMinTicks, kMaxTicks, kAccelTicks, kDecelTicks, kCellTicks);
         pid_left.reset();
         pid_right.reset();
+        hw.encoder_left.reset_ticks();
+        hw.encoder_right.reset_ticks();
 
         usart_print(hw.usart, "n,goal,prog,setpt,L_ticks,R_ticks\r\n");
 

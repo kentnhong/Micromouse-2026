@@ -49,7 +49,9 @@ bool PID::update(float desired_speed_ticks, Drv8231::Direction polarity,
 
     if (final_drive < 0.0f)
     {
-        dir = Drv8231::Direction::BRAKE;
+        state.integral = 0.0f;
+        motor.drive(Drv8231::Direction::COAST, 0);
+        return true;
     }
 
     // Map magnitude to 0-100 duty cycle

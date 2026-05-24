@@ -69,12 +69,12 @@ StEncoderSettings enc_settings_left{.mode = EncMode::MODE_3,
                                      .channel = EncChannel::BOTH,
                                      .polarity = EncInputPolarity::RISING,
                                      .slave_mode = EncSlaveMode::DISABLED,
-                                     .invert_direction = true};
+                                     .invert_direction = false};
 StEncoderSettings enc_settings_right{.mode = EncMode::MODE_3,
                                       .channel = EncChannel::BOTH,
                                       .polarity = EncInputPolarity::RISING,
                                       .slave_mode = EncSlaveMode::DISABLED,
-                                      .invert_direction = true};
+                                      .invert_direction = false};
 StEncoderParams encoder_left_params{TIM4, enc_settings_left};
 StEncoderParams encoder_right_params{TIM3, enc_settings_right};
 HwEncoder encoder_left{encoder_left_params};
@@ -82,7 +82,7 @@ HwEncoder encoder_right{encoder_right_params};
 
 /* ── Motor drivers ────────────────────────────────────────────────────── */
 Drv8231 motor_left{pwm1_left, pwm2_left};
-Drv8231 motor_right{pwm1_right, pwm2_right};
+Drv8231 motor_right{pwm2_right, pwm1_right};
 
 /* ── USART1 (PA9=TX, PA10=RX, AF7) ───────────────────────────────────── */
 StGpioSettings usart_gpio_settings{GpioMode::AF, GpioOtype::PUSH_PULL,
