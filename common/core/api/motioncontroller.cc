@@ -9,8 +9,8 @@ static constexpr float kTicksPerMotorRev = 12.0f;
 static constexpr float kMmPerTick =
     (kWheelDiameterMm * kPi) / (kGearRatio * kTicksPerMotorRev);
 
-// Robot geometry
-static constexpr float kCellDistanceMm = 155.0f;
+// Robot geometry — cell = 180 mm unit square; travel 150 mm center-to-center (tuned)
+static constexpr float kCellDistanceMm = 57.0f;
 static constexpr float kWheelbaseMm = 73.0f;
 
 // Tick distances for each move type
@@ -21,17 +21,17 @@ static constexpr int32_t k90DegTurnTicks =
 static constexpr int32_t k180DegTurnTicks =
     static_cast<int32_t>((kWheelbaseMm * kPi / 2.0f) / kMmPerTick);
 
-// Straight profile — 100% = 8000 ticks/s, target cruise = 3000 ticks/s (37.5%)
-static constexpr float kStraightMinTicks   =    50.0f;  // ticks/s
-static constexpr float kStraightMaxTicks   =  3000.0f;  // ticks/s
-static constexpr float kStraightAccelTicks = 12000.0f;  // ticks/s²
-static constexpr float kStraightDecelTicks = 16000.0f;  // ticks/s²
+// Straight profile
+static constexpr float kStraightMinTicks   =   200.0f;  // ticks/s
+static constexpr float kStraightMaxTicks   =  1000.0f;  // ticks/s
+static constexpr float kStraightAccelTicks =  1500.0f;  // ticks/s²
+static constexpr float kStraightDecelTicks =  1500.0f;  // ticks/s²
 
-// Turn profile — slower for accuracy
-static constexpr float kTurnMinTicks   =  100.0f;   // ticks/s
-static constexpr float kTurnMaxTicks   = 2000.0f;   // ticks/s
-static constexpr float kTurnAccelTicks = 8000.0f;   // ticks/s²
-static constexpr float kTurnDecelTicks = 8000.0f;   // ticks/s²
+// Turn profile
+static constexpr float kTurnMinTicks   =   200.0f;  // ticks/s
+static constexpr float kTurnMaxTicks   =  1000.0f;  // ticks/s
+static constexpr float kTurnAccelTicks =  1500.0f;  // ticks/s²
+static constexpr float kTurnDecelTicks =  1500.0f;  // ticks/s²
 
 // Wall centering: correction in ticks/s per raw IR unit of imbalance
 static constexpr uint16_t kWallSideThreshold = 2000;
@@ -47,8 +47,17 @@ MotionController::MotionController(MotionControllerParams p)
       encoder_right(p.encoder_right),
       pid_left(p.motor_left, p.gains),
       pid_right(p.motor_right, p.gains),
-      encoder_timing(Sample::init_encoder_timing(p.encoder_left, p.encoder_sample_us))
+      encoder_timing(Sample::init_encoder_timing(p.encoder_left, p.encoder_sample_us)),
+      encoder_sample_us(p.encoder_sample_us)
 {
+    pid_left.set_output_limits(0.0f, p.max_output);
+    pid_right.set_output_limits(0.0f, p.max_output);
+}
+
+void MotionController::init()
+{
+    encoder_left.init_cycle_counter();
+    encoder_timing = Sample::init_encoder_timing(encoder_left, encoder_sample_us);
 }
 
 bool MotionController::forward(const IrValues& ir)

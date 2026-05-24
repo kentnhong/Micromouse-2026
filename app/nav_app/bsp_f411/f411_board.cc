@@ -90,8 +90,8 @@ HwEncoder encoder_left{encoder_left_params};
 HwEncoder encoder_right{encoder_right_params};
 
 /* ── Motor drivers ────────────────────────────────────────────────────── */
-Drv8231 motor_left{pwm2_left, pwm1_left};
-Drv8231 motor_right{pwm1_right, pwm2_right};
+Drv8231 motor_left{pwm1_left, pwm2_left};
+Drv8231 motor_right{pwm2_right, pwm1_right};
 
 /* ── IR emitters ──────────────────────────────────────────────────────── */
 StGpioSettings ir_emit_settings{GpioMode::GPOUT, GpioOtype::PUSH_PULL,
@@ -196,6 +196,7 @@ bool bsp_init()
     bool ret = true;
 
     ret = ret && Stmf4::clk.init();
+    motion_controller.init();
     const uint32_t hclk = Stmf4::clk.get_freq();
     const uint32_t tim_pclk = hclk / 2u;
 

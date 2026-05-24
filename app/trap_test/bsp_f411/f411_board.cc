@@ -83,8 +83,8 @@ HwEncoder encoder_left{encoder_left_params};
 HwEncoder encoder_right{encoder_right_params};
 
 /* ── Motor drivers ────────────────────────────────────────────────────── */
-Drv8231 motor_left{pwm2_left, pwm1_left};
-Drv8231 motor_right{pwm1_right, pwm2_right};
+Drv8231 motor_left{pwm1_left, pwm2_left};
+Drv8231 motor_right{pwm2_right, pwm1_right};
 
 /* ── USART1 (PA9=TX, PA10=RX, AF7) ───────────────────────────────────── */
 StGpioSettings usart_gpio_settings{GpioMode::AF, GpioOtype::PUSH_PULL,
@@ -110,13 +110,14 @@ HwTimebase delay_timer{delay_params};
 }  // namespace Stmf4
 
 /* ── MotionController ─────────────────────────────────────────────────── */
-static constexpr Gains kGains{.kp = 0.000018f, .ki = 0.0f, .kd = 0.000018f};
-MotionControllerParams mc_params{.motor_left       = Stmf4::motor_left,
-                                  .motor_right      = Stmf4::motor_right,
-                                  .encoder_left     = Stmf4::encoder_left,
-                                  .encoder_right    = Stmf4::encoder_right,
-                                  .gains            = kGains,
-                                  .encoder_sample_us = kEncoderSampleUs};
+static constexpr Gains kGains{.kp = 0.0002f, .ki = 0.005f, .kd = 0.0f};
+MotionControllerParams mc_params{.motor_left        = Stmf4::motor_left,
+                                  .motor_right       = Stmf4::motor_right,
+                                  .encoder_left      = Stmf4::encoder_left,
+                                  .encoder_right     = Stmf4::encoder_right,
+                                  .gains             = kGains,
+                                  .encoder_sample_us = kEncoderSampleUs,
+                                  .max_output        = 0.20f};
 MotionController motion_controller{mc_params};
 
 /* ── Board ────────────────────────────────────────────────────────────── */
@@ -130,6 +131,7 @@ bool bsp_init()
     bool ret = true;
 
     ret = ret && Stmf4::clk.init();
+    motion_controller.init();
 
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN |
                     RCC_AHB1ENR_GPIOCEN;

@@ -26,12 +26,20 @@ struct MotionControllerParams
     Encoder& encoder_right;
     Gains gains;
     uint32_t encoder_sample_us;
+    float max_output = 1.0f;
 };
 
 class MotionController
 {
 public:
     explicit MotionController(MotionControllerParams params);
+
+    /**
+    * @brief Re-initialise encoder timing with the correct CPU clock.
+    * Must be called from bsp_init() after the PLL is running, because the
+    * constructor runs before main() when SystemCoreClock is still HSI (16 MHz).
+    */
+    void init();
 
     /**
     * @brief Drive straight for one cell (or straight_cells_remaining cells in zoom mode).
@@ -87,6 +95,8 @@ private:
     PID pid_right;
     Trapezoidal profile;
     Sample::EncoderTiming encoder_timing;
+
+    uint32_t encoder_sample_us;
 
     MoveState move_state{MoveState::IDLE};
     int straight_cells_remaining{1};

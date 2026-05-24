@@ -45,20 +45,20 @@ int main()
         while (!hw.motion.turn_left()) {}
         usart_print(hw.usart, "L_DONE\r\n");
 
-        while (!hw.motion.forward(no_ir)) {}
-        usart_print(hw.usart, "F_DONE\r\n");
+        // while (!hw.motion.forward(no_ir)) {}
+        // usart_print(hw.usart, "F_DONE\r\n");
 
-        while (!hw.motion.turn_left()) {}
-        usart_print(hw.usart, "L_DONE\r\n");
+        // while (!hw.motion.turn_left()) {}
+        // usart_print(hw.usart, "L_DONE\r\n");
 
-        while (!hw.motion.forward(no_ir)) {}
-        usart_print(hw.usart, "F_DONE\r\n");
+        // while (!hw.motion.forward(no_ir)) {}
+        // usart_print(hw.usart, "F_DONE\r\n");
 
-        while (!hw.motion.turn_right()) {}
-        usart_print(hw.usart, "R_DONE\r\n");
+        // while (!hw.motion.turn_right()) {}
+        // usart_print(hw.usart, "R_DONE\r\n");
 
-        while (!hw.motion.forward(no_ir)) {}
-        usart_print(hw.usart, "F_DONE\r\n");
+        // while (!hw.motion.forward(no_ir)) {}
+        // usart_print(hw.usart, "F_DONE\r\n");
 
         usart_print(hw.usart, "SEQ_DONE\r\n");
     }
