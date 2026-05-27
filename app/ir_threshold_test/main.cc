@@ -51,25 +51,22 @@ int main()
 
         const IrValues& v = board.ir_controller.get_ir_vals();
 
-        const bool wall_front =
-            (v.front_left > kThresholdFront) || (v.front_right > kThresholdFront);
+        const bool wall_front = (v.front_left > kThresholdFront) ||
+                                (v.front_right > kThresholdFront);
         const bool wall_left = v.left > kThresholdSide;
         const bool wall_right = v.right > kThresholdSide;
 
         int len = std::snprintf(
             reinterpret_cast<char*>(tx_buf.data()), tx_buf.size(),
-            "L:%4u FL:%4u FR:%4u R:%4u | L:%s F:%s R:%s\r\n",
-            v.left, v.front_left, v.front_right, v.right,
-            wall_left ? "WALL" : "open",
-            wall_front ? "WALL" : "open",
-            wall_right ? "WALL" : "open");
+            "L:%4u FL:%4u FR:%4u R:%4u | L:%s F:%s R:%s\r\n", v.left,
+            v.front_left, v.front_right, v.right, wall_left ? "WALL" : "open",
+            wall_front ? "WALL" : "open", wall_right ? "WALL" : "open");
 
         if (len > 0)
         {
-            const size_t out_len =
-                static_cast<size_t>(len) < tx_buf.size()
-                    ? static_cast<size_t>(len)
-                    : tx_buf.size();
+            const size_t out_len = static_cast<size_t>(len) < tx_buf.size()
+                                       ? static_cast<size_t>(len)
+                                       : tx_buf.size();
             board.usart.send(std::span<const uint8_t>(tx_buf.data(), out_len));
         }
     }

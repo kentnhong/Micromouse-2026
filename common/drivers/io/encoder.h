@@ -65,6 +65,6 @@ public:
                                                float ticks_per_output_rev,
                                                float cm_per_tick) = 0;
 
-    ~Encoder() = default;
+    virtual ~Encoder() = default;
 };
 }  // namespace MM

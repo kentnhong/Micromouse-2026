@@ -26,7 +26,10 @@ struct MotionControllerParams
     Encoder& encoder_right;
     Gains gains;
     uint32_t encoder_sample_us;
-    float max_output = 1.0f;
+    float max_output_left = 1.0f;
+    float max_output_right = 1.0f;
+    float right_speed_scale =
+        1.0f;  // < 1.0 if right motor runs faster than left
 };
 
 class MotionController
@@ -97,6 +100,7 @@ private:
     Sample::EncoderTiming encoder_timing;
 
     uint32_t encoder_sample_us;
+    float right_speed_scale{1.0f};
 
     MoveState move_state{MoveState::IDLE};
     int straight_cells_remaining{1};
@@ -104,6 +108,11 @@ private:
     // Exponential low-pass filter state for IR wall centering (match 2024 α=0.4)
     float ir_left_smooth{0.0f};
     float ir_right_smooth{0.0f};
+    float ir_front_left_smooth{0.0f};
+    float ir_front_right_smooth{0.0f};
+    float ir_wall_error_prev{0.0f};
+    bool ir_left_was_wall{false};
+    bool ir_right_was_wall{false};
 };
 
 }  // namespace MM

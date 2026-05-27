@@ -58,7 +58,6 @@ public:
 
     static constexpr uint8_t REG_OPR_MODE =
         0x3D;  ///< OPR_MODE register address
-
     static constexpr uint8_t ADDR_PRIMARY = 0x28;    ///< Default I2C Address
     static constexpr uint8_t ADDR_ALTERNATE = 0x29;  ///< Alternate I2C Address
 

@@ -10,32 +10,35 @@ static constexpr float kMmPerTick =
     (kWheelDiameterMm * kPi) / (kGearRatio * kTicksPerMotorRev);
 
 // Robot geometry — cell = 180 mm unit square; travel 150 mm center-to-center (tuned)
-static constexpr float kCellDistanceMm = 57.0f;
-static constexpr float kWheelbaseMm = 73.0f;
+static constexpr float kCellDistanceMm = 47.5f;
+static constexpr float kWheelbaseMm = 57.5f;
 
 // Tick distances for each move type
 static constexpr int32_t kCellTicks =
     static_cast<int32_t>(kCellDistanceMm / kMmPerTick);
 static constexpr int32_t k90DegTurnTicks =
-    static_cast<int32_t>((kWheelbaseMm * kPi / 4.0f) / kMmPerTick);
-static constexpr int32_t k180DegTurnTicks =
-    static_cast<int32_t>((kWheelbaseMm * kPi / 2.0f) / kMmPerTick);
+    static_cast<int32_t>((kWheelbaseMm * kPi / 8.0f) / kMmPerTick);
+static constexpr int32_t k180DegTurnTicks = k90DegTurnTicks * 2;
 
-// Straight profile
-static constexpr float kStraightMinTicks   =   200.0f;  // ticks/s
-static constexpr float kStraightMaxTicks   =  1000.0f;  // ticks/s
-static constexpr float kStraightAccelTicks =  1500.0f;  // ticks/s²
-static constexpr float kStraightDecelTicks =  1500.0f;  // ticks/s²
+// Straight profile — moderate speed, gentle ramps for reliable cell stopping
+static constexpr float kStraightMinTicks = 150.0f;     // ticks/s
+static constexpr float kStraightMaxTicks = 400.0f;     // ticks/s
+static constexpr float kStraightAccelTicks = 600.0f;   // ticks/s²
+static constexpr float kStraightDecelTicks = 1200.0f;  // ticks/s²
 
-// Turn profile
-static constexpr float kTurnMinTicks   =   200.0f;  // ticks/s
-static constexpr float kTurnMaxTicks   =  1000.0f;  // ticks/s
-static constexpr float kTurnAccelTicks =  1500.0f;  // ticks/s²
-static constexpr float kTurnDecelTicks =  1500.0f;  // ticks/s²
+// Turn profile — very slow for body clearance during pivot
+static constexpr float kTurnMinTicks = 150.0f;    // ticks/s
+static constexpr float kTurnMaxTicks = 250.0f;    // ticks/s
+static constexpr float kTurnAccelTicks = 350.0f;  // ticks/s²
+static constexpr float kTurnDecelTicks = 350.0f;  // ticks/s²
 
-// Wall centering: correction in ticks/s per raw IR unit of imbalance
-static constexpr uint16_t kWallSideThreshold = 2000;
-static constexpr float kWallCenterGain = 0.005f;
+// Wall centering: P corrects drift, small D damps overshoot
+static constexpr uint16_t kWallSideThreshold = 3667;
+static constexpr float kWallCenterKp = 0.10f;
+static constexpr float kWallCenterKd = 0.003f;
+
+// Front wall: stop when robot is very close — must be well above normal open-corridor reading (~3846)
+static constexpr uint16_t kFrontWallThreshold = 4000;
 
 namespace MM
 {
@@ -47,17 +50,20 @@ MotionController::MotionController(MotionControllerParams p)
       encoder_right(p.encoder_right),
       pid_left(p.motor_left, p.gains),
       pid_right(p.motor_right, p.gains),
-      encoder_timing(Sample::init_encoder_timing(p.encoder_left, p.encoder_sample_us)),
-      encoder_sample_us(p.encoder_sample_us)
+      encoder_timing(
+          Sample::init_encoder_timing(p.encoder_left, p.encoder_sample_us)),
+      encoder_sample_us(p.encoder_sample_us),
+      right_speed_scale(p.right_speed_scale)
 {
-    pid_left.set_output_limits(0.0f, p.max_output);
-    pid_right.set_output_limits(0.0f, p.max_output);
+    pid_left.set_output_limits(0.0f, p.max_output_left);
+    pid_right.set_output_limits(0.0f, p.max_output_right);
 }
 
 void MotionController::init()
 {
     encoder_left.init_cycle_counter();
-    encoder_timing = Sample::init_encoder_timing(encoder_left, encoder_sample_us);
+    encoder_timing =
+        Sample::init_encoder_timing(encoder_left, encoder_sample_us);
 }
 
 bool MotionController::forward(const IrValues& ir)
@@ -66,9 +72,15 @@ bool MotionController::forward(const IrValues& ir)
     {
         const int32_t total_ticks = kCellTicks * straight_cells_remaining;
         profile.configure(kStraightMinTicks, kStraightMaxTicks,
-                          kStraightAccelTicks, kStraightDecelTicks, total_ticks);
+                          kStraightAccelTicks, kStraightDecelTicks,
+                          total_ticks);
         pid_left.reset();
         pid_right.reset();
+        ir_front_left_smooth = 0.0f;
+        ir_front_right_smooth = 0.0f;
+        ir_wall_error_prev = 0.0f;
+        ir_left_was_wall = false;
+        ir_right_was_wall = false;
         move_state = MoveState::FORWARD;
     }
 
@@ -79,21 +91,72 @@ bool MotionController::forward(const IrValues& ir)
     profile.trapezoidal(enc, dt);
     const float base_speed = profile.get_speed_setpoint();
 
-    // Exponential low-pass on raw IR (α=0.4, matches 2024 SMOOTHING_VALUE_DISTANCE_INV)
-    ir_left_smooth  = 0.4f * static_cast<float>(ir.left)  + 0.6f * ir_left_smooth;
-    ir_right_smooth = 0.4f * static_cast<float>(ir.right) + 0.6f * ir_right_smooth;
+    // Exponential low-pass on raw IR (α=0.4)
+    ir_left_smooth = 0.4f * static_cast<float>(ir.left) + 0.6f * ir_left_smooth;
+    ir_right_smooth =
+        0.4f * static_cast<float>(ir.right) + 0.6f * ir_right_smooth;
+    ir_front_left_smooth =
+        0.4f * static_cast<float>(ir.front_left) + 0.6f * ir_front_left_smooth;
+    ir_front_right_smooth = 0.4f * static_cast<float>(ir.front_right) +
+                            0.6f * ir_front_right_smooth;
 
-    // Wall centering: steer away from the closer wall when walls exist on both sides
-    float correction = 0.0f;
-    if (ir_left_smooth > kWallSideThreshold && ir_right_smooth > kWallSideThreshold)
+    // Front wall: stop immediately if either front sensor sees a wall
+    if (ir_front_left_smooth > kFrontWallThreshold ||
+        ir_front_right_smooth > kFrontWallThreshold)
     {
-        correction = (ir_right_smooth - ir_left_smooth) * kWallCenterGain;
+        motor_left.drive(Drv8231::Direction::COAST, 0);
+        motor_right.drive(Drv8231::Direction::COAST, 0);
+        for (int i = 0; i < 5; ++i)
+        {
+            Sample::sample_encoders(encoder_left, encoder_right,
+                                    encoder_timing);
+        }
+        move_state = MoveState::IDLE;
+        return true;
+    }
+
+    // Wall-edge detection: a wall that was present just disappeared → junction reached
+    const bool left_wall = ir_left_smooth > kWallSideThreshold;
+    const bool right_wall = ir_right_smooth > kWallSideThreshold;
+    if ((ir_left_was_wall && !left_wall) || (ir_right_was_wall && !right_wall))
+    {
+        motor_left.drive(Drv8231::Direction::COAST, 0);
+        motor_right.drive(Drv8231::Direction::COAST, 0);
+        for (int i = 0; i < 5; ++i)
+        {
+            Sample::sample_encoders(encoder_left, encoder_right,
+                                    encoder_timing);
+        }
+        ir_left_was_wall = false;
+        ir_right_was_wall = false;
+        move_state = MoveState::IDLE;
+        return true;
+    }
+    ir_left_was_wall = left_wall;
+    ir_right_was_wall = right_wall;
+
+    // Wall centering PD: use both walls when available, fall back to single wall
+    float correction = 0.0f;
+    if (left_wall || right_wall)
+    {
+        float wall_error = 0.0f;
+        if (left_wall && right_wall)
+            wall_error = ir_right_smooth - ir_left_smooth;
+        else if (right_wall)
+            wall_error =
+                ir_right_smooth - kWallSideThreshold;  // too close to right
+        else
+            wall_error =
+                -(ir_left_smooth - kWallSideThreshold);  // too close to left
+        const float d_error = (wall_error - ir_wall_error_prev) / dt;
+        correction = kWallCenterKp * wall_error + kWallCenterKd * d_error;
+        ir_wall_error_prev = wall_error;
     }
 
     pid_left.update(base_speed - correction, Drv8231::Direction::FORWARD,
                     enc.left_ticks, dt);
-    pid_right.update(base_speed + correction, Drv8231::Direction::FORWARD,
-                     enc.right_ticks, dt);
+    pid_right.update((base_speed + correction) * right_speed_scale,
+                     Drv8231::Direction::FORWARD, enc.right_ticks, dt);
 
     if (profile.is_complete())
     {
@@ -101,7 +164,8 @@ bool MotionController::forward(const IrValues& ir)
         motor_right.drive(Drv8231::Direction::COAST, 0);
         for (int i = 0; i < 5; ++i)
         {
-            Sample::sample_encoders(encoder_left, encoder_right, encoder_timing);
+            Sample::sample_encoders(encoder_left, encoder_right,
+                                    encoder_timing);
         }
         move_state = MoveState::IDLE;
         return true;
@@ -136,10 +200,12 @@ bool MotionController::run_turn(MoveState turn_state, int32_t distance_ticks)
     int32_t fwd_ticks = 0;
     int32_t rev_ticks = 0;
 
-    if (turn_state == MoveState::TURNING_LEFT || turn_state == MoveState::U_TURN)
+    if (turn_state == MoveState::TURNING_LEFT ||
+        turn_state == MoveState::U_TURN)
     {
-        fwd_ticks = enc.right_ticks;   // right goes forward
-        rev_ticks = -enc.left_ticks;   // left goes backward (negate to get positive value)
+        fwd_ticks = enc.right_ticks;  // right goes forward
+        rev_ticks =
+            -enc.left_ticks;  // left goes backward (negate to get positive value)
     }
     else  // TURNING_RIGHT
     {
@@ -151,15 +217,19 @@ bool MotionController::run_turn(MoveState turn_state, int32_t distance_ticks)
     profile.trapezoidal(EncoderInput{rev_ticks, fwd_ticks}, dt);
     const float speed = profile.get_speed_setpoint();
 
-    if (turn_state == MoveState::TURNING_LEFT || turn_state == MoveState::U_TURN)
+    const float right_speed = speed * right_speed_scale;
+    if (turn_state == MoveState::TURNING_LEFT ||
+        turn_state == MoveState::U_TURN)
     {
         pid_left.update(speed, Drv8231::Direction::REVERSE, rev_ticks, dt);
-        pid_right.update(speed, Drv8231::Direction::FORWARD, fwd_ticks, dt);
+        pid_right.update(right_speed, Drv8231::Direction::FORWARD, fwd_ticks,
+                         dt);
     }
     else
     {
         pid_left.update(speed, Drv8231::Direction::FORWARD, fwd_ticks, dt);
-        pid_right.update(speed, Drv8231::Direction::REVERSE, rev_ticks, dt);
+        pid_right.update(right_speed, Drv8231::Direction::REVERSE, rev_ticks,
+                         dt);
     }
 
     if (profile.is_complete())
@@ -168,7 +238,8 @@ bool MotionController::run_turn(MoveState turn_state, int32_t distance_ticks)
         motor_right.drive(Drv8231::Direction::COAST, 0);
         for (int i = 0; i < 5; ++i)
         {
-            Sample::sample_encoders(encoder_left, encoder_right, encoder_timing);
+            Sample::sample_encoders(encoder_left, encoder_right,
+                                    encoder_timing);
         }
         move_state = MoveState::IDLE;
         return true;

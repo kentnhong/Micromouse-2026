@@ -21,9 +21,13 @@ int main()
     Navigation nav;
 
     // Wait for PB4 button press (active low) before starting
-    while (hw.start_bt.read() != 0) {}
+    while (hw.start_bt.read() != 0)
+    {
+    }
     Utils::delay_ms(50);  // debounce
-    while (hw.start_bt.read() != 0) {}
+    while (hw.start_bt.read() != 0)
+    {
+    }
 
     while (1)
     {

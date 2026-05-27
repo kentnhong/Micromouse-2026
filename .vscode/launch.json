@@ -325,8 +325,8 @@
     },
     {
       "cwd": "${workspaceFolder}",
-      "executable": "${workspaceRoot}/build/stm32f411/app/ir_test/ir_test",
-      "name": "DEBUG IR F4",
+      "executable": "${workspaceRoot}/build/stm32f411/app/ir_threshold_test/ir_threshold_test.elf",
+      "name": "DEBUG IR THRESHOLD F4",
       "request": "launch",
       "type": "cortex-debug",
       "servertype": "openocd",
@@ -340,7 +340,7 @@
       ],
       "debuggerArgs": ["-d", "${workspaceRoot}"],
       "preRestartCommands": [
-        "add-symbol-file build/stm32f411/app/ir_test/ir_test",
+        "add-symbol-file build/stm32f411/app/ir_threshold_test/ir_threshold_test.elf",
         "load",
         "enable breakpoint",
         "monitor reset"

@@ -32,7 +32,8 @@ float Sample::sample_encoder(Encoder& encoder, const EncoderTiming& timing)
     const int32_t pre_ticks = encoder.get_ticks();
     int32_t sync_ticks;
     uint32_t t1;
-    do {
+    do
+    {
         sync_ticks = encoder.get_ticks();
         t1 = encoder.get_time_cycles();
         if (t1 >= deadline)
@@ -42,7 +43,8 @@ float Sample::sample_encoder(Encoder& encoder, const EncoderTiming& timing)
     // Phase 2: measure time to the following tick edge
     int32_t next_ticks;
     uint32_t t2;
-    do {
+    do
+    {
         next_ticks = encoder.get_ticks();
         t2 = encoder.get_time_cycles();
         if (t2 >= deadline)

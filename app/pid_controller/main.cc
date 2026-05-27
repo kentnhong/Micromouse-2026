@@ -44,7 +44,6 @@ static void usart_print(Usart& usart, const char* str)
                                         __builtin_strlen(str)));
 }
 
-
 int main()
 {
     bsp_init();
@@ -73,7 +72,6 @@ int main()
     // Reduce oscillation around ktarget=4000 ticks/s.
     const Gains kGains{0.000018f, 0.00000f, 0.000018f};
 
-
     PID pid_left(hw.motor_left, kGains);
     PID pid_right(hw.motor_right, kGains);
 
@@ -96,30 +94,29 @@ int main()
         //hw.motor_left.drive(Drv8231::Direction::FORWARD, 100);
         //hw.motor_right.drive(Drv8231::Direction::FORWARD, 100);
         // T method: returns ticks/sec directly
-        const float vel_ticks_left  = Sample::sample_encoder(hw.encoder_left,  timing);
+        const float vel_ticks_left =
+            Sample::sample_encoder(hw.encoder_left, timing);
         // const float vel_ticks_right = Sample::sample_encoder(hw.encoder_right, timing);
 
-        const float vel_left  = vel_ticks_left;
+        const float vel_left = vel_ticks_left;
         // const float vel_right = vel_ticks_right;
 
         // [[maybe_unused]] const float ktarget = 8000.0f;
-         [[maybe_unused]] const float ktarget = 4000.0f;
+        [[maybe_unused]] const float ktarget = 4000.0f;
         // error = ktarget - vel_ticks (dt=1.0f so PID sees velocity directly)
         pid_left.update(ktarget, Drv8231::Direction::FORWARD,
-                         static_cast<int32_t>(vel_ticks_left),
-                         timing.sample_time_sec);
+                        static_cast<int32_t>(vel_ticks_left),
+                        timing.sample_time_sec);
         // pid_right.update(ktarget, Drv8231::Direction::FORWARD,
         //                   static_cast<int32_t>(vel_ticks_right),
         //                   timing.sample_time_sec);
-
 
         if (++sample_count % 5 != 0)
             continue;
 
         // const uint32_t elapsed_us = timebase.get_count() - start_us;
         char buf[64];
-        snprintf(buf, sizeof(buf), "%.2f\r\n",
-                 static_cast<double>(vel_left));
+        snprintf(buf, sizeof(buf), "%.2f\r\n", static_cast<double>(vel_left));
         usart_print(hw.usart, buf);
     }
 

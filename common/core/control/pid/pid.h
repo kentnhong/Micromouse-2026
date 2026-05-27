@@ -14,6 +14,9 @@
 namespace MM
 {
 
+/**
+* @brief Debug information for the PID controller
+*/
 struct PidDebug
 {
     float error = 0.0f;
@@ -26,9 +29,6 @@ struct PidDebug
 class PID
 {
 public:
-    /**
-    * @brief PID controller wrapping an individual motor
-    */
     PID(Drv8231& motor, const Gains& gains);
 
     /**

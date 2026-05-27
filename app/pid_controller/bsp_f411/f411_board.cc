@@ -9,7 +9,7 @@
 
 namespace
 {
-static constexpr uint32_t kEncoderSampleUs{5'000};  
+static constexpr uint32_t kEncoderSampleUs{5'000};
 }
 
 namespace MM

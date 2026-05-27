@@ -52,7 +52,7 @@ HwGpio in2_right{in2_right_params};
 
 /* ── Encoder GPIO (AF mode, TIM3/TIM4) ────────────────────────────────── */
 StGpioSettings enc_af_settings{GpioMode::AF, GpioOtype::PUSH_PULL,
-                                GpioOspeed::LOW, GpioPupd::PULL_UP, 2};
+                               GpioOspeed::LOW, GpioPupd::PULL_UP, 2};
 // Left encoder:  PB6 = TIM4_CH1(B), PB7 = TIM4_CH2(A)
 StGpioParams enc_left_ch1_params{6, GPIOB, enc_af_settings};
 StGpioParams enc_left_ch2_params{7, GPIOB, enc_af_settings};
@@ -66,7 +66,7 @@ HwGpio enc_right_ch2{enc_right_ch2_params};
 
 /* ── PWM ──────────────────────────────────────────────────────────────── */
 StPwmSettings pwm_settings{PwmMode::EDGE_ALIGNED, PwmOutputMode::PWM_MODE_1,
-                            PwmDir::UPCOUNTING};
+                           PwmDir::UPCOUNTING};
 StPwmParams pwm1_left_params{TIM2, PwmChannel::CH3, pwm_settings, 100'000'000};
 StPwmParams pwm2_left_params{TIM2, PwmChannel::CH4, pwm_settings, 100'000'000};
 StPwmParams pwm1_right_params{TIM2, PwmChannel::CH1, pwm_settings, 100'000'000};
@@ -78,10 +78,10 @@ HwPwm pwm2_right{pwm2_right_params};
 
 /* ── Encoders ─────────────────────────────────────────────────────────── */
 StEncoderSettings enc_settings{.mode = EncMode::MODE_3,
-                                .channel = EncChannel::BOTH,
-                                .polarity = EncInputPolarity::RISING,
-                                .slave_mode = EncSlaveMode::DISABLED,
-                                .invert_direction = false};
+                               .channel = EncChannel::BOTH,
+                               .polarity = EncInputPolarity::RISING,
+                               .slave_mode = EncSlaveMode::DISABLED,
+                               .invert_direction = false};
 StEncoderParams encoder_left_params{TIM4, enc_settings};
 StEncoderParams encoder_right_params{TIM3, enc_settings};
 HwEncoder encoder_left{encoder_left_params};
@@ -93,7 +93,7 @@ Drv8231 motor_right{pwm1_right, pwm2_right};
 
 /* ── IR emitters (output GPIO) ────────────────────────────────────────── */
 StGpioSettings ir_emit_settings{GpioMode::GPOUT, GpioOtype::PUSH_PULL,
-                                 GpioOspeed::VERY_HIGH, GpioPupd::PULL_DOWN, 0};
+                                GpioOspeed::VERY_HIGH, GpioPupd::PULL_DOWN, 0};
 StGpioParams ir_emit1_params{7, GPIOA, ir_emit_settings};  // PA7 → LEFT
 StGpioParams ir_emit2_params{6, GPIOA, ir_emit_settings};  // PA6 → FRONT_LEFT
 StGpioParams ir_emit3_params{4, GPIOA, ir_emit_settings};  // PA4 → FRONT_RIGHT
@@ -105,7 +105,7 @@ HwGpio ir_emit4{ir_emit4_params};
 
 /* ── IR phototransistors (analog input GPIO) ─────────────────────────── */
 StGpioSettings ir_pt_settings{GpioMode::ANALOG, GpioOtype::PUSH_PULL,
-                               GpioOspeed::VERY_HIGH, GpioPupd::NO_PULL, 0};
+                              GpioOspeed::VERY_HIGH, GpioPupd::NO_PULL, 0};
 StGpioParams ir_pt1_params{1, GPIOB, ir_pt_settings};  // PB1 = ADC1_IN9
 StGpioParams ir_pt2_params{0, GPIOB, ir_pt_settings};  // PB0 = ADC1_IN8
 StGpioParams ir_pt3_params{1, GPIOC, ir_pt_settings};  // PC1 = ADC1_IN11
@@ -117,7 +117,7 @@ HwGpio ir_pt4{ir_pt4_params};
 
 /* ── DMA ──────────────────────────────────────────────────────────────── */
 StDmaSettings dma_settings{DmaChSel::CH0, DmaPriority::VERY_HIGH,
-                            DmaWidth::HALF_WORD, DmaDataDir::PERIPH_TO_MEM};
+                           DmaWidth::HALF_WORD, DmaDataDir::PERIPH_TO_MEM};
 StDmaParams dma_params{
     dma_settings, DMA2, DMA2_Stream0,
     static_cast<uint32_t>(reinterpret_cast<std::uintptr_t>(&ADC1->DR))};
@@ -130,14 +130,14 @@ AdcChCycles ch8_cycles{8, AdcCycles::CYCLES_144};
 AdcChCycles ch11_cycles{11, AdcCycles::CYCLES_144};
 AdcChCycles ch10_cycles{10, AdcCycles::CYCLES_144};
 std::array<AdcChCycles, 4> adc_ch_cycles{ch9_cycles, ch8_cycles, ch11_cycles,
-                                          ch10_cycles};
+                                         ch10_cycles};
 StAdcSettings adc_settings{AdcResolution::TWELVE_BIT,
-                            AdcClkPrescaler::PCLK2_DIV_2,
-                            AdcTriggerSource::SOFTWARE,
-                            AdcOverrunInt::OVRIE_EN,
-                            AdcDma::DMA_ENABLE,
-                            adc_seq,
-                            adc_ch_cycles};
+                           AdcClkPrescaler::PCLK2_DIV_2,
+                           AdcTriggerSource::SOFTWARE,
+                           AdcOverrunInt::OVRIE_EN,
+                           AdcDma::DMA_ENABLE,
+                           adc_seq,
+                           adc_ch_cycles};
 StAdcParams adc_params{adc_settings, ADC1, ADC1_COMMON};
 HwAdc adc{adc_params};
 
@@ -167,12 +167,12 @@ HwTimebase delay_timer{delay_params};
 
 /* ── LEDs and buttons ─────────────────────────────────────────────────── */
 StGpioSettings led_settings{GpioMode::GPOUT, GpioOtype::PUSH_PULL,
-                             GpioOspeed::LOW, GpioPupd::NO_PULL, 0};
+                            GpioOspeed::LOW, GpioPupd::NO_PULL, 0};
 StGpioSettings button_settings{GpioMode::GPI, GpioOtype::PUSH_PULL,
-                                GpioOspeed::LOW, GpioPupd::PULL_UP, 0};
-StGpioParams led1_params{3, GPIOC, led_settings};    // PC3
-StGpioParams led2_params{4, GPIOC, led_settings};    // PC4
-StGpioParams led3_params{5, GPIOC, led_settings};    // PC5
+                               GpioOspeed::LOW, GpioPupd::PULL_UP, 0};
+StGpioParams led1_params{3, GPIOC, led_settings};          // PC3
+StGpioParams led2_params{4, GPIOC, led_settings};          // PC4
+StGpioParams led3_params{5, GPIOC, led_settings};          // PC5
 StGpioParams search_bt_params{4, GPIOB, button_settings};  // PB4
 StGpioParams zoom_bt_params{12, GPIOA, button_settings};   // PA12
 HwGpio led1{led1_params};
@@ -184,13 +184,15 @@ HwGpio zoom_bt{zoom_bt_params};
 }  // namespace Stmf4
 
 /* ── MotionController ─────────────────────────────────────────────────── */
-static constexpr Gains kDefaultGains{.kp = 0.000018f, .ki = 0.0f, .kd = 0.000018f};
+static constexpr Gains kDefaultGains{.kp = 0.000018f,
+                                     .ki = 0.0f,
+                                     .kd = 0.000018f};
 MotionControllerParams mc_params{.motor_left = Stmf4::motor_left,
-                                  .motor_right = Stmf4::motor_right,
-                                  .encoder_left = Stmf4::encoder_left,
-                                  .encoder_right = Stmf4::encoder_right,
-                                  .gains = kDefaultGains,
-                                  .encoder_sample_us = kEncoderSampleUs};
+                                 .motor_right = Stmf4::motor_right,
+                                 .encoder_left = Stmf4::encoder_left,
+                                 .encoder_right = Stmf4::encoder_right,
+                                 .gains = kDefaultGains,
+                                 .encoder_sample_us = kEncoderSampleUs};
 MotionController motion_controller{mc_params};
 
 /* ── Board ────────────────────────────────────────────────────────────── */
@@ -209,7 +211,8 @@ bool board_init()
 
     ret = ret && Stmf4::clk.init();
     const uint32_t hclk = Stmf4::clk.get_freq();
-    const uint32_t tim_pclk = hclk / 2u;  // APB1 timers ×2 at default prescalers
+    const uint32_t tim_pclk =
+        hclk / 2u;  // APB1 timers ×2 at default prescalers
 
     /* Enable peripheral bus clocks */
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN |
@@ -227,7 +230,8 @@ bool board_init()
     ret = ret && Stmf4::pwm2_left.init();
     ret = ret && Stmf4::pwm1_right.init();
     ret = ret && Stmf4::pwm2_right.init();
-    ret = ret && Stmf4::pwm1_left.set_frequency(kPwmFreqHz);  // all 4 share TIM2
+    ret =
+        ret && Stmf4::pwm1_left.set_frequency(kPwmFreqHz);  // all 4 share TIM2
     ret = ret && Stmf4::motor_left.init();
     ret = ret && Stmf4::motor_right.init();
 
@@ -254,7 +258,8 @@ bool board_init()
     ret = ret && Stmf4::adc.init();
 
     /* IR timebase: TIM1 at 100 µs period */
-    ret = ret && Stmf4::timebase.init(tim_pclk, kIrTimerFreqHz, kIrTimerPeriod, true);
+    ret = ret &&
+          Stmf4::timebase.init(tim_pclk, kIrTimerFreqHz, kIrTimerPeriod, true);
     if (ret)
     {
         Stmf4::timebase.start();
@@ -262,7 +267,7 @@ bool board_init()
 
     /* Delay timer: TIM5 */
     ret = ret && Stmf4::delay_timer.init(50'000'000u, 1'000'000u,
-                                          std::chrono::microseconds(4'294'967u));
+                                         std::chrono::microseconds(4'294'967u));
     Stmf4::delay_timer.start();
     Utils::bind_timebase(Stmf4::delay_timer);
 
